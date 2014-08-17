@@ -41,13 +41,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BigQueryable.cs" />
+    <Compile Include="Query\BigQueryable.Join.cs" />
+    <Compile Include="Query\BigQueryable.Limit.cs" />
+    <Compile Include="Query\BigQueryable.OrderBy.cs" />
+    <Compile Include="Query\BigQueryable.Where.cs" />
     <Compile Include="BigQueryContext.cs" />
+    <Compile Include="DataType.cs" />
+    <Compile Include="FormatOption.cs" />
     <Compile Include="Functions\Function.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BigQueryTranslateVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="Query\BigQueryable.Select.cs" />
+    <Compile Include="Query\BigQueryable.From.cs" />
+    <Compile Include="Query\BigQueryable.TableDecorate.cs" />
+    <Compile Include="Query\BigQueryable.GroupBy.cs" />
+    <Compile Include="Query\BigQueryable.Having.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

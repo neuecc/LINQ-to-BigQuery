@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Functions
 {
+    // expr : object
+    // numeric_expr : long, double
+    // timestamp: DateTime
+
+
     internal class FunctionNameAttribute : Attribute
     {
         public string Name { get; set; }
@@ -20,7 +25,7 @@ namespace BigQuery.Linq.Functions
     /// </summary>
     internal class SR
     {
-        public const string InvalidMessage = "MathBq is marker class for Query Analyze. Can't call directly.";
+        public const string InvalidMessage = "Function is marker for Query Analyze. Can't call directly.";
     }
 
     public static class Aggregate
@@ -90,15 +95,19 @@ namespace BigQuery.Linq.Functions
         }
     }
 
+    public static class Mathematical
+    {
+        public static int Abs(long numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+        public static int Abs(double numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+    }
+
     public static class Other
     {
         // Case => () ? :
 
         // If => () ? :
 
-        public static void Hash()
-        {
-        }
+        public static long Hash(object expr) { throw new InvalidOperationException(SR.InvalidMessage); }
 
         public static void Position()
         {
