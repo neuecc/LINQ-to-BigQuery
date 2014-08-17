@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    public class HavingBigQueryable<T> : LimitBigQueryable<T>
+    internal class HavingBigQueryable<TSource> : BigQueryable, IHavingBigQueryable<TSource>
     {
-        internal HavingBigQueryable(BigQueryable parent) : base(parent) { }
+        readonly Expression<Func<TSource, bool>> predicate;
 
-        public LimitBigQueryable<T> Limit(int numRows)
+        internal HavingBigQueryable(IBigQueryable parent, Expression<Func<TSource, bool>> predicate)
+            : base(parent)
         {
-            if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
-
-            return new LimitBigQueryable<T>(this, numRows);
+            this.predicate = predicate;
         }
 
-        public OrderByBigQueryable<T> OrderBy()
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             throw new NotImplementedException();
         }

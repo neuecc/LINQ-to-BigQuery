@@ -7,33 +7,24 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.Query
 {
 
-    public class FromBigQueryable<T> : TableDecoratorBigQueryable<T>
+    internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>
     {
         readonly string tableName;
 
-        internal FromBigQueryable(BigQueryable subselect)
+        internal FromBigQueryable(IBigQueryable subselect)
             : base(subselect)
         {
 
         }
 
-        internal FromBigQueryable(string tableName, BigQueryable parent)
+        internal FromBigQueryable(string tableName, IBigQueryable parent)
             : base(parent)
         {
             this.tableName = tableName;
         }
 
-        public TableDecoratorBigQueryable<T> WithSnapshot()
-        {
-            throw new NotImplementedException();
-        }
 
-        public TableDecoratorBigQueryable<T> WithRange()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override string ToString(int depth, int indentSize, FormatOption option)
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             return "FROM " + Environment.NewLine + "  " + tableName;
         }

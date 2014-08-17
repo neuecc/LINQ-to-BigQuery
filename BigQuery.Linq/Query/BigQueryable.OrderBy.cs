@@ -1,28 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    public class OrderByBigQueryable<T> : LimitBigQueryable<T>
+    internal class OrderByBigQueryable<TSource, TKey> : BigQueryable, IOrderByBigQueryable<TSource>
     {
-        internal OrderByBigQueryable(BigQueryable parent) : base(parent) { }
+        readonly Tuple<Expression, bool>[] keySelectors;
 
-        public LimitBigQueryable<T> Limit(int numRows)
+        internal OrderByBigQueryable(IBigQueryable parent, Expression<Func<TSource, TKey>> keySelector, bool isDescending)
+            : base(parent)
         {
-            if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
-
-            return new LimitBigQueryable<T>(this, numRows);
+            this.keySelectors = new[] { Tuple.Create<Expression, bool>(keySelector, isDescending) };
         }
 
-        public OrderByBigQueryable<T> ThenBy()
+        OrderByBigQueryable(IBigQueryable parent, Tuple<Expression, bool>[] keySelectors)
+            : base(parent)
         {
-            throw new NotImplementedException();
+            this.keySelectors = keySelectors;
         }
 
-        public override string ToString()
+        public IOrderByBigQueryable<TSource> CreateThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector, bool isDescending)
+        {
+            var newContainer = new Tuple<Expression, bool>[this.keySelectors.Length + 1];
+            Array.Copy(this.keySelectors, newContainer, 0);
+
+            newContainer[newContainer.Length - 1] = Tuple.Create<Expression, bool>(keySelector, isDescending);
+            return new OrderByBigQueryable<TSource, TThenByKey>(this.Parent, newContainer);
+        }
+
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             throw new NotImplementedException();
         }

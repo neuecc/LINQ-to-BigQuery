@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
 
-    public class GroupByBigQueryable<T> : HavingBigQueryable<T>
+    internal class GroupByBigQueryable<TSource, TKey> : BigQueryable, IGroupByBigQueryable<TSource>
     {
-        public bool each { get; set; }
+        readonly Expression<Func<TSource, TKey>> keySelector;
+        readonly bool each;
 
-        internal GroupByBigQueryable(BigQueryable parent) : base(parent) { }
-
-        public HavingBigQueryable<T> Having()
+        internal GroupByBigQueryable(IBigQueryable parent, Expression<Func<TSource, TKey>> keySelector, bool each)
+            : base(parent)
         {
-            throw new NotImplementedException();
+            this.keySelector = keySelector;
+            this.each = each;
         }
 
-        internal override string ToString(int depth, int indentSize, FormatOption option)
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             return "GROUP " + ((each) ? "EACH BY " : "BY ")
                 + Environment.NewLine;

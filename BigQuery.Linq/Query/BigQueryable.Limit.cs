@@ -8,32 +8,17 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.Query
 {
 
-    public class LimitBigQueryable<TSource> : BigQueryable<TSource>
+    internal class LimitBigQueryable<T> : BigQueryable, ILimitBigQueryable<T>
     {
         readonly int numRows;
 
-        internal LimitBigQueryable(BigQueryable parent)
-            : base(parent)
-        {
-        }
-
-        internal LimitBigQueryable(BigQueryable parent, int numRows)
+        internal LimitBigQueryable(IBigQueryable parent, int numRows)
             : base(parent)
         {
             this.numRows = numRows;
         }
 
-        public SelectBigQueryable<TSource, TSource> Select()
-        {
-            return new SelectBigQueryable<TSource, TSource>(this, x => x);
-        }
-
-        public SelectBigQueryable<TSource, TResult> Select<TResult>(Expression<Func<TSource, TResult>> selector)
-        {
-            return new SelectBigQueryable<TSource, TResult>(this, selector);
-        }
-
-        internal override string ToString(int depth, int indentSize, FormatOption option)
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             // TODO:set depth, indentSize, option
             var command = "LIMIT " + numRows;

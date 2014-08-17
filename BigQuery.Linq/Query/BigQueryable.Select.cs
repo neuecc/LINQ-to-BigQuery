@@ -6,19 +6,14 @@ using System.Text;
 namespace BigQuery.Linq.Query
 {
     // SELECT expr1 [AS alias1], expr2 [AS alias2], ...
-    public class SelectBigQueryable<TSource, TResult> : BigQueryable<TResult>, IEnumerable<TResult>
+    internal class SelectBigQueryable<TSource, TResult> : BigQueryable, ISelectBigQueryable<TSource, TResult>
     {
         readonly Expression<Func<TSource, TResult>> selector;
 
-        internal SelectBigQueryable(BigQueryable parent, Expression<Func<TSource, TResult>> selector)
+        internal SelectBigQueryable(IBigQueryable parent, Expression<Func<TSource, TResult>> selector)
             : base(parent)
         {
             this.selector = selector;
-        }
-
-        public FromBigQueryable<TResult> AsNestedQuery()
-        {
-            return new FromBigQueryable<TResult>(this);
         }
 
         public IEnumerator<TResult> GetEnumerator()
@@ -32,7 +27,7 @@ namespace BigQuery.Linq.Query
             return GetEnumerator();
         }
 
-        internal override string ToString(int depth, int indentSize, FormatOption option)
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             if (depth < 1) throw new ArgumentOutOfRangeException("depth:" + depth);
 

@@ -48,7 +48,7 @@ namespace BigQuery.Linq
 
             //new MySource().Execute(
             // var context = new BigQueryContext().From<int>().Select();
-            var context = new BigQueryContext();
+            
 
             //var query = new BigQueryContext()
             //    .From<HogeMoge>()
@@ -64,8 +64,7 @@ namespace BigQuery.Linq
 SELECT
   title,
   HASH(title) AS hash_value,
-  IF(ABS(HASH(title)) % 2 == 1, 'True', 'False') 
-    AS included_in_sample
+  IF(ABS(HASH(title)) % 2 = 1, 'True', 'False') AS included_in_sample
 FROM
   [publicdata:samples.wikipedia]
 WHERE
@@ -75,24 +74,28 @@ LIMIT 5;
              */
 
 
+            // context.From<Wikipedia>("[publicdata:samples.wikipedia]").Where(x => x)
+
+            var context = new BigQueryContext();
 
             var query = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
                 .Where(x => x.wp_namespace == 0)
-                .Where(x => x.wp_namespace == 0)
+                .Where(x => x.repository == null)
                 .Limit(5)
                 .Select(x => new
                 {
                     x.title,
                     hashValue = Other.Hash(x.title),
-                    includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False"
-                })
-                .ToString();
+                    includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False",
+                    casewhentes = (x.title == "aaa") ? "b" : (x.title == "bbb") ? "c" : (x.title == "ddd") ? "e" : "f"
+                });
 
 
 
 
 
-            Console.WriteLine(query);
+
+            Console.WriteLine(query.ToString());
         }
     }
 }

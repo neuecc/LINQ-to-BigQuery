@@ -1,7 +1,9 @@
-﻿using System;
+﻿using BigQuery.Linq.Functions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -50,13 +52,30 @@ namespace BigQuery.Linq
             }
         }
 
+        string VisitAndClearBuffer(Expression node)
+        {
+            Visit(node);
+            var result = sb.ToString();
+            sb.Clear();
+            return result;
+        }
+
         protected override Expression VisitNew(NewExpression node)
         {
-            var targetType = node.Type;
-
             var indent = new string(' ', depth * indentSize);
+            var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+
+            var merge = node.Members.Zip(node.Arguments, (x, y) =>
+            {
+                var rightValue = innerTranslator.VisitAndClearBuffer(y);
+
+                if (x.Name == rightValue) return x.Name;
+
+                return rightValue + " AS " + x.Name;
+            });
+
             var command = string.Join("," + Environment.NewLine,
-                targetType.GetProperties().Select(x => indent + x.Name));
+                merge.Select(x => indent + x));
 
             sb.Append(command);
 
@@ -69,6 +88,7 @@ namespace BigQuery.Linq
             bool isNull = false;
             switch (node.NodeType)
             {
+                // Comparison functions
                 case ExpressionType.AndAlso:
                     expr = "&&";
                     break;
@@ -101,6 +121,22 @@ namespace BigQuery.Linq
                         expr = (isNull) ? "IS NOT NULL" : "!=";
                     }
                     break;
+                // Arithmetic operators
+                case ExpressionType.Add:
+                    expr = "+";
+                    break;
+                case ExpressionType.Subtract:
+                    expr = "-";
+                    break;
+                case ExpressionType.Multiply:
+                    expr = "*";
+                    break;
+                case ExpressionType.Divide:
+                    expr = "/";
+                    break;
+                case ExpressionType.Modulo:
+                    expr = "%";
+                    break;
                 default:
                     throw new InvalidOperationException("Invalid node type:" + node.NodeType);
             }
@@ -118,6 +154,7 @@ namespace BigQuery.Linq
         }
 
         // Casting functions(lack of HexString convert)
+        // TODO: ! is NOT?
         protected override Expression VisitUnary(UnaryExpression node)
         {
             if (node.NodeType == ExpressionType.Convert)
@@ -180,9 +217,116 @@ namespace BigQuery.Linq
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            // TODO:if value is DateTime, need format!
-            sb.Append(node.Value);
-            return base.VisitConstant(node);
+            string expr = "";
+            switch (Type.GetTypeCode(node.Value.GetType()))
+            {
+                case TypeCode.Boolean:
+                    var b = (bool)node.Value;
+                    expr = (b == true) ? "true" : "false";
+                    break;
+                case TypeCode.Char:
+                case TypeCode.String:
+                    expr = "\'" + node.Value + "\'";
+                    break;
+                case TypeCode.DateTime:
+                    // TODO:if value is DateTime, need format!
+                    expr = node.Value.ToString();
+                    break;
+                case TypeCode.DBNull:
+                case TypeCode.Empty:
+                    sb.Append("NULL");
+                    break;
+                case TypeCode.Decimal:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    sb.Append(node.Value);
+                    break;
+                case TypeCode.Object:
+                    // TODO:it's record?
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            sb.Append(expr);
+            return node;
+        }
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            var attr = node.Method.GetCustomAttributes<FunctionNameAttribute>().FirstOrDefault();
+            if (attr == null) throw new InvalidOperationException("Not support method:" + node.Method.DeclaringType.Name + "." + node.Method.Name + " Method can only call BigQuery.Linq.Functions.*");
+
+            sb.Append(attr.Name + "(");
+
+            base.VisitMethodCall(node);
+
+            sb.Append(")");
+
+            return node;
+        }
+
+        protected override Expression VisitConditional(ConditionalExpression node)
+        {
+            var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+
+            // case when ... then ... ... else .. end
+            // TODO:need more clean format
+            if (node.IfFalse is ConditionalExpression)
+            {
+                sb.Append("CASE");
+
+                sb.Append(Environment.NewLine);
+
+                Expression right = node;
+                while (right is ConditionalExpression)
+                {
+                    var rightNode = right as ConditionalExpression;
+
+                    // left
+                    sb.Append(" WHEN ");
+                    {
+                        sb.Append(innerTranslator.VisitAndClearBuffer(rightNode.Test));
+                    }
+
+                    sb.Append(" THEN ");
+                    {
+                        sb.Append(innerTranslator.VisitAndClearBuffer(rightNode.IfTrue));
+                    }
+
+                    right = rightNode.IfFalse;
+                }
+
+                sb.Append(" ELSE ");
+                sb.Append(innerTranslator.VisitAndClearBuffer(right));
+
+                sb.Append(" END");
+            }
+            else
+            {
+                sb.Append("IF(");
+                {
+                    sb.Append(innerTranslator.VisitAndClearBuffer(node.Test));
+                }
+                sb.Append(", ");
+                {
+                    sb.Append(innerTranslator.VisitAndClearBuffer(node.IfTrue));
+                }
+                sb.Append(", ");
+                {
+                    sb.Append(innerTranslator.VisitAndClearBuffer(node.IfFalse));
+                }
+                sb.Append(")");
+            }
+            return node;
         }
     }
 }

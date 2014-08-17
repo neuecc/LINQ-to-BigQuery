@@ -6,19 +6,38 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-
-    public class TableDecoratorBigQueryable<T> : JoinBigQueryable<T>
+    internal enum DecorateType
     {
-        internal TableDecoratorBigQueryable(BigQueryable parent)
+        Snapshot,
+        Range
+    }
+
+    internal class TableDecoratorBigQueryable<T> : BigQueryable, ITableDecoratorBigQueryable<T>
+    {
+        public static DateTime Zero = DateTime.MinValue;
+
+        readonly DecorateType Type;
+        readonly DateTime Time1;
+        readonly DateTime Time2;
+
+        internal TableDecoratorBigQueryable(IBigQueryable parent, DecorateType type, DateTime time1)
             : base(parent)
         {
-
+            this.Type = type;
+            this.Time1 = time1;
         }
 
-        public JoinBigQueryable<T> Join()
+        internal TableDecoratorBigQueryable(IBigQueryable parent, DecorateType type, DateTime time1, DateTime time2)
+            : base(parent)
+        {
+            this.Type = type;
+            this.Time1 = time1;
+            this.Time2 = time2;
+        }
+
+        public override string ToString(int depth, int indentSize, FormatOption option)
         {
             throw new NotImplementedException();
         }
-
     }
 }

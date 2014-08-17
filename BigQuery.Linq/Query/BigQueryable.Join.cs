@@ -7,15 +7,30 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    // public AfterSelectBigQueryable<TResult> Select<TResult>(Expression<Func<TSource, TResult>> selector)
-
-    public class JoinBigQueryable<T> : WhereBigQueryable<T>
+    public enum JoinType
     {
-        internal JoinBigQueryable(BigQueryable parent) : base(parent) { }
+        Inner,
+        LeftOuter,
+        Cross
+    }
 
-        public sealed override WhereBigQueryable<T> Where(Expression<Func<T, bool>> predicate)
+    // TODO:table & expression
+
+    internal class JoinBigQueryable<T> : BigQueryable, IJoinBigQueryable<T>
+    {
+        readonly JoinType joinType;
+        readonly bool each;
+
+        internal JoinBigQueryable(IBigQueryable parent, JoinType joinType, bool each)
+            : base(parent)
         {
-            return new WhereBigQueryable<T>(this, predicate);
+            this.joinType = joinType;
+            this.each = each;
+        }
+
+        public override string ToString(int depth, int indentSize, FormatOption option)
+        {
+            throw new NotImplementedException();
         }
     }
 }

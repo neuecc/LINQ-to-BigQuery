@@ -97,7 +97,9 @@ namespace BigQuery.Linq.Functions
 
     public static class Mathematical
     {
+        [FunctionName("ABS")]
         public static int Abs(long numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+        [FunctionName("ABS")]
         public static int Abs(double numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
     }
 
@@ -107,6 +109,7 @@ namespace BigQuery.Linq.Functions
 
         // If => () ? :
 
+        [FunctionName("HASH")]
         public static long Hash(object expr) { throw new InvalidOperationException(SR.InvalidMessage); }
 
         public static void Position()

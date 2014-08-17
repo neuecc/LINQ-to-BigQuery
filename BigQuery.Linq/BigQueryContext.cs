@@ -22,23 +22,23 @@ namespace BigQuery.Linq
             FormatOption = Linq.FormatOption.Indent;
         }
 
-        public FromBigQueryable<T> From<T>()
+        public IFromBigQueryable<T> From<T>()
         {
             return new FromBigQueryable<T>(typeof(T).Name, new RootBigQueryable<T>(this));
         }
 
 
-        public FromBigQueryable<T> From<T>(string tableName)
+        public IFromBigQueryable<T> From<T>(string tableName)
         {
             return new FromBigQueryable<T>(tableName, new RootBigQueryable<T>(this));
         }
 
-        public FromBigQueryable<T> From<T>(string tableName, T dynamicSchema)
+        public IFromBigQueryable<T> From<T>(string tableName, T dynamicSchema)
         {
             return new FromBigQueryable<T>(tableName, new RootBigQueryable<T>(this));
         }
 
-        public FromBigQueryable<T> From<T>(BigQueryable<T> nestedSource)
+        public IFromBigQueryable<T> From<T>(IBigQueryable nestedSource)
         {
 
             return new FromBigQueryable<T>(nestedSource);
