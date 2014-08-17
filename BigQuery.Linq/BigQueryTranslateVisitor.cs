@@ -105,8 +105,6 @@ namespace BigQuery.Linq
                     throw new InvalidOperationException("Invalid node type:" + node.NodeType);
             }
 
-            sb.Append("  "); // indent depth
-
             base.Visit(node.Left); // run to left
 
             sb.Append(" " + expr + " ");
@@ -179,170 +177,12 @@ namespace BigQuery.Linq
 
             return node;
         }
-    }
-
-
-
-
-
-
-
-
-
-    // TODO:delete
-
-
-
-    internal class FieldSelectExpressionVisitor : ExpressionVisitor
-    {
-        List<MemberExpression> members = new List<MemberExpression>();
-
-        public static string BuildString(Expression expression)
-        {
-            var visitor = new FieldSelectExpressionVisitor();
-            visitor.Visit(expression);
-            // TODO: method call and alias...
-            return "  " + string.Join(", ", visitor.members.Select(x => x.Member.Name));
-        }
-
-        protected override Expression VisitMember(MemberExpression node)
-        {
-            members.Add(node);
-            return base.VisitMember(node);
-        }
-    }
-
-    public class ConditionExpressionVisitor : ExpressionVisitor
-    {
-        // ?? => IFNULL(expr, null_default)
-        StringBuilder sb = new StringBuilder();
-
-        public static string Build(Expression expression)
-        {
-            var visitor = new ConditionExpressionVisitor();
-            visitor.Visit(expression);
-            return visitor.sb.ToString();
-        }
-
-        protected override Expression VisitBinary(BinaryExpression node)
-        {
-            string expr;
-            bool isNull = false;
-            switch (node.NodeType)
-            {
-                case ExpressionType.AndAlso:
-                    expr = "&&";
-                    break;
-                case ExpressionType.OrElse:
-                    expr = "||";
-                    break;
-                case ExpressionType.LessThan:
-                    expr = "<";
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    expr = "<=";
-                    break;
-                case ExpressionType.GreaterThan:
-                    expr = ">";
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    expr = ">=";
-                    break;
-                case ExpressionType.Equal:
-                    {
-                        var right = node.Right;
-                        isNull = (right is ConstantExpression) && ((ConstantExpression)right).Value == null;
-                        expr = (isNull) ? "IS NULL" : "=";
-                    }
-                    break;
-                case ExpressionType.NotEqual:
-                    {
-                        var right = node.Right;
-                        isNull = (right is ConstantExpression) && ((ConstantExpression)right).Value == null;
-                        expr = (isNull) ? "IS NOT NULL" : "!=";
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException("Invalid node type:" + node.NodeType);
-            }
-
-            sb.Append("  "); // indent depth
-
-            base.Visit(node.Left); // run to left
-
-            sb.Append(" " + expr + " ");
-
-            if (!isNull)
-            {
-                base.Visit(node.Right); // run to right
-            }
-
-            return node;
-        }
-
-        protected override Expression VisitMember(MemberExpression node)
-        {
-            sb.Append(node.Member.Name);
-            return base.VisitMember(node);
-        }
-
-        protected override Expression VisitConditional(ConditionalExpression node)
-        {
-            return base.VisitConditional(node);
-        }
-
-        protected override Expression VisitUnary(UnaryExpression node)
-        {
-            return base.VisitUnary(node);
-        }
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
+            // TODO:if value is DateTime, need format!
             sb.Append(node.Value);
             return base.VisitConstant(node);
-        }
-    }
-
-    public class MyExpressionVisitor : ExpressionVisitor
-    {
-        int depth = 1;
-        int indentSize = 2;
-
-        StringBuilder commandBuilder = new StringBuilder();
-
-        public static string BuildCommand(Expression expression)
-        {
-            var visitor = new MyExpressionVisitor();
-            visitor.Visit(expression);
-            return visitor.commandBuilder.ToString();
-        }
-
-        protected override Expression VisitNew(NewExpression node)
-        {
-            var targetType = node.Type;
-
-            var indent = new string(' ', depth * indentSize);
-            var command = string.Join("," + Environment.NewLine,
-                targetType.GetProperties().Select(x => indent + x.Name));
-
-            commandBuilder.Append(command);
-
-            return node;
-        }
-
-        protected override Expression VisitMethodCall(MethodCallExpression node)
-        {
-            return base.VisitMethodCall(node);
-        }
-
-        protected override Expression VisitInvocation(InvocationExpression node)
-        {
-            return base.VisitInvocation(node);
-        }
-
-        protected override Expression VisitMember(MemberExpression node)
-        {
-            return base.VisitMember(node);
         }
     }
 }

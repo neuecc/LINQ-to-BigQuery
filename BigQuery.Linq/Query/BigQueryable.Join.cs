@@ -13,12 +13,9 @@ namespace BigQuery.Linq.Query
     {
         internal JoinBigQueryable(BigQueryable parent) : base(parent) { }
 
-        public WhereBigQueryable<T> Where(Expression<Func<T, bool>> predicate)
+        public sealed override WhereBigQueryable<T> Where(Expression<Func<T, bool>> predicate)
         {
-            return new WhereBigQueryable<T>(this)
-            {
-                buildCommand = () => ConditionExpressionVisitor.Build(predicate)
-            };
+            return new WhereBigQueryable<T>(this, predicate);
         }
     }
 }

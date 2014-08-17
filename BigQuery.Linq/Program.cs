@@ -44,22 +44,24 @@ namespace BigQuery.Linq
     {
         static void Main(string[] args)
         {
-         
+
 
             //new MySource().Execute(
             // var context = new BigQueryContext().From<int>().Select();
             var context = new BigQueryContext();
 
-            var query = new BigQueryContext()
-                .From<HogeMoge>()
-                .Where(x => x.Tako == 1000 && x.Huga == null)
-                .GroupBy(x => new { x.Hoge, x.Huga })
-                .Select(x => new { x.Hoge, x.Huga })
-                .ToString();
+            //var query = new BigQueryContext()
+            //    .From<HogeMoge>()
+            //    .Where(x => x.Tako == 1000 && x.Huga == null)
+            //    .GroupBy(x => new { x.Hoge, x.Huga })
+            //    .Limit(10)
+            //    .Select(x => new { x.Hoge, x.Huga })
+            //    .ToString();
+
 
 
             /*
-             * SELECT
+SELECT
   title,
   HASH(title) AS hash_value,
   IF(ABS(HASH(title)) % 2 == 1, 'True', 'False') 
@@ -68,19 +70,25 @@ FROM
   [publicdata:samples.wikipedia]
 WHERE
   wp_namespace = 0
-LIMIT 5;*/
+LIMIT 5;
+             
+             */
 
 
-            // as ↓
 
-            //context.From<Wikipedia>("[publicdata:samples.wikipedia]")
-            //    .Where(x => x.wp_namespace == 0)
-            //    .Limit(5)
-            //    .Select(x => new
-            //    {
-            //        x.title,
-            //        includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False"
-            //    });
+            var query = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
+                .Where(x => x.wp_namespace == 0)
+                .Where(x => x.wp_namespace == 0)
+                .Limit(5)
+                .Select(x => new
+                {
+                    x.title,
+                    hashValue = Other.Hash(x.title),
+                    includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False"
+                })
+                .ToString();
+
+
 
 
 

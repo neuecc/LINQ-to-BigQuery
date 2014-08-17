@@ -12,7 +12,9 @@ namespace BigQuery.Linq.Query
 
         public LimitBigQueryable<T> Limit(int numRows)
         {
-            throw new NotImplementedException();
+            if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
+
+            return new LimitBigQueryable<T>(this, numRows);
         }
 
         public OrderByBigQueryable<T> OrderBy()

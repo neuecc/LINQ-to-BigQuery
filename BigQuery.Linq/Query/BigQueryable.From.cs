@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.Query
 {
 
-    public class FromBigQueryable<T> : TableDecorateBigQueryable<T>
+    public class FromBigQueryable<T> : TableDecoratorBigQueryable<T>
     {
         readonly string tableName;
 
@@ -23,12 +23,12 @@ namespace BigQuery.Linq.Query
             this.tableName = tableName;
         }
 
-        public TableDecorateBigQueryable<T> WithSnapshot()
+        public TableDecoratorBigQueryable<T> WithSnapshot()
         {
             throw new NotImplementedException();
         }
 
-        public TableDecorateBigQueryable<T> WithRange()
+        public TableDecoratorBigQueryable<T> WithRange()
         {
             throw new NotImplementedException();
         }

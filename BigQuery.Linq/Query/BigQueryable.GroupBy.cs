@@ -9,7 +9,6 @@ namespace BigQuery.Linq.Query
 
     public class GroupByBigQueryable<T> : HavingBigQueryable<T>
     {
-        public Func<string> buildCommand { get; set; }
         public bool each { get; set; }
 
         internal GroupByBigQueryable(BigQueryable parent) : base(parent) { }
@@ -22,7 +21,7 @@ namespace BigQuery.Linq.Query
         internal override string ToString(int depth, int indentSize, FormatOption option)
         {
             return "GROUP " + ((each) ? "EACH BY " : "BY ")
-                + Environment.NewLine + buildCommand();
+                + Environment.NewLine;
         }
     }
 }

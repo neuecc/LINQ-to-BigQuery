@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.Query
 {
 
-    public class TableDecorateBigQueryable<T> : JoinBigQueryable<T>
+    public class TableDecoratorBigQueryable<T> : JoinBigQueryable<T>
     {
-        internal TableDecorateBigQueryable(BigQueryable parent)
+        internal TableDecoratorBigQueryable(BigQueryable parent)
             : base(parent)
         {
 

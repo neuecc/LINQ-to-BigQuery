@@ -6,18 +6,23 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-
-
     public class OrderByBigQueryable<T> : LimitBigQueryable<T>
     {
         internal OrderByBigQueryable(BigQueryable parent) : base(parent) { }
 
-        public LimitBigQueryable<T> Limit()
+        public LimitBigQueryable<T> Limit(int numRows)
+        {
+            if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
+
+            return new LimitBigQueryable<T>(this, numRows);
+        }
+
+        public OrderByBigQueryable<T> ThenBy()
         {
             throw new NotImplementedException();
         }
 
-        public OrderByBigQueryable<T> ThenBy()
+        public override string ToString()
         {
             throw new NotImplementedException();
         }

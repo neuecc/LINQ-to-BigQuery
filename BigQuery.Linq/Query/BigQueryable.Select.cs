@@ -6,25 +6,25 @@ using System.Text;
 namespace BigQuery.Linq.Query
 {
     // SELECT expr1 [AS alias1], expr2 [AS alias2], ...
-    public class SelectBigQueryable<T> : BigQueryable<T>, IEnumerable<T>
+    public class SelectBigQueryable<TSource, TResult> : BigQueryable<TResult>, IEnumerable<TResult>
     {
-        readonly Expression selector;
+        readonly Expression<Func<TSource, TResult>> selector;
 
-        internal SelectBigQueryable(BigQueryable parent, Expression selector)
+        internal SelectBigQueryable(BigQueryable parent, Expression<Func<TSource, TResult>> selector)
             : base(parent)
         {
             this.selector = selector;
         }
 
-        public FromBigQueryable<T> AsNestedQuery()
+        public FromBigQueryable<TResult> AsNestedQuery()
         {
-            return new FromBigQueryable<T>(this);
+            return new FromBigQueryable<TResult>(this);
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<TResult> GetEnumerator()
         {
             var queryString = ToString();
-            return QueryContext.Query<T>(queryString).GetEnumerator();
+            return QueryContext.Query<TResult>(queryString).GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
