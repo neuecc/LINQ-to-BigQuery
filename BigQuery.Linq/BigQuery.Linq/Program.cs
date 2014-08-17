@@ -10,6 +10,9 @@ namespace BigQuery.Linq
     {
         static void Main(string[] args)
         {
+            var ctx = new BigQueryContext();
+            ctx.From("tablename", new { Hoge = default(int), Huga = default(int) });
+            
         }
     }
 }
