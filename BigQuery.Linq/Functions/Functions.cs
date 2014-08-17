@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,11 +14,18 @@ namespace BigQuery.Linq.Functions
 
     internal class FunctionNameAttribute : Attribute
     {
-        public string Name { get; set; }
+        public string Name { get; private set; }
+        public Type SpecifiedFormatterType { get; set; }
+
         public FunctionNameAttribute(string name)
         {
             this.Name = name;
         }
+    }
+
+    internal interface ISpeficiedFormatter
+    {
+        string Format(MethodCallExpression node);
     }
 
     /// <summary>
@@ -43,7 +51,7 @@ namespace BigQuery.Linq.Functions
         /// CORR(numeric_expr, numeric_expr). Returns the Pearson correlation coefficient of a set of number pairs.
         /// </summary>
         [FunctionName("CORR")]
-        public static int Correlation(int numericExpression1, int numericExpression2)
+        public static int Correlation(long numericExpression1, long numericExpression2)
         {
             throw new InvalidOperationException(SR.InvalidMessage);
         }
@@ -59,6 +67,52 @@ namespace BigQuery.Linq.Functions
         public static int CovarianceSample()
         {
             throw new InvalidOperationException(SR.InvalidMessage);
+        }
+
+        /// <summary>
+        /// COUNT(*)
+        /// </summary>
+        [FunctionName("COUNT", SpecifiedFormatterType = typeof(CountAllFormatter))]
+        public static int Count()
+        {
+            throw new InvalidOperationException(SR.InvalidMessage);
+        }
+
+        [FunctionName("COUNT")]
+        public static int Count(object field)
+        {
+            throw new InvalidOperationException(SR.InvalidMessage);
+        }
+
+        [FunctionName("COUNT(DISTINCT)", SpecifiedFormatterType = typeof(CountDistinctFormatter))]
+        public static int CountDistinct(object field)
+        {
+            throw new InvalidOperationException(SR.InvalidMessage);
+        }
+
+        [FunctionName("COUNT(DISTINCT)", SpecifiedFormatterType = typeof(CountDistinctFormatter))]
+        public static int CountDistinct(object field, int n)
+        {
+            throw new InvalidOperationException(SR.InvalidMessage);
+        }
+
+        class CountAllFormatter : ISpeficiedFormatter
+        {
+            public string Format(MethodCallExpression node)
+            {
+                return "COUNT(*)";
+            }
+        }
+
+        class CountDistinctFormatter : ISpeficiedFormatter
+        {
+            public string Format(MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+                var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));
+
+                return "COUNT(DISTINCT " + args + ")";
+            }
         }
     }
 

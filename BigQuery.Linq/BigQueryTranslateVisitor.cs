@@ -52,7 +52,7 @@ namespace BigQuery.Linq
             }
         }
 
-        string VisitAndClearBuffer(Expression node)
+        internal string VisitAndClearBuffer(Expression node)
         {
             Visit(node);
             var result = sb.ToString();
@@ -88,13 +88,14 @@ namespace BigQuery.Linq
             bool isNull = false;
             switch (node.NodeType)
             {
-                // Comparison functions
+                // Logical operators
                 case ExpressionType.AndAlso:
-                    expr = "&&";
+                    expr = "AND";
                     break;
                 case ExpressionType.OrElse:
-                    expr = "||";
+                    expr = "OR";
                     break;
+                // Comparison functions
                 case ExpressionType.LessThan:
                     expr = "<";
                     break;
@@ -153,10 +154,9 @@ namespace BigQuery.Linq
             return node;
         }
 
-        // Casting functions(lack of HexString convert)
-        // TODO: ! is NOT?
         protected override Expression VisitUnary(UnaryExpression node)
         {
+            // Casting functions(lack of HexString convert)
             if (node.NodeType == ExpressionType.Convert)
             {
                 var typeCode = Type.GetTypeCode(node.Type);
@@ -186,6 +186,11 @@ namespace BigQuery.Linq
                 sb.Append(")");
 
                 return expr;
+            }
+            else if (node.NodeType == ExpressionType.Not) // Logical operator
+            {
+                sb.Append("NOT ");
+                return base.VisitUnary(node);
             }
 
             throw new InvalidOperationException("Not supported unary expression:" + node);
@@ -265,11 +270,22 @@ namespace BigQuery.Linq
             var attr = node.Method.GetCustomAttributes<FunctionNameAttribute>().FirstOrDefault();
             if (attr == null) throw new InvalidOperationException("Not support method:" + node.Method.DeclaringType.Name + "." + node.Method.Name + " Method can only call BigQuery.Linq.Functions.*");
 
-            sb.Append(attr.Name + "(");
+            if (attr.SpecifiedFormatterType != null)
+            {
+                var formatter = Activator.CreateInstance(attr.SpecifiedFormatterType, true) as ISpeficiedFormatter;
+                sb.Append(formatter.Format(node));
+            }
+            else
+            {
+                sb.Append(attr.Name + "(");
 
-            base.VisitMethodCall(node);
+                var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+                var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
-            sb.Append(")");
+                sb.Append(args);
+
+                sb.Append(")");
+            }
 
             return node;
         }

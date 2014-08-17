@@ -48,7 +48,7 @@ namespace BigQuery.Linq
 
             //new MySource().Execute(
             // var context = new BigQueryContext().From<int>().Select();
-            
+
 
             //var query = new BigQueryContext()
             //    .From<HogeMoge>()
@@ -86,6 +86,11 @@ LIMIT 5;
                 {
                     x.title,
                     hashValue = Other.Hash(x.title),
+                    count1 = Aggregate.Count(),
+                    count2 = Aggregate.Count(x.title),
+                    count3 = Aggregate.CountDistinct(x.title),
+                    count4 = Aggregate.CountDistinct(x.title, 100),
+                    logical = !(x.title == "hoge"),
                     includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False",
                     casewhentes = (x.title == "aaa") ? "b" : (x.title == "bbb") ? "c" : (x.title == "ddd") ? "e" : "f"
                 });
