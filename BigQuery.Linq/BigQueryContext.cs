@@ -40,7 +40,6 @@ namespace BigQuery.Linq
 
         public IFromBigQueryable<T> From<T>(IBigQueryable nestedSource)
         {
-
             return new FromBigQueryable<T>(nestedSource);
         }
 

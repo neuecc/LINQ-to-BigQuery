@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    internal class HavingBigQueryable<TSource> : BigQueryable, IHavingBigQueryable<TSource>
+    internal class HavingBigQueryable<TSource> : QueryExecutable<TSource>, IHavingBigQueryable<TSource>
     {
         readonly Expression<Func<TSource, bool>> predicate;
 

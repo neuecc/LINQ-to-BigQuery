@@ -131,6 +131,22 @@ namespace BigQuery.Linq.Functions
         }
     }
 
+    public static class Comparison
+    {
+        /// <summary>Returns true if numeric_expr is positive or negative infinity.</summary>
+        [FunctionName("IS_INF")]
+        public static bool IsInfinity(long numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+        /// <summary>Returns true if numeric_expr is positive or negative infinity.</summary>
+        [FunctionName("IS_INF")]
+        public static bool IsInfinity(double numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+        [FunctionName("IS_NAN")]
+        /// <summary>Returns true if numeric_expr is the special NaN numeric value.</summary>
+        public static bool IsNAN(long numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+        /// <summary>Returns true if numeric_expr is the special NaN numeric value.</summary>
+        [FunctionName("IS_NAN")]
+        public static bool IsNAN(double numericExpr) { throw new InvalidOperationException(SR.InvalidMessage); }
+    }
+
     public static class Window
     {
         public static void CumulativeDistribution()

@@ -6,7 +6,7 @@ using System.Text;
 namespace BigQuery.Linq.Query
 {
     // SELECT expr1 [AS alias1], expr2 [AS alias2], ...
-    internal class SelectBigQueryable<TSource, TResult> : BigQueryable, ISelectBigQueryable<TSource, TResult>
+    internal class SelectBigQueryable<TSource, TResult> : QueryExecutable<TResult>, ISelectBigQueryable<TResult>
     {
         readonly Expression<Func<TSource, TResult>> selector;
 
@@ -20,11 +20,6 @@ namespace BigQuery.Linq.Query
         {
             var queryString = ToString();
             return QueryContext.Query<TResult>(queryString).GetEnumerator();
-        }
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         public override string ToString(int depth, int indentSize, FormatOption option)

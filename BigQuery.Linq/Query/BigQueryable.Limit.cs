@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.Query
 {
 
-    internal class LimitBigQueryable<T> : BigQueryable, ILimitBigQueryable<T>
+    internal class LimitBigQueryable<T> : QueryExecutable<T>, ILimitBigQueryable<T>
     {
         readonly int numRows;
 

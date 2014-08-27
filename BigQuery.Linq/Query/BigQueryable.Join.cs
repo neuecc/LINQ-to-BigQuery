@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BigQuery.Linq.Query
+namespace BigQuery.Linq
 {
     public enum JoinType
     {
@@ -13,6 +13,10 @@ namespace BigQuery.Linq.Query
         LeftOuter,
         Cross
     }
+}
+
+namespace BigQuery.Linq.Query
+{
 
     // TODO:table & expression
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    internal class WhereBigQueryable<TSource> : BigQueryable, IWhereBigQueryable<TSource>
+    internal class WhereBigQueryable<TSource> : QueryExecutable<TSource>, IWhereBigQueryable<TSource>
     {
         readonly Expression<Func<TSource, bool>> predicate;
 
@@ -17,9 +17,13 @@ namespace BigQuery.Linq.Query
             this.predicate = predicate;
         }
 
-        public IWhereBigQueryable<TSource> CombinePredicate(Expression<Func<TSource, bool>> predicate)
+        /// <summary>
+        /// The WHERE clause, sometimes called the predicate, states the qualifying conditions for a query. Multiple conditions can be joined by boolean AND and OR clauses, optionally surrounded by (parentheses) to group them. The fields listed in a WHERE clause do not need to be listed in any SELECT clause.
+        /// </summary>
+        /// <param name="condition">Aggregate functions cannot be used in the WHERE clause.</param>
+        public IWhereBigQueryable<TSource> Where(Expression<Func<TSource, bool>> condition)
         {
-            var newBody = Expression.AndAlso(this.predicate.Body, predicate.Body);
+            var newBody = Expression.AndAlso(this.predicate.Body, condition.Body);
             var newPredicate = Expression.Lambda<Func<TSource, bool>>(newBody, this.predicate.Parameters);
 
             return new WhereBigQueryable<TSource>(Parent, newPredicate);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    internal class OrderByBigQueryable<TSource, TKey> : BigQueryable, IOrderByBigQueryable<TSource>
+    internal class OrderByBigQueryable<TSource, TKey> : QueryExecutable<TSource>, IOrderByBigQueryable<TSource>
     {
         readonly Tuple<Expression, bool>[] keySelectors;
 
@@ -23,13 +23,23 @@ namespace BigQuery.Linq.Query
             this.keySelectors = keySelectors;
         }
 
-        public IOrderByBigQueryable<TSource> CreateThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector, bool isDescending)
+        IOrderByBigQueryable<TSource> CreateThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector, bool isDescending)
         {
             var newContainer = new Tuple<Expression, bool>[this.keySelectors.Length + 1];
             Array.Copy(this.keySelectors, newContainer, 0);
 
             newContainer[newContainer.Length - 1] = Tuple.Create<Expression, bool>(keySelector, isDescending);
             return new OrderByBigQueryable<TSource, TThenByKey>(this.Parent, newContainer);
+        }
+
+        public IOrderByBigQueryable<TSource> ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
+        {
+            return CreateThenBy(keySelector, isDescending: false);
+        }
+
+        public IOrderByBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
+        {
+            return CreateThenBy(keySelector, isDescending: true);
         }
 
         public override string ToString(int depth, int indentSize, FormatOption option)

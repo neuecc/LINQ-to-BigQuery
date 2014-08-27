@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.Query
 {
 
-    internal class GroupByBigQueryable<TSource, TKey> : BigQueryable, IGroupByBigQueryable<TSource>
+    internal class GroupByBigQueryable<TSource, TKey> : QueryExecutable<TSource>, IGroupByBigQueryable<TSource>
     {
         readonly Expression<Func<TSource, TKey>> keySelector;
         readonly bool each;
