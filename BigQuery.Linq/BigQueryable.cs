@@ -185,28 +185,63 @@ namespace BigQuery.Linq
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, TableDecoratorBigQueryable<T>.Zero);
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, absoluteTime1: TableDecoratorBigQueryable<T>.Zero);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithSnapshot<T>(this IFromBigQueryable<T> source, DateTime time)
+        public static ITableDecoratorBigQueryable<T> WithSnapshot<T>(this IFromBigQueryable<T> source, DateTime absoluteTime)
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, time);
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, absoluteTime1: absoluteTime);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime timeFrom)
+        public static ITableDecoratorBigQueryable<T> WithSnapshot<T>(this IFromBigQueryable<T> source, TimeSpan relativeTime)
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, timeFrom);
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, relativeTime1: relativeTime);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime timeFrom, DateTime timeTo)
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime absoluteTimeFrom)
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, timeFrom, timeTo);
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom);
+        }
+
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom);
+        }
+
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime absoluteTimeFrom, DateTime absoluteTimeTo)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom, absoluteTime2: absoluteTimeTo);
+        }
+
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime absoluteTimeFrom, TimeSpan relativeTimeTo)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom, relativeTime2: relativeTimeTo);
+        }
+
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom, DateTime absoluteTimeTo)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom, absoluteTime2: absoluteTimeTo);
+        }
+
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom, TimeSpan relativeTimeTo)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom, relativeTime2: relativeTimeTo);
         }
 
         public static IJoinBigQueryable<T> Join<T>(this IJoinBigQueryable<T> source, JoinType joinType = JoinType.Inner, bool each = false)

@@ -9,7 +9,7 @@ namespace BigQuery.Linq.Query
 
     internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>
     {
-        readonly string tableName;
+        internal readonly string tableName;
 
         internal FromBigQueryable(IBigQueryable subselect)
             : base(subselect)
