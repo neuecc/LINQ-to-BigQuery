@@ -78,28 +78,27 @@ LIMIT 5;
 
             var context = new BigQueryContext();
 
-            //var query = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
-            //    .Where(x => x.wp_namespace == 0)
-            //    // .Where(x => x.repository == null)
-            //    .Limit(5)
-            //    .Select(x => new
-            //    {
-            //        x.title,
-            //        hashValue = Other.Hash(x.title),
-            //        count1 = Aggregate.Count(),
-            //        count2 = Aggregate.Count(x.title),
-            //        count3 = Aggregate.CountDistinct(x.title),
-            //        count4 = Aggregate.CountDistinct(x.title, 100),
-            //        logical = !(x.title == "hoge"),
-            //        includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False",
-            //        casewhentes = (x.title == "aaa") ? "b" : (x.title == "bbb") ? "c" : (x.title == "ddd") ? "e" : "f"
-            //    });
+            var query = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
+                .Where(x => x.wp_namespace == 0)
+                .Select(x => new
+                {
+                    x.title,
+                    hashValue = Other.Hash(x.title),
+                    count1 = Aggregate.Count(),
+                    count2 = Aggregate.Count(x.title),
+                    count3 = Aggregate.CountDistinct(x.title),
+                    count4 = Aggregate.CountDistinct(x.title, 100),
+                    logical = !(x.title == "hoge"),
+                    includedInSample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1) ? "True" : "False",
+                    casewhentes = (x.title == "aaa") ? "b" : (x.title == "bbb") ? "c" : (x.title == "ddd") ? "e" : "f"
+                })
+                .Limit(5);
 
 
 
 
 
-            //Console.WriteLine(query.ToString());
+            Console.WriteLine(query.ToString());
         }
     }
 }

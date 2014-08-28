@@ -27,7 +27,6 @@ namespace BigQuery.Linq
             return new FromBigQueryable<T>(typeof(T).Name, new RootBigQueryable<T>(this));
         }
 
-
         public IFromBigQueryable<T> From<T>(string tableName)
         {
             return new FromBigQueryable<T>(tableName, new RootBigQueryable<T>(this));
@@ -41,6 +40,14 @@ namespace BigQuery.Linq
         public IFromBigQueryable<T> From<T>(IBigQueryable nestedSource)
         {
             return new FromBigQueryable<T>(nestedSource);
+        }
+
+        public IQueryExecutable<T> Select<T>(Expression<Func<T>> selector)
+        {
+            var unusedParameter = Expression.Parameter(typeof(T), "_");
+            var wrapped = Expression.Lambda<Func<T, T>>(selector.Body, unusedParameter);
+
+            return new SelectBigQueryable<T, T>(new RootBigQueryable<T>(this), wrapped);
         }
 
         public IEnumerable<T> Query<T>(string query)

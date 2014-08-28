@@ -82,7 +82,8 @@ namespace BigQuery.Linq
 
         public override string ToString(int depth, int indentSize, FormatOption option)
         {
-            throw new System.NotImplementedException();
+            return "";
+            // throw new System.NotImplementedException();
         }
     }
 

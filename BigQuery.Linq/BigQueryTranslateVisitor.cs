@@ -26,7 +26,7 @@ namespace BigQuery.Linq
         }
 
         // EntryPoint
-        public static string BuildQuery(string command, int depth, int indentSize, FormatOption option, Expression expression)
+        public static string BuildQuery(string command, int depth, int indentSize, FormatOption option, Expression expression, bool forceIndent = false)
         {
             var visitor = new BigQueryTranslateVisitor(depth, indentSize, option);
 
@@ -34,6 +34,10 @@ namespace BigQuery.Linq
             if (option == FormatOption.Indent)
             {
                 visitor.sb.Append(Environment.NewLine);
+                if (forceIndent)
+                {
+                    visitor.AppendIndent();
+                }
             }
             else
             {
@@ -69,9 +73,9 @@ namespace BigQuery.Linq
             {
                 var rightValue = innerTranslator.VisitAndClearBuffer(y);
 
-                if (x.Name == rightValue) return x.Name;
+                if (x.Name == rightValue.Trim('[', ']')) return "[" + x.Name + "]";
 
-                return rightValue + " AS " + x.Name;
+                return rightValue + " AS " + "[" + x.Name + "]";
             });
 
             var command = string.Join("," + Environment.NewLine,
@@ -210,7 +214,7 @@ namespace BigQuery.Linq
             // for record type
             for (int i = nodes.Count - 1; i >= 0; i--)
             {
-                sb.Append(nodes[i].Member.Name);
+                sb.Append("[" + nodes[i].Member.Name + "]");
                 if (nodes.Count != 1 && i != 0)
                 {
                     sb.Append(".");

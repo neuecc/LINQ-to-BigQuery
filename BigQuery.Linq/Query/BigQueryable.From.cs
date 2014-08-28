@@ -26,7 +26,7 @@ namespace BigQuery.Linq.Query
 
         public override string ToString(int depth, int indentSize, FormatOption option)
         {
-            return "FROM " + Environment.NewLine + "  " + tableName;
+            return "FROM" + Environment.NewLine + "  " + tableName;
         }
     }
 }

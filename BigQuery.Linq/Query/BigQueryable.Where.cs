@@ -33,7 +33,7 @@ namespace BigQuery.Linq.Query
         {
             if (depth < 1) throw new ArgumentOutOfRangeException("depth:" + depth);
 
-            var command = BigQueryTranslateVisitor.BuildQuery("WHERE", depth, indentSize, option, predicate);
+            var command = BigQueryTranslateVisitor.BuildQuery("WHERE", depth, indentSize, option, predicate, forceIndent: true);
             return Parent.ToString(depth, indentSize, option) + Environment.NewLine + command;
         }
     }
