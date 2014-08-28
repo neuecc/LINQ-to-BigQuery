@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    internal class OrderByBigQueryable<TSource, TKey> : QueryExecutable<TSource>, IOrderByBigQueryable<TSource>
+    internal class OrderByBigQueryable<TSource, TKey> : QueryExecutable<TSource>, IOrderByBigQueryable<TSource>, IOrderByAfterSelectBigQueryable<TSource>
     {
         readonly Tuple<Expression, bool>[] keySelectors;
 
@@ -23,7 +23,7 @@ namespace BigQuery.Linq.Query
             this.keySelectors = keySelectors;
         }
 
-        IOrderByBigQueryable<TSource> CreateThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector, bool isDescending)
+        OrderByBigQueryable<TSource, TThenByKey> CreateThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector, bool isDescending)
         {
             var newContainer = new Tuple<Expression, bool>[this.keySelectors.Length + 1];
             Array.Copy(this.keySelectors, newContainer, 0);
@@ -32,12 +32,22 @@ namespace BigQuery.Linq.Query
             return new OrderByBigQueryable<TSource, TThenByKey>(this.Parent, newContainer);
         }
 
-        public IOrderByBigQueryable<TSource> ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
+        IOrderByBigQueryable<TSource> IOrderByBigQueryable<TSource>.ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
         {
             return CreateThenBy(keySelector, isDescending: false);
         }
 
-        public IOrderByBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
+        IOrderByBigQueryable<TSource> IOrderByBigQueryable<TSource>.ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
+        {
+            return CreateThenBy(keySelector, isDescending: true);
+        }
+
+        IOrderByAfterSelectBigQueryable<TSource> IOrderByAfterSelectBigQueryable<TSource>.ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
+        {
+            return CreateThenBy(keySelector, isDescending: false);
+        }
+
+        IOrderByAfterSelectBigQueryable<TSource> IOrderByAfterSelectBigQueryable<TSource>.ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector)
         {
             return CreateThenBy(keySelector, isDescending: true);
         }

@@ -90,6 +90,10 @@ namespace BigQuery.Linq
     {
         IEnumerable<T> AsEnumerable();
         T[] ToArray();
+
+        // Run, RunAsync
+
+        IFromBigQueryable<T> AsSubquery();
     }
 
     internal abstract class QueryExecutable<T> : BigQueryable, BigQuery.Linq.IQueryExecutable<T>
@@ -110,50 +114,69 @@ namespace BigQuery.Linq
             var queryString = ToString();
             return QueryContext.Query<T>(queryString);
         }
+
+        public IFromBigQueryable<T> AsSubquery()
+        {
+            return new FromBigQueryable<T>(this);
+        }
     }
 
     // method chain marker
-    // From.Join.Select.[Where/GroupBy.Having].OrderBy.Limit
-
-    public interface ILimitBigQueryable<T> : IQueryExecutable<T> // ToArray, AsEnumerable, ToString
+    /*
+    From(+TableDecorate) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit
+                                           | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) |
+                                                       | -> OrderBy(ThenBy) ->                   |
+    */
+    public interface IFromBigQueryable<T> : ITableDecoratorBigQueryable<T> // TableDecorate, Join, Where, OrderBy, Select
     {
     }
 
-    public interface IOrderByBigQueryable<TSource> : IQueryExecutable<TSource> // ThenBy, ThenByDescending, Limit, ToArray, AsEnumerable, ToString
+    public interface ITableDecoratorBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
+    {
+    }
+
+    public interface IJoinBigQueryable<T> : IWhereBigQueryable<T> // Join, Where, OrderBy, Select
+    {
+    }
+
+    public interface IWhereBigQueryable<T> : IBigQueryable // Where, OrderBy, Select
+    {
+
+    }
+
+    public interface IOrderByBigQueryable<TSource> : IBigQueryable // ThenBy, ThenByDescending, Select
     {
         IOrderByBigQueryable<TSource> ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
         IOrderByBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
     }
 
-    public interface IHavingBigQueryable<T> : IQueryExecutable<T> // Having, OrderBy, OrderByDescending, Limit, ToArray, AsEnumerable, ToString
+    public interface IOrderByAfterSelectBigQueryable<TSource> : IQueryExecutable<TSource> // ThenBy, ThenByDescending, Limit, Execute
+    {
+        IOrderByAfterSelectBigQueryable<TSource> ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
+        IOrderByAfterSelectBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
+    }
+
+    public interface ISelectAfterOrderByBigQueryable<T> : IQueryExecutable<T> // Limit
+    {
+    }
+
+    public interface ISelectBigQueryable<T> : IQueryExecutable<T> // GroupBy, OrderBy, Limit, Execute
+    {
+    }
+
+    public interface IGroupByBigQueryable<T> : IQueryExecutable<T> // Having, OrderBy, Limit, Execute
+    {
+    }
+
+    public interface IHavingBigQueryable<T> : IGroupByBigQueryable<T> // Having, OrderBy, Limit, Execute
     {
         // Having
     }
 
-    public interface IGroupByBigQueryable<T> : IQueryExecutable<T> // Having, OrderBy, OrderByDescending, Limit, ToArray, AsEnumerable, ToString
+    public interface ILimitBigQueryable<T> : IQueryExecutable<T> // Execute
     {
     }
 
-    public interface IWhereBigQueryable<T> : IQueryExecutable<T> // Where, OrderBy, OrderByDescending, Limit, ToArray, AsEnumerable, ToString
-    {
-        // Where
-    }
-
-    public interface ISelectBigQueryable<T> : IQueryExecutable<T> // Where, GroupBy, OrderBy, OrderByDescending, Limit, ToArray, AsEnumerable, ToString
-    {
-    }
-
-    public interface IJoinBigQueryable<T> : IBigQueryable // Select
-    {
-    }
-
-    public interface ITableDecoratorBigQueryable<T> : IJoinBigQueryable<T> // Join, Select
-    {
-    }
-
-    public interface IFromBigQueryable<T> : ITableDecoratorBigQueryable<T> // TableDecorate, Join, Select
-    {
-    }
 
     public static class BigQueryableQueryChainExtensions
     {
@@ -185,31 +208,16 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, timeFrom, timeTo);
         }
 
-        public static IJoinBigQueryable<T> Join<T>(this ITableDecoratorBigQueryable<T> source, JoinType joinType = JoinType.Inner, bool each = false)
+        public static IJoinBigQueryable<T> Join<T>(this IJoinBigQueryable<T> source, JoinType joinType = JoinType.Inner, bool each = false)
         {
             return new JoinBigQueryable<T>(source, joinType, each);
-        }
-
-        public static ISelectBigQueryable<TSource> Select<TSource>(this IJoinBigQueryable<TSource> source)
-        {
-            return new SelectBigQueryable<TSource, TSource>(source, x => x);
-        }
-
-        public static ISelectBigQueryable<TResult> Select<TSource, TResult>(this IJoinBigQueryable<TSource> source, Expression<Func<TSource, TResult>> selector)
-        {
-            return new SelectBigQueryable<TSource, TResult>(source, selector);
-        }
-
-        public static IFromBigQueryable<TSource> AsNestedQuery<TSource>(this ISelectBigQueryable<TSource> source)
-        {
-            return new FromBigQueryable<TSource>(source);
         }
 
         /// <summary>
         /// The WHERE clause, sometimes called the predicate, states the qualifying conditions for a query. Multiple conditions can be joined by boolean AND and OR clauses, optionally surrounded by (parentheses) to group them. The fields listed in a WHERE clause do not need to be listed in any SELECT clause.
         /// </summary>
         /// <param name="condition">Aggregate functions cannot be used in the WHERE clause.</param>
-        public static IWhereBigQueryable<T> Where<T>(this ISelectBigQueryable<T> source, Expression<Func<T, bool>> condition)
+        public static IWhereBigQueryable<T> Where<T>(this IJoinBigQueryable<T> source, Expression<Func<T, bool>> condition)
         {
             if (source == null) throw new ArgumentNullException("source");
             if (condition == null) throw new ArgumentNullException("condition");
@@ -217,7 +225,48 @@ namespace BigQuery.Linq
             return new WhereBigQueryable<T>(source, condition);
         }
 
-        public static IGroupByBigQueryable<TSource> GroupBy<TSource, TKey>(this IWhereBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, bool each = false)
+        public static IOrderByBigQueryable<TSource> OrderBy<TSource, TKey>(this IWhereBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: false);
+        }
+
+        public static IOrderByBigQueryable<TSource> OrderByDescending<TSource, TKey>(this IWhereBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: true);
+        }
+
+        public static IOrderByAfterSelectBigQueryable<TSource> OrderBy<TSource, TKey>(this ISelectBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: false);
+        }
+
+        public static IOrderByAfterSelectBigQueryable<TSource> OrderByDescending<TSource, TKey>(this ISelectBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: true);
+        }
+
+
+        public static ISelectBigQueryable<TSource> Select<TSource>(this IWhereBigQueryable<TSource> source)
+        {
+            return new SelectBigQueryable<TSource, TSource>(source, x => x);
+        }
+
+        public static ISelectBigQueryable<TResult> Select<TSource, TResult>(this IWhereBigQueryable<TSource> source, Expression<Func<TSource, TResult>> selector)
+        {
+            return new SelectBigQueryable<TSource, TResult>(source, selector);
+        }
+
+        public static ISelectAfterOrderByBigQueryable<TSource> Select<TSource>(this IOrderByBigQueryable<TSource> source)
+        {
+            return new SelectBigQueryable<TSource, TSource>(source, x => x);
+        }
+
+        public static ISelectAfterOrderByBigQueryable<TResult> Select<TSource, TResult>(this IOrderByBigQueryable<TSource> source, Expression<Func<TSource, TResult>> selector)
+        {
+            return new SelectBigQueryable<TSource, TResult>(source, selector);
+        }
+
+        public static IGroupByBigQueryable<TSource> GroupBy<TSource, TKey>(this ISelectBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, bool each = false)
         {
             return new GroupByBigQueryable<TSource, TKey>(source, keySelector, each);
         }
@@ -227,28 +276,32 @@ namespace BigQuery.Linq
             return new HavingBigQueryable<TSource>(source, condition);
         }
 
-        public static IOrderByBigQueryable<TSource> OrderBy<TSource, TKey>(this IHavingBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
-        {
-            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: false);
-        }
-
-        public static IOrderByBigQueryable<TSource> OrderByDescending<TSource, TKey>(this IHavingBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
-        {
-            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: true);
-        }
-
-        public static ILimitBigQueryable<T> Limit<T>(this IHavingBigQueryable<T> source, int numRows)
+        public static ILimitBigQueryable<T> Limit<T>(this ISelectBigQueryable<T> source, int numRows)
         {
             if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
 
             return new LimitBigQueryable<T>(source, numRows);
         }
 
-        public static ILimitBigQueryable<TSource> Limit<TSource>(this IOrderByBigQueryable<TSource> source, int numRows)
+        public static ILimitBigQueryable<T> Limit<T>(this ISelectAfterOrderByBigQueryable<T> source, int numRows)
         {
             if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
 
-            return new LimitBigQueryable<TSource>(source, numRows);
+            return new LimitBigQueryable<T>(source, numRows);
+        }
+
+        public static ILimitBigQueryable<T> Limit<T>(this IGroupByBigQueryable<T> source, int numRows)
+        {
+            if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
+
+            return new LimitBigQueryable<T>(source, numRows);
+        }
+
+        public static ILimitBigQueryable<T> Limit<T>(this IOrderByAfterSelectBigQueryable<T> source, int numRows)
+        {
+            if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
+
+            return new LimitBigQueryable<T>(source, numRows);
         }
     }
 }
