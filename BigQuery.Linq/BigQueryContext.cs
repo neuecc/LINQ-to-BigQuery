@@ -37,12 +37,12 @@ namespace BigQuery.Linq
             return new FromBigQueryable<T>(tableName, new RootBigQueryable<T>(this));
         }
 
-        public IFromBigQueryable<T> From<T>(IBigQueryable nestedSource)
+        public ISubqueryBigQueryable<T> From<T>(IExecutableBigQueryable<T> nestedSource)
         {
-            return new FromBigQueryable<T>(nestedSource);
+            return new SubqueryBigQueryable<T>(nestedSource);
         }
 
-        public IQueryExecutable<T> Select<T>(Expression<Func<T>> selector)
+        public IExecutableBigQueryable<T> Select<T>(Expression<Func<T>> selector)
         {
             var unusedParameter = Expression.Parameter(typeof(T), "_");
             var wrapped = Expression.Lambda<Func<T, T>>(selector.Body, unusedParameter);

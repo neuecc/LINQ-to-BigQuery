@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    internal class OrderByBigQueryable<TSource, TKey> : QueryExecutable<TSource>, IOrderByBigQueryable<TSource>, IOrderByAfterSelectBigQueryable<TSource>
+    internal class OrderByBigQueryable<TSource, TKey> : ExecutableBigQueryableBase<TSource>, IOrderByBigQueryable<TSource>, IOrderByAfterSelectBigQueryable<TSource>
     {
         readonly Tuple<Expression, bool>[] keySelectors;
 

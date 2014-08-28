@@ -6,7 +6,7 @@ using System.Text;
 namespace BigQuery.Linq.Query
 {
     // SELECT expr1 [AS alias1], expr2 [AS alias2], ...
-    internal class SelectBigQueryable<TSource, TResult> : QueryExecutable<TResult>, ISelectBigQueryable<TResult>, ISelectAfterOrderByBigQueryable<TResult>
+    internal class SelectBigQueryable<TSource, TResult> : ExecutableBigQueryableBase<TResult>, ISelectBigQueryable<TResult>, ISelectAfterOrderByBigQueryable<TResult>
     {
         readonly Expression<Func<TSource, TResult>> selector;
 

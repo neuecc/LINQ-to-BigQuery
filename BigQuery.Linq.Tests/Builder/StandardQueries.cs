@@ -96,77 +96,13 @@ WHERE
         }
 
         [TestMethod]
-        public void WithSnapshot()
+        public void TodoJoin()
         {
             var context = new BigQuery.Linq.BigQueryContext();
-            context.From<Wikipedia>("tablewikipedia")
-                .WithSnapshot()
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@0]");
 
-            context.From<Wikipedia>("tablewikipedia")
-                .WithSnapshot(TimeSpan.FromHours(1))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@-3600000]");
-
-            context.From<Wikipedia>("tablewikipedia")
-                .WithSnapshot(new DateTime(2014, 8, 8, 13, 20, 14))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@1407504014000000]");
-        }
-
-        [TestMethod]
-        public void WithRange()
-        {
-            var context = new BigQuery.Linq.BigQueryContext();
-            context.From<Wikipedia>("tablewikipedia")
-                .WithRange(new DateTime(2014, 8, 8, 13, 20, 14))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@1407504014000000-]");
-
-            context.From<Wikipedia>("tablewikipedia")
-                .WithRange(TimeSpan.FromHours(1))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@-3600000-]");
-
-            context.From<Wikipedia>("tablewikipedia")
-                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4), new DateTime(2014, 8, 8, 13, 20, 14))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@1349056984000000-1407504014000000]");
-
-            context.From<Wikipedia>("tablewikipedia")
-                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4), TimeSpan.FromHours(1))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@1349056984000000--3600000]");
-
-            context.From<Wikipedia>("tablewikipedia")
-                .WithRange(TimeSpan.FromHours(1), TimeSpan.FromHours(2))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@-3600000--7200000]");
-
-            context.From<Wikipedia>("tablewikipedia")
-                .WithRange(TimeSpan.FromHours(1), new DateTime(2014, 8, 8, 13, 20, 14))
-                .ToString()
-                .Replace(Environment.NewLine + "  ", " ")
-                .Is("FROM [tablewikipedia@-3600000-1407504014000000]");
-        }
-
-        [TestMethod]
-        public void ToBigQueryTimestamp()
-        {
-            new DateTime(1970, 1, 1, 0, 0, 0).ToBigQueryTimestamp().Is(0);
-            new DateTime(1970, 1, 1, 0, 0, 0, 1).ToBigQueryTimestamp().Is(1000);
-            new DateTime(1970, 1, 1, 0, 0, 1).ToBigQueryTimestamp().Is(1000000);
-            new DateTime(2014, 8, 8, 13, 20, 14).ToBigQueryTimestamp().Is(1407504014000000);
-            new DateTime(2012, 10, 1, 2, 3, 4).ToBigQueryTimestamp().Is(1349056984000000);
+            var s = context.From<Wikipedia>("tablewikipedia")
+                .Join(context.From<Wikipedia>("aaa").Select(), (kp, tp) => new { kp, tp },
+                x => x.tp.title == "");
         }
     }
 }

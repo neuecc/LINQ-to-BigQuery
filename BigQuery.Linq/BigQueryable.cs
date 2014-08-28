@@ -83,23 +83,23 @@ namespace BigQuery.Linq
         public override string ToString(int depth, int indentSize, FormatOption option)
         {
             return "";
-            // throw new System.NotImplementedException();
         }
     }
 
-    public interface IQueryExecutable<T> : IBigQueryable
+    public interface IExecutableBigQueryable<T> : IBigQueryable
     {
         IEnumerable<T> AsEnumerable();
+
         T[] ToArray();
 
         // Run, RunAsync
 
-        IFromBigQueryable<T> AsSubquery();
+        ISubqueryBigQueryable<T> AsSubquery();
     }
 
-    internal abstract class QueryExecutable<T> : BigQueryable, BigQuery.Linq.IQueryExecutable<T>
+    internal abstract class ExecutableBigQueryableBase<T> : BigQueryable, BigQuery.Linq.IExecutableBigQueryable<T>
     {
-        public QueryExecutable(IBigQueryable parent)
+        public ExecutableBigQueryableBase(IBigQueryable parent)
             : base(parent)
         {
 
@@ -116,9 +116,9 @@ namespace BigQuery.Linq
             return QueryContext.Query<T>(queryString);
         }
 
-        public IFromBigQueryable<T> AsSubquery()
+        public ISubqueryBigQueryable<T> AsSubquery()
         {
-            return new FromBigQueryable<T>(this);
+            return QueryContext.From(this);
         }
     }
 
@@ -130,6 +130,11 @@ namespace BigQuery.Linq
     */
     public interface IFromBigQueryable<T> : ITableDecoratorBigQueryable<T> // TableDecorate, Join, Where, OrderBy, Select
     {
+    }
+
+    public interface ISubqueryBigQueryable<T> : ITableDecoratorBigQueryable<T>, IExecutableBigQueryable<T> // Join, Where, OrderBy, Select
+    {
+        IExecutableBigQueryable<T> Unwrap();
     }
 
     public interface ITableDecoratorBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
@@ -151,21 +156,21 @@ namespace BigQuery.Linq
         IOrderByBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
     }
 
-    public interface IOrderByAfterSelectBigQueryable<TSource> : IQueryExecutable<TSource> // ThenBy, ThenByDescending, Limit, Execute
+    public interface IOrderByAfterSelectBigQueryable<TSource> : IExecutableBigQueryable<TSource> // ThenBy, ThenByDescending, Limit, Execute
     {
         IOrderByAfterSelectBigQueryable<TSource> ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
         IOrderByAfterSelectBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
     }
 
-    public interface ISelectAfterOrderByBigQueryable<T> : IQueryExecutable<T> // Limit
+    public interface ISelectAfterOrderByBigQueryable<T> : IExecutableBigQueryable<T> // Limit
     {
     }
 
-    public interface ISelectBigQueryable<T> : IQueryExecutable<T> // GroupBy, OrderBy, Limit, Execute
+    public interface ISelectBigQueryable<T> : IExecutableBigQueryable<T> // GroupBy, OrderBy, Limit, Execute
     {
     }
 
-    public interface IGroupByBigQueryable<T> : IQueryExecutable<T> // Having, OrderBy, Limit, Execute
+    public interface IGroupByBigQueryable<T> : IExecutableBigQueryable<T> // Having, OrderBy, Limit, Execute
     {
     }
 
@@ -174,7 +179,7 @@ namespace BigQuery.Linq
         // Having
     }
 
-    public interface ILimitBigQueryable<T> : IQueryExecutable<T> // Execute
+    public interface ILimitBigQueryable<T> : IExecutableBigQueryable<T> // Execute
     {
     }
 
@@ -244,9 +249,35 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom, relativeTime2: relativeTimeTo);
         }
 
-        public static IJoinBigQueryable<T> Join<T>(this IJoinBigQueryable<T> source, JoinType joinType = JoinType.Inner, bool each = false)
+        public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
+            IExecutableBigQueryable<TInner> joinTable,
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector,
+            Expression<Func<TResult, bool>> joinCondition)
         {
-            return new JoinBigQueryable<T>(source, joinType, each);
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, null, joinTable, aliasSelector, joinCondition);
+        }
+
+        public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
+            JoinType joinType,
+            IExecutableBigQueryable<TInner> joinTable,
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector,
+            Expression<Func<TResult, bool>> joinCondition)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, null, joinTable, aliasSelector, joinCondition);
+        }
+
+        public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
+            JoinType joinType,
+            IExecutableBigQueryable<TInner> joinTable,
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, joinTable, aliasSelector, null);
         }
 
         /// <summary>
