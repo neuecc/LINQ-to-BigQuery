@@ -148,10 +148,11 @@ namespace BigQuery.Linq
 
             base.Visit(node.Left); // run to left
 
-            sb.Append(" " + expr + " ");
+            sb.Append(" " + expr);
 
             if (!isNull)
             {
+                sb.Append(" ");
                 base.Visit(node.Right); // run to right
             }
 

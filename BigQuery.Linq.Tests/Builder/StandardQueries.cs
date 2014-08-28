@@ -73,5 +73,26 @@ FROM
 WHERE
   [wp_namespace] = 100");
         }
+
+        [TestMethod]
+        public void WhereWhere()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var s = context.From<Wikipedia>("tablewikipedia")
+                .Where(x => x.wp_namespace == 100)
+                .Where(x => x.title != null)
+                .Where(x => x.title == "AiUeo")
+                .Select(x => new { x.title, x.wp_namespace })
+                .ToString().TrimEnd();
+
+            s.Is(@"SELECT
+  [title],
+  [wp_namespace]
+FROM
+  tablewikipedia
+WHERE
+  [wp_namespace] = 100 AND [title] IS NOT NULL AND [title] = 'AiUeo'");
+        }
     }
 }

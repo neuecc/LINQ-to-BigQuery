@@ -17,11 +17,7 @@ namespace BigQuery.Linq.Query
             this.predicate = predicate;
         }
 
-        /// <summary>
-        /// The WHERE clause, sometimes called the predicate, states the qualifying conditions for a query. Multiple conditions can be joined by boolean AND and OR clauses, optionally surrounded by (parentheses) to group them. The fields listed in a WHERE clause do not need to be listed in any SELECT clause.
-        /// </summary>
-        /// <param name="condition">Aggregate functions cannot be used in the WHERE clause.</param>
-        public IWhereBigQueryable<TSource> Where(Expression<Func<TSource, bool>> condition)
+        internal IWhereBigQueryable<TSource> CombineWhere(Expression<Func<TSource, bool>> condition)
         {
             var newBody = Expression.AndAlso(this.predicate.Body, condition.Body);
             var newPredicate = Expression.Lambda<Func<TSource, bool>>(newBody, this.predicate.Parameters);
