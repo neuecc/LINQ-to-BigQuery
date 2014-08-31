@@ -22,6 +22,7 @@ namespace BigQuery.Linq.Tests.Builder
         public int Tako { get; set; }
     }
 
+    [TableName("[publicdata:samples.wikipedia]")]
     class Wikipedia
     {
         public string title { get; set; }
@@ -103,6 +104,36 @@ WHERE
             var s = context.From<Wikipedia>("tablewikipedia")
                 .Join(context.From<Wikipedia>("aaa").Select(), (kp, tp) => new { kp, tp },
                 x => x.tp.title == "");
+        }
+
+        [TestMethod]
+        public void Sample1()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Wikipedia>()
+                .Where(x => x.wp_namespace == 0)
+                .Select(x => new
+                {
+                    x.title,
+                    hash_value = BigQuery.Linq.Functions.Other.Hash(x.title),
+                    included_in_sample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1)
+                        ? "True"
+                        : "False"
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [title],
+  HASH([title]) AS [hash_value],
+  IF(ABS(HASH([title])) % 2 = 1, 'True', 'False') AS [included_in_sample]
+FROM
+  [publicdata:samples.wikipedia]
+WHERE
+  [wp_namespace] = 0
+LIMIT 5".TrimStart());
         }
     }
 }

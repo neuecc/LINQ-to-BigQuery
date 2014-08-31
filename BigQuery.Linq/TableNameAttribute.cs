@@ -13,7 +13,7 @@ namespace BigQuery.Linq
 
         public TableNameAttribute(string tableName)
         {
-            this.TableName = TableName;
+            this.TableName = tableName;
         }
     }
 

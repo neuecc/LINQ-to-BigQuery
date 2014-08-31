@@ -43,7 +43,7 @@ namespace BigQuery.Linq.Tests.Builder
                 .Is("FROM [tablewikipedia@-3600000]");
 
             context.From<int>("tablewikipedia")
-                .WithSnapshot(new DateTime(2014, 8, 8, 13, 20, 14))
+                .WithSnapshot(new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc))
                 .ToString()
                 .Replace(Environment.NewLine + "  ", " ")
                 .Is("FROM [tablewikipedia@1407504014000000]");
@@ -54,7 +54,7 @@ namespace BigQuery.Linq.Tests.Builder
         {
             var context = new BigQuery.Linq.BigQueryContext();
             context.From<int>("tablewikipedia")
-                .WithRange(new DateTime(2014, 8, 8, 13, 20, 14))
+                .WithRange(new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc))
                 .ToString()
                 .Replace(Environment.NewLine + "  ", " ")
                 .Is("FROM [tablewikipedia@1407504014000000-]");
@@ -66,13 +66,13 @@ namespace BigQuery.Linq.Tests.Builder
                 .Is("FROM [tablewikipedia@-3600000-]");
 
             context.From<int>("tablewikipedia")
-                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4), new DateTime(2014, 8, 8, 13, 20, 14))
+                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc))
                 .ToString()
                 .Replace(Environment.NewLine + "  ", " ")
                 .Is("FROM [tablewikipedia@1349056984000000-1407504014000000]");
 
             context.From<int>("tablewikipedia")
-                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4), TimeSpan.FromHours(1))
+                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), TimeSpan.FromHours(1))
                 .ToString()
                 .Replace(Environment.NewLine + "  ", " ")
                 .Is("FROM [tablewikipedia@1349056984000000--3600000]");
@@ -84,7 +84,7 @@ namespace BigQuery.Linq.Tests.Builder
                 .Is("FROM [tablewikipedia@-3600000--7200000]");
 
             context.From<int>("tablewikipedia")
-                .WithRange(TimeSpan.FromHours(1), new DateTime(2014, 8, 8, 13, 20, 14))
+                .WithRange(TimeSpan.FromHours(1), new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc))
                 .ToString()
                 .Replace(Environment.NewLine + "  ", " ")
                 .Is("FROM [tablewikipedia@-3600000-1407504014000000]");

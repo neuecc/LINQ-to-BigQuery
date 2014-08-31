@@ -13,7 +13,7 @@ namespace BigQuery.Linq.Query
         internal FromBigQueryable(string tableName, IBigQueryable parent)
             : base(parent)
         {
-            this.tableName = tableName;
+            this.tableName = tableName.EscapeBq();
         }
 
         public override string ToString(int depth, int indentSize, FormatOption option)
