@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -24,7 +26,10 @@ namespace BigQuery.Linq
 
         public IFromBigQueryable<T> From<T>()
         {
-            return new FromBigQueryable<T>(typeof(T).Name, new RootBigQueryable<T>(this));
+            var attr = typeof(T).GetCustomAttribute<TableNameAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TableNameAttribute");
+
+            return new FromBigQueryable<T>(attr.TableName, new RootBigQueryable<T>(this));
         }
 
         public IFromBigQueryable<T> From<T>(string tableName)
@@ -42,6 +47,39 @@ namespace BigQuery.Linq
             return new SubqueryBigQueryable<T>(nestedSource);
         }
 
+        public IFromBigQueryable<T> FromDateRange<T>(DateTime timestampFrom, DateTime timestampTo)
+        {
+            var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
+
+            return FromDateRange<T>(attr.TablePrefix, timestampFrom, timestampTo);
+        }
+
+        public IFromBigQueryable<T> FromDateRange<T>(string prefix, DateTime timestampFrom, DateTime timestampTo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFromBigQueryable<T> FromDateRangeStrict<T>(DateTime timestampFrom, DateTime timestampTo)
+        {
+            var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
+
+            throw new NotImplementedException();
+        }
+
+        public IFromBigQueryable<T> FromDateRangeStrict<T>(string prefix, DateTime timestampFrom, DateTime timestampTo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IFromBigQueryable<T> FromTableQuery<T>(string dataset, Expression<Func<MetaTable, bool>> tableMatchCondition)
+        {
+            FromTableQuery<int>("aaa", x => x.table_id.Contains("hogehoge"));
+
+            throw new NotImplementedException();
+        }
+
         public IExecutableBigQueryable<T> Select<T>(Expression<Func<T>> selector)
         {
             var unusedParameter = Expression.Parameter(typeof(T), "_");
@@ -49,6 +87,14 @@ namespace BigQuery.Linq
 
             return new SelectBigQueryable<T, T>(new RootBigQueryable<T>(this), wrapped);
         }
+
+        public MetaTable[] GetAllTableInfo(string dataset)
+        {
+            var query = "SELECT " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
+            return Query<MetaTable>(query).ToArray();
+        }
+
+        // Run
 
         public IEnumerable<T> Query<T>(string query)
         {

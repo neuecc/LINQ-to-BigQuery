@@ -11,7 +11,7 @@ namespace BigQuery.Linq.Functions
     // numeric_expr : long, double
     // timestamp: DateTime
 
-
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     internal class FunctionNameAttribute : Attribute
     {
         public string Name { get; private set; }

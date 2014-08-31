@@ -16,6 +16,15 @@ namespace BigQuery.Linq.Tests.Builder
             new DateTime(2014, 8, 8, 13, 20, 14).ToBigQueryTimestamp().Is(1407504014000000);
             new DateTime(2012, 10, 1, 2, 3, 4).ToBigQueryTimestamp().Is(1349056984000000);
         }
+        [TestMethod]
+        public void ToBigQueryTimestampOffset()
+        {
+            new DateTimeOffset(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).ToBigQueryTimestamp().Is(0);
+            new DateTimeOffset(new DateTime(1970, 1, 1, 0, 0, 0, 1, DateTimeKind.Utc)).ToBigQueryTimestamp().Is(1000);
+            new DateTimeOffset(new DateTime(1970, 1, 1, 0, 0, 1, DateTimeKind.Utc)).ToBigQueryTimestamp().Is(1000000);
+            new DateTimeOffset(new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc)).ToBigQueryTimestamp().Is(1407504014000000);
+            new DateTimeOffset(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc)).ToBigQueryTimestamp().Is(1349056984000000);
+        }
 
         [TestMethod]
         public void WithSnapshot()

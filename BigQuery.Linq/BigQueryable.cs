@@ -193,7 +193,7 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, absoluteTime1: TableDecoratorBigQueryable<T>.Zero);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithSnapshot<T>(this IFromBigQueryable<T> source, DateTime absoluteTime)
+        public static ITableDecoratorBigQueryable<T> WithSnapshot<T>(this IFromBigQueryable<T> source, DateTimeOffset absoluteTime)
         {
             if (source == null) throw new ArgumentNullException("source");
 
@@ -207,7 +207,7 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Snapshot, relativeTime1: relativeTime);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime absoluteTimeFrom)
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTimeOffset absoluteTimeFrom)
         {
             if (source == null) throw new ArgumentNullException("source");
 
@@ -221,21 +221,21 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime absoluteTimeFrom, DateTime absoluteTimeTo)
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTimeOffset absoluteTimeFrom, DateTimeOffset absoluteTimeTo)
         {
             if (source == null) throw new ArgumentNullException("source");
 
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom, absoluteTime2: absoluteTimeTo);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTime absoluteTimeFrom, TimeSpan relativeTimeTo)
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTimeOffset absoluteTimeFrom, TimeSpan relativeTimeTo)
         {
             if (source == null) throw new ArgumentNullException("source");
 
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom, relativeTime2: relativeTimeTo);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom, DateTime absoluteTimeTo)
+        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom, DateTimeOffset absoluteTimeTo)
         {
             if (source == null) throw new ArgumentNullException("source");
 
@@ -346,7 +346,7 @@ namespace BigQuery.Linq
             return new GroupByBigQueryable<TSource, TKey>(source, keySelector, each);
         }
 
-        public static IHavingBigQueryable<TSource> Having<TSource, TKey>(this IGroupByBigQueryable<TSource> source, Expression<Func<TSource, bool>> condition)
+        public static IHavingBigQueryable<TSource> Having<TSource>(this IGroupByBigQueryable<TSource> source, Expression<Func<TSource, bool>> condition)
         {
             return new HavingBigQueryable<TSource>(source, condition);
         }

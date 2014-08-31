@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigQueryable.cs" />
+    <Compile Include="MetaTable.cs" />
     <Compile Include="Query\BigQueryable.Join.cs" />
     <Compile Include="Query\BigQueryable.Limit.cs" />
     <Compile Include="Query\BigQueryable.OrderBy.cs" />
@@ -53,7 +54,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BigQueryTranslateVisitor.cs" />
+    <Compile Include="TableNameAttribute.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
+    <Compile Include="Utils\StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

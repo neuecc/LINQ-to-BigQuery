@@ -79,7 +79,18 @@ LIMIT 5;
             var context = new BigQueryContext();
 
             var query = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
-                .Where(x => x.wp_namespace == 0)
+                .OrderBy(x => x)
+                .Select(x => x)
+                .AsSubquery()
+                .Where(x => true)
+                //.Select(x=>x)
+                //.GroupBy(x=>x, true)
+                //.Having(x=>x.wp_namespace = 100)
+                //.Limit(1000);
+
+
+
+                //.Where(x => x.wp_namespace == 0)
                 .Select(x => new
                 {
                     x.title,

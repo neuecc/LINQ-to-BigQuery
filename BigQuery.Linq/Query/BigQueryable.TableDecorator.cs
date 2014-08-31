@@ -14,22 +14,22 @@ namespace BigQuery.Linq.Query
 
     internal class TableDecoratorBigQueryable<T> : BigQueryable, ITableDecoratorBigQueryable<T>
     {
-        public static DateTime Zero = DateTime.MinValue;
+        public static DateTimeOffset Zero = DateTimeOffset.MinValue;
 
-        readonly DecorateType Type;
-        readonly TimeSpan? RelativeTime1;
-        readonly TimeSpan? RelativeTime2;
-        readonly DateTime? AbsoluteTime1;
-        readonly DateTime? AbsoluteTime2;
+        readonly DecorateType type;
+        readonly TimeSpan? relativeTime1;
+        readonly TimeSpan? relativeTime2;
+        readonly DateTimeOffset? absoluteTime1;
+        readonly DateTimeOffset? absoluteTime2;
 
-        internal TableDecoratorBigQueryable(IFromBigQueryable<T> parent, DecorateType type, DateTime? absoluteTime1 = null, DateTime? absoluteTime2 = null, TimeSpan? relativeTime1 = null, TimeSpan? relativeTime2 = null)
+        internal TableDecoratorBigQueryable(IFromBigQueryable<T> parent, DecorateType type, DateTimeOffset? absoluteTime1 = null, DateTimeOffset? absoluteTime2 = null, TimeSpan? relativeTime1 = null, TimeSpan? relativeTime2 = null)
             : base(parent)
         {
-            this.Type = type;
-            this.AbsoluteTime1 = absoluteTime1;
-            this.AbsoluteTime2 = absoluteTime2;
-            this.RelativeTime1 = relativeTime1;
-            this.RelativeTime2 = relativeTime2;
+            this.type = type;
+            this.absoluteTime1 = absoluteTime1;
+            this.absoluteTime2 = absoluteTime2;
+            this.relativeTime1 = relativeTime1;
+            this.relativeTime2 = relativeTime2;
         }
 
         public override string ToString(int depth, int indentSize, FormatOption option)
@@ -42,40 +42,39 @@ namespace BigQuery.Linq.Query
 
             sb.AppendLine("FROM").Append("  [").Append(tableName).Append("@");
 
-
-            if (Type == DecorateType.Snapshot)
+            if (type == DecorateType.Snapshot)
             {
-                if (RelativeTime1 != null)
+                if (relativeTime1 != null)
                 {
-                    sb.Append("-").Append(Math.Floor(RelativeTime1.Value.TotalMilliseconds));
+                    sb.Append("-").Append(Math.Floor(relativeTime1.Value.TotalMilliseconds));
                 }
-                else if (AbsoluteTime1 == Zero)
+                else if (absoluteTime1 == Zero)
                 {
                     sb.Append("0");
                 }
                 else
                 {
-                    sb.Append(AbsoluteTime1.Value.ToBigQueryTimestamp());
+                    sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
                 }
             }
             else
             {
-                if (RelativeTime1 != null)
+                if (relativeTime1 != null)
                 {
-                    sb.Append("-").Append(Math.Floor(RelativeTime1.Value.TotalMilliseconds));
+                    sb.Append("-").Append(Math.Floor(relativeTime1.Value.TotalMilliseconds));
                 }
-                else if (AbsoluteTime1.HasValue)
+                else if (absoluteTime1.HasValue)
                 {
-                    sb.Append(AbsoluteTime1.Value.ToBigQueryTimestamp());
+                    sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
                 }
                 sb.Append("-");
-                if (RelativeTime2 != null)
+                if (relativeTime2 != null)
                 {
-                    sb.Append("-").Append(Math.Floor(RelativeTime2.Value.TotalMilliseconds));
+                    sb.Append("-").Append(Math.Floor(relativeTime2.Value.TotalMilliseconds));
                 }
-                else if (AbsoluteTime2.HasValue)
+                else if (absoluteTime2.HasValue)
                 {
-                    sb.Append(AbsoluteTime2.Value.ToBigQueryTimestamp());
+                    sb.Append(absoluteTime2.Value.ToBigQueryTimestamp());
                 }
             }
 
