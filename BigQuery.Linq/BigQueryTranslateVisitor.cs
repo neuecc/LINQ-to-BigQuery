@@ -1,5 +1,4 @@
-﻿using BigQuery.Linq.Functions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -142,9 +141,27 @@ namespace BigQuery.Linq
                 case ExpressionType.Modulo:
                     expr = "%";
                     break;
+                // Bitwise functions
+                case ExpressionType.And:
+                    expr = "&";
+                    break;
+                case ExpressionType.Or:
+                    expr = "|";
+                    break;
+                case ExpressionType.ExclusiveOr:
+                    expr = "^";
+                    break;
+                case ExpressionType.LeftShift:
+                    expr = "<<";
+                    break;
+                case ExpressionType.RightShift:
+                    expr = ">>";
+                    break;
                 default:
                     throw new InvalidOperationException("Invalid node type:" + node.NodeType);
             }
+
+            sb.Append("(");
 
             base.Visit(node.Left); // run to left
 
@@ -156,6 +173,8 @@ namespace BigQuery.Linq
                 base.Visit(node.Right); // run to right
             }
 
+            sb.Append(")");
+
             return node;
         }
 
@@ -164,6 +183,8 @@ namespace BigQuery.Linq
             // Casting functions(lack of HexString convert)
             if (node.NodeType == ExpressionType.Convert)
             {
+                bool emitCast = true;
+
                 var typeCode = Type.GetTypeCode(node.Type);
                 switch (typeCode)
                 {
@@ -183,18 +204,29 @@ namespace BigQuery.Linq
                         sb.Append("STRING(");
                         break;
                     default:
-                        throw new InvalidOperationException("Not supported cast type:" + node.Type);
+                        emitCast = false;
+                        break;
                 }
 
                 var expr = base.VisitUnary(node);
 
-                sb.Append(")");
+                if (emitCast)
+                {
+                    sb.Append(")");
+                }
 
                 return expr;
             }
-            else if (node.NodeType == ExpressionType.Not) // Logical operator
+            else if (node.NodeType == ExpressionType.Not)
             {
-                sb.Append("NOT ");
+                if (node.Type == typeof(bool))
+                {
+                    sb.Append("NOT "); // Logical operator
+                }
+                else
+                {
+                    sb.Append("~"); // Bitwise operator
+                }
                 return base.VisitUnary(node);
             }
 
@@ -212,15 +244,16 @@ namespace BigQuery.Linq
                 next = next.Expression as MemberExpression;
             }
 
-            // for record type
+            sb.Append("[");
             for (int i = nodes.Count - 1; i >= 0; i--)
             {
-                sb.Append("[" + nodes[i].Member.Name + "]");
+                sb.Append(nodes[i].Member.Name);
                 if (nodes.Count != 1 && i != 0)
                 {
                     sb.Append(".");
                 }
             }
+            sb.Append("]");
 
             return node;
         }
@@ -228,7 +261,8 @@ namespace BigQuery.Linq
         protected override Expression VisitConstant(ConstantExpression node)
         {
             string expr = "";
-            switch (Type.GetTypeCode(node.Value.GetType()))
+            var valueType = node.Value.GetType();
+            switch (Type.GetTypeCode(valueType))
             {
                 case TypeCode.Boolean:
                     var b = (bool)node.Value;
@@ -257,7 +291,14 @@ namespace BigQuery.Linq
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
-                    sb.Append(node.Value);
+                    if (valueType.IsEnum)
+                    {
+                        sb.Append("\'" + node.Value + "\'");
+                    }
+                    else
+                    {
+                        sb.Append(node.Value);
+                    }
                     break;
                 case TypeCode.Object:
                     // TODO:it's record?

@@ -54,7 +54,12 @@
     <Compile Include="Builder\TableDecoratorTest.cs" />
     <Compile Include="ChainingAssertion.MSTest.cs" />
     <Compile Include="Builder\StandardQueries.cs" />
+    <Compile Include="Functions\BitwiseTest.cs" />
+    <Compile Include="Functions\LogicalOperatorTest.cs" />
+    <Compile Include="Functions\DateAndTimeTest.cs" />
+    <Compile Include="Functions\AggreagteTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

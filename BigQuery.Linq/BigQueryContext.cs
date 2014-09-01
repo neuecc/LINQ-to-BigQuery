@@ -6,7 +6,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using BigQuery.Linq.Functions;
 using BigQuery.Linq.Query;
 
 namespace BigQuery.Linq
@@ -47,7 +46,7 @@ namespace BigQuery.Linq
             return new SubqueryBigQueryable<T>(nestedSource);
         }
 
-        public IFromBigQueryable<T> FromDateRange<T>(DateTime timestampFrom, DateTime timestampTo)
+        public IFromBigQueryable<T> FromDateRange<T>(DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
             if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
@@ -55,12 +54,12 @@ namespace BigQuery.Linq
             return FromDateRange<T>(attr.TablePrefix, timestampFrom, timestampTo);
         }
 
-        public IFromBigQueryable<T> FromDateRange<T>(string prefix, DateTime timestampFrom, DateTime timestampTo)
+        public IFromBigQueryable<T> FromDateRange<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             throw new NotImplementedException();
         }
 
-        public IFromBigQueryable<T> FromDateRangeStrict<T>(DateTime timestampFrom, DateTime timestampTo)
+        public IFromBigQueryable<T> FromDateRangeStrict<T>(DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
             if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
@@ -68,7 +67,7 @@ namespace BigQuery.Linq
             throw new NotImplementedException();
         }
 
-        public IFromBigQueryable<T> FromDateRangeStrict<T>(string prefix, DateTime timestampFrom, DateTime timestampTo)
+        public IFromBigQueryable<T> FromDateRangeStrict<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             throw new NotImplementedException();
         }

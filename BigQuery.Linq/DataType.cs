@@ -12,7 +12,7 @@ namespace BigQuery.Linq
         Integer, // long
         Float, // double
         Boolean,
-        Timestamp, // DateTime
+        Timestamp, // DateTimeOffset
         Record // object
     }
 }

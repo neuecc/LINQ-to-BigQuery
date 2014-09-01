@@ -45,6 +45,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigQueryable.cs" />
+    <Compile Include="Functions\BqFunc.Window.cs" />
+    <Compile Include="Functions\BqFunc.Url.cs" />
+    <Compile Include="Functions\BqFunc.TableWildcard.cs" />
+    <Compile Include="Functions\BqFunc.String.cs" />
+    <Compile Include="Functions\BqFunc.RegularExpression.cs" />
+    <Compile Include="Functions\BqFunc.Mathematical.cs" />
+    <Compile Include="Functions\BqFunc.LogicalOperator.cs" />
+    <Compile Include="Functions\BqFunc.JSON.cs" />
+    <Compile Include="Functions\BqFunc.IP.cs" />
+    <Compile Include="Functions\BqFunc.DateAndTime.cs" />
+    <Compile Include="Functions\BqFunc.Comparison.cs" />
+    <Compile Include="Functions\BqFunc.Casting.cs" />
+    <Compile Include="Functions\BqFunc.Bitwise.cs" />
+    <Compile Include="Functions\BqFunc.Arithmetic.cs" />
     <Compile Include="MetaTable.cs" />
     <Compile Include="Query\BigQueryable.Join.cs" />
     <Compile Include="Query\BigQueryable.Limit.cs" />
@@ -67,6 +81,8 @@
     <Compile Include="Query\BigQueryable.TableDecorator.cs" />
     <Compile Include="Query\BigQueryable.GroupBy.cs" />
     <Compile Include="Query\BigQueryable.Having.cs" />
+    <Compile Include="Functions\BqFunc.Aggregate.cs" />
+    <Compile Include="Functions\BqFunc.Other.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

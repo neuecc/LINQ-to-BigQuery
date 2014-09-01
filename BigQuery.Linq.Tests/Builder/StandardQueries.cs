@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BigQuery.Linq.Functions;
 
 namespace BigQuery.Linq.Tests.Builder
 {
@@ -46,7 +45,7 @@ namespace BigQuery.Linq.Tests.Builder
             var s = context.Select(() => new
             {
                 A = "aaa",
-                B = Mathematical.Abs(-5),
+                B = BqFunc.Abs(-5),
                 FROM = 100,
             }).ToString().TrimEnd();
 
@@ -116,8 +115,8 @@ WHERE
                 .Select(x => new
                 {
                     x.title,
-                    hash_value = BigQuery.Linq.Functions.Other.Hash(x.title),
-                    included_in_sample = (Mathematical.Abs(Other.Hash(x.title)) % 2 == 1)
+                    hash_value = BqFunc.Hash(x.title),
+                    included_in_sample = (BqFunc.Abs(BqFunc.Hash(x.title)) % 2 == 1)
                         ? "True"
                         : "False"
                 })

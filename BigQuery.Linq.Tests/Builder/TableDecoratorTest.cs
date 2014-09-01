@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BigQuery.Linq.Functions;
 
 namespace BigQuery.Linq.Tests.Builder
 {
