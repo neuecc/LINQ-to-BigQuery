@@ -26,6 +26,14 @@ namespace BigQuery.Linq.Tests.Builder
         }
 
         [TestMethod]
+        public void FromBigQueryTimestamp()
+        {
+            var l = 1409549072345L;
+            l.FromTimestampMilliSeconds().DateTime.ToString().Is(new DateTime(2014, 9, 1, 5, 24, 32, DateTimeKind.Utc).ToString());
+            1349056984000000.FromBigQueryTimestamp().DateTime.Is(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc));
+        }
+
+        [TestMethod]
         public void WithSnapshot()
         {
             var context = new BigQuery.Linq.BigQueryContext();

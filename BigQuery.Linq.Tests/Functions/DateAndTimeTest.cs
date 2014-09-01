@@ -27,8 +27,6 @@ namespace BigQuery.Linq.Tests.Functions
             Ctx.Select<DateTimeOffset>(() => BqFunc.DateAdd(BqFunc.Timestamp("2012-10-01 02:03:04"), 5, IntervalUnit.YEAR)).ToSql().Is("SELECT DATE_ADD(TIMESTAMP('2012-10-01 02:03:04'), 5, 'YEAR')");
             Ctx.Select<DateTimeOffset>(() => BqFunc.DateAdd(BqFunc.Timestamp("2012-10-01 02:03:04"), -5, IntervalUnit.YEAR)).ToSql().Is("SELECT DATE_ADD(TIMESTAMP('2012-10-01 02:03:04'), -5, 'YEAR')");
             Ctx.Select<long>(() => BqFunc.DateDiff(BqFunc.Timestamp("2012-10-02 05:23:48"), BqFunc.Timestamp("2011-06-24 12:18:35"))).ToSql().Is("SELECT DATEDIFF(TIMESTAMP('2012-10-02 05:23:48'), TIMESTAMP('2011-06-24 12:18:35'))");
-
-
         }
     }
 }

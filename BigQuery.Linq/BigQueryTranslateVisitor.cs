@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq
 {
-    // Expression to BigQuery Query Translate
+    // Expression to BigQuery Query Translater
     internal class BigQueryTranslateVisitor : ExpressionVisitor
     {
         readonly int depth = 1;
