@@ -7,6 +7,11 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using BigQuery.Linq.Query;
+using Google.Apis.Bigquery.v2.Data;
+using Google.Apis.Bigquery.v2;
+using System.Security.Cryptography.X509Certificates;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
 
 namespace BigQuery.Linq
 {
@@ -95,6 +100,39 @@ namespace BigQuery.Linq
 
         public IEnumerable<T> Query<T>(string query)
         {
+            var queryRequest = new QueryRequest { Query = query };
+
+            // TODO:Authenticate
+            var projectId = "";
+            var service = new BigqueryService();
+
+            var certificate = new X509Certificate2(@"", "", X509KeyStorageFlags.Exportable);
+
+            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(@"")
+            {
+                Scopes = new[]
+		{
+			BigqueryService.Scope.Bigquery,
+			BigqueryService.Scope.BigqueryInsertdata,
+		}
+            }.FromCertificate(certificate));
+
+            var bigquery = new BigqueryService(new BaseClientService.Initializer
+            {
+                ApplicationName = "",
+                HttpClientInitializer = credential
+            });
+
+            var queryResponse = bigquery.Jobs.Query(queryRequest, projectId).Execute();
+
+            // schema?
+            // queryResponse.Schema.Fields[0].
+            queryResponse.Rows.Select(row => row.F.Select(cell =>
+            {
+                // TODO:Deserialize
+                return cell;
+            }));
+
             throw new NotImplementedException();
         }
     }
