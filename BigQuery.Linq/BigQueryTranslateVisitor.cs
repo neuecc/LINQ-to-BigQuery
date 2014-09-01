@@ -55,7 +55,7 @@ namespace BigQuery.Linq
             }
         }
 
-        internal string VisitAndClearBuffer(Expression node)
+        public string VisitAndClearBuffer(Expression node)
         {
             Visit(node);
             var result = sb.ToString();
@@ -125,6 +125,16 @@ namespace BigQuery.Linq
                         expr = (isNull) ? "IS NOT NULL" : "!=";
                     }
                     break;
+                case ExpressionType.Coalesce:
+                    {
+                        sb.Append("IFNULL(");
+                        base.Visit(node.Left);
+                        sb.Append(", ");
+                        base.Visit(node.Right);
+                        sb.Append(")");
+
+                        return node;
+                    }
                 // Arithmetic operators
                 case ExpressionType.Add:
                     expr = "+";
@@ -180,42 +190,11 @@ namespace BigQuery.Linq
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            // Casting functions(lack of HexString convert)
             if (node.NodeType == ExpressionType.Convert)
             {
-                bool emitCast = true;
+                // cast do nothing, use BqFunc.Boolean,Float, etc...
 
-                var typeCode = Type.GetTypeCode(node.Type);
-                switch (typeCode)
-                {
-                    case TypeCode.Boolean:
-                        sb.Append("BOOLEAN(");
-                        break;
-                    case TypeCode.Int16:
-                    case TypeCode.Int32:
-                    case TypeCode.Int64:
-                        sb.Append("INTEGER(");
-                        break;
-                    case TypeCode.Single:
-                    case TypeCode.Double:
-                        sb.Append("FLOAT(");
-                        break;
-                    case TypeCode.String:
-                        sb.Append("STRING(");
-                        break;
-                    default:
-                        emitCast = false;
-                        break;
-                }
-
-                var expr = base.VisitUnary(node);
-
-                if (emitCast)
-                {
-                    sb.Append(")");
-                }
-
-                return expr;
+                return base.VisitUnary(node);
             }
             else if (node.NodeType == ExpressionType.Not)
             {
@@ -261,8 +240,10 @@ namespace BigQuery.Linq
         protected override Expression VisitConstant(ConstantExpression node)
         {
             string expr = "";
-            var valueType = node.Value.GetType();
-            switch (Type.GetTypeCode(valueType))
+            var typeCode = (node.Value == null)
+                ? TypeCode.Empty
+                : Type.GetTypeCode(node.Value.GetType());
+            switch (typeCode)
             {
                 case TypeCode.Boolean:
                     var b = (bool)node.Value;
@@ -291,7 +272,7 @@ namespace BigQuery.Linq
                 case TypeCode.UInt16:
                 case TypeCode.UInt32:
                 case TypeCode.UInt64:
-                    if (valueType.IsEnum)
+                    if (node.Value.GetType().IsEnum)
                     {
                         sb.Append("\'" + node.Value + "\'");
                     }

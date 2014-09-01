@@ -2,7 +2,7 @@
 namespace BigQuery.Linq
 {
     /// <summary>
-    /// Table meta data shown by __TABLES__. This definition under
+    /// Table meta data shown by __TABLES__.
     /// </summary>
     public class MetaTable
     {
