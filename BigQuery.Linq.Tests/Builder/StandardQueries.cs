@@ -34,6 +34,7 @@ namespace BigQuery.Linq.Tests.Builder
     {
         public string word { get; set; }
         public string corpus { get; set; }
+        public int word_count { get; set; }
     }
 
     class Repository
@@ -109,8 +110,8 @@ WHERE
 
             var query1 = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
                 .Join(context.From<Wikipedia>("[publicdata:samples.wikipedia]").Select(x => new { x.title, x.wp_namespace }).Limit(1000),
-                    (kp, tp) => new { kp, tp },
-                    x => x.tp.title == x.kp.title)
+                    (kp, tp) => new { kp, tp }, // alias selector
+                    x => x.tp.title == x.kp.title) // conditional
                 .Select(x => new { x.kp.title, x.tp.wp_namespace })
                 .OrderBy(x => x.title)
                 .ThenByDescending(x => x.wp_namespace)
@@ -197,6 +198,175 @@ WHERE
 GROUP BY
   [word],
   [corpus]".TrimSmart());
+        }
+
+
+        [TestMethod]
+        public void WindowFunction()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello")
+                .Select(x => new
+                {
+                    x.word,
+                    cume_dist = BqFunc.CumulativeDistribution(x)
+                        .PartitionBy(y => y.corpus)
+                        .OrderByDescending(y => y.word_count)
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  CUME_DIST() OVER (PARTITION BY [corpus] ORDER BY [word_count] DESC) AS [cume_dist]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  ([corpus] = 'othello')
+LIMIT 5".TrimSmart());
+        }
+
+        [TestMethod]
+        public void WindowFunction2()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello")
+                .Select(x => new
+                {
+                    x.word,
+                    lag = BqFunc.Lag(x, y => y.word, 1, "aaa")
+                        .PartitionBy(y => y.corpus)
+                        .OrderByDescending(y => y.word_count)
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  LAG([word], 1, 'aaa') OVER (PARTITION BY [corpus] ORDER BY [word_count] DESC) AS [lag]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  ([corpus] = 'othello')
+LIMIT 5".TrimSmart());
+        }
+
+        [TestMethod]
+        public void RowNumber1()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello" && BqFunc.Length(x.word) > 10)
+                .Select(x => new
+                {
+                    x.word,
+                    lag = BqFunc.RowNumber(x)
+                    //.PartitionBy(y => y.corpus)
+                    //.OrderByDescending(y => y.word_count)
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  ROW_NUMBER() OVER () AS [lag]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  (([corpus] = 'othello') AND (LENGTH([word]) > 10))
+LIMIT 5".TrimSmart());
+        }
+
+        [TestMethod]
+        public void RowNumber2()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello" && BqFunc.Length(x.word) > 10)
+                .Select(x => new
+                {
+                    x.word,
+                    lag = BqFunc.RowNumber(x)
+                      .PartitionBy(y => y.corpus)
+                    //.OrderByDescending(y => y.word_count)
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  ROW_NUMBER() OVER (PARTITION BY [corpus]) AS [lag]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  (([corpus] = 'othello') AND (LENGTH([word]) > 10))
+LIMIT 5".TrimSmart());
+        }
+
+        [TestMethod]
+        public void RowNumber3()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello" && BqFunc.Length(x.word) > 10)
+                .Select(x => new
+                {
+                    x.word,
+                    lag = BqFunc.RowNumber(x)
+                        //.PartitionBy(y => y.corpus)
+                    .OrderByDescending(y => y.word_count)
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  ROW_NUMBER() OVER (ORDER BY [word_count] DESC) AS [lag]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  (([corpus] = 'othello') AND (LENGTH([word]) > 10))
+LIMIT 5".TrimSmart());
+        }
+
+        [TestMethod]
+        public void RowNumber4()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello" && BqFunc.Length(x.word) > 10)
+                .Select(x => new
+                {
+                    x.word,
+                    lag = BqFunc.RowNumber(x)
+                        .PartitionBy(y => y.corpus)
+                        .OrderByDescending(y => y.word_count)
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  ROW_NUMBER() OVER (PARTITION BY [corpus] ORDER BY [word_count] DESC) AS [lag]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  (([corpus] = 'othello') AND (LENGTH([word]) > 10))
+LIMIT 5".TrimSmart());
         }
     }
 }

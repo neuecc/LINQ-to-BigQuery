@@ -47,7 +47,6 @@
     <Compile Include="BigQueryable.cs" />
     <Compile Include="Functions\BqFunc.Window.cs" />
     <Compile Include="Functions\BqFunc.Url.cs" />
-    <Compile Include="Functions\BqFunc.TableWildcard.cs" />
     <Compile Include="Functions\BqFunc.String.cs" />
     <Compile Include="Functions\BqFunc.RegularExpression.cs" />
     <Compile Include="Functions\BqFunc.Mathematical.cs" />

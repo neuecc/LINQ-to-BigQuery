@@ -13,7 +13,7 @@ namespace BigQuery.Linq
         /// AVG(numeric_expr). Returns the average of the values for a group of rows computed by numeric_expr. Rows with a NULL value are not included in the calculation.
         /// </summary>
         [FunctionName("AVG")]
-        public static int Average(int numericExpression)
+        public static long Average(object numericExpression)
         {
             throw Invalid();
         }

@@ -21,7 +21,7 @@ namespace BigQuery.Linq.Tests.Functions
         {
             var context = new BigQueryContext();
 
-            context.Select<int>(() => BqFunc.Average(100)).ToString().TrimFlat()
+            context.Select<long>(() => BqFunc.Average(100)).ToString().TrimFlat()
                 .Is("SELECT AVG(100)");
 
             context.Select<int>(() => BqFunc.Correlation(100, 100)).ToString().TrimFlat()

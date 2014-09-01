@@ -9,7 +9,10 @@ namespace BigQuery.Linq
     public static partial class BqFunc
     {
 
-
-
+        [FunctionName("LENGTH")]
+        public static long Length(string str)
+        {
+            throw Invalid();
+        }
     }
 }

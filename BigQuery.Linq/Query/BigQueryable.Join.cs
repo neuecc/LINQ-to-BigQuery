@@ -119,8 +119,6 @@ namespace BigQuery.Linq.Query
             }
 
             // alias select
-            // 1.same type, 2.another name, 3.last
-            // TODO:not yet done!
             var aliasExpr = aliasSelector.Body as NewExpression;
             var aliasName = aliasExpr.Members.Last().Name;
             sb.Append(" AS " + aliasName);

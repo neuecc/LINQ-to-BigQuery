@@ -196,6 +196,10 @@ namespace BigQuery.Linq
                 }
                 return base.VisitUnary(node);
             }
+            else if (node.NodeType == ExpressionType.Quote)
+            {
+
+            }
 
             throw new InvalidOperationException("Not supported unary expression:" + node);
         }
@@ -294,6 +298,31 @@ namespace BigQuery.Linq
                 return node;
             }
 
+            // window function
+            if (node.Method.GetCustomAttributes<WindowFunctionAttribute>().Any())
+            {
+                MethodCallExpression root;
+                var paritionBy = (MethodCallExpression)node.Object;
+                if (paritionBy == null)
+                {
+                    root = node;
+                }
+                else
+                {
+                    root = (MethodCallExpression)paritionBy.Object;
+                    if (root == null)
+                    {
+                        root = paritionBy;
+                    }
+                }
+
+                var para = root.Arguments[0] as ParameterExpression;
+                var windowFunction = Expression.Lambda(node, para);
+                var compiledWindowFunction = windowFunction.Compile();
+                var windowQuery = compiledWindowFunction.DynamicInvoke(new object[1]);
+                sb.Append(windowQuery.ToString());
+                return node;
+            }
 
             var attr = node.Method.GetCustomAttributes<FunctionNameAttribute>().FirstOrDefault();
             if (attr == null) throw new InvalidOperationException("Not support method:" + node.Method.DeclaringType.Name + "." + node.Method.Name + " Method can only call BigQuery.Linq.Functions.*");

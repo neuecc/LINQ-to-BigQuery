@@ -23,6 +23,11 @@ namespace BigQuery.Linq
         }
     }
 
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    internal class WindowFunctionAttribute : Attribute
+    {
+    }
+
     internal interface ISpeficiedFormatter
     {
         string Format(MethodCallExpression node);
