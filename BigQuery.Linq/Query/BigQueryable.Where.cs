@@ -10,6 +10,10 @@ namespace BigQuery.Linq.Query
     internal class WhereBigQueryable<TSource> : ExecutableBigQueryableBase<TSource>, IWhereBigQueryable<TSource>
     {
         readonly Expression<Func<TSource, bool>> predicate;
+        internal override int Order
+        {
+            get { return 3; }
+        }
 
         internal WhereBigQueryable(IBigQueryable parent, Expression<Func<TSource, bool>> predicate)
             : base(parent)
@@ -25,12 +29,17 @@ namespace BigQuery.Linq.Query
             return new WhereBigQueryable<TSource>(Parent, newPredicate);
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
-            if (depth < 1) throw new ArgumentOutOfRangeException("depth:" + depth);
+            var command = BigQueryTranslateVisitor.BuildQuery(depth + 1, QueryContext.IndentSize, predicate);
 
-            var command = BigQueryTranslateVisitor.BuildQuery("WHERE", depth, indentSize, option, predicate, forceIndent: true);
-            return Parent.ToString(depth, indentSize, option) + Environment.NewLine + command;
+            var sb = new StringBuilder();
+            sb.Append(Indent(depth));
+            sb.AppendLine("WHERE");
+            sb.Append(Indent(depth + 1));
+            sb.Append(command);
+
+            return sb.ToString();
         }
     }
 }

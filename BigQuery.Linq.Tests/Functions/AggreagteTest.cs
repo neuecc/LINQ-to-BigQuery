@@ -30,10 +30,9 @@ namespace BigQuery.Linq.Tests.Functions
             context.Select<int>(() => BqFunc.Count()).ToString().TrimFlat()
                 .Is("SELECT COUNT(*)");
 
-            var x = new MyClass();
-            context.Select<int>(() => BqFunc.Count(x.field1)).ToString().TrimFlat()
-                .Is("SELECT COUNT(field1)");
-
+            var field1 = 100;
+            context.Select<int>(() => BqFunc.Count(field1)).ToString().TrimFlat()
+                .Is("SELECT COUNT([field1])");
         }
     }
 }

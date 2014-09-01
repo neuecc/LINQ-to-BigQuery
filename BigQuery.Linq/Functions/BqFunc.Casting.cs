@@ -26,7 +26,7 @@ namespace BigQuery.Linq
         /// Returns numeric_expr as a hexadecimal string.
         /// </summary>
         [FunctionName("HEX_STRING")]
-        public static string HexString(object expr) { throw Invalid(); }
+        public static string HexString(object numericExpr) { throw Invalid(); }
 
         /// <summary>
         /// Returns expr as a 64-bit integer. This function expects an integer string, such as '45', and returns NULL for non-integer values.

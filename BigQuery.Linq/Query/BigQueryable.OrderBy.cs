@@ -10,6 +10,10 @@ namespace BigQuery.Linq.Query
     internal class OrderByBigQueryable<TSource, TKey> : ExecutableBigQueryableBase<TSource>, IOrderByBigQueryable<TSource>, IOrderByAfterSelectBigQueryable<TSource>
     {
         readonly Tuple<Expression, bool>[] keySelectors;
+        internal override int Order
+        {
+            get { return 6; }
+        }
 
         internal OrderByBigQueryable(IBigQueryable parent, Expression<Func<TSource, TKey>> keySelector, bool isDescending)
             : base(parent)
@@ -52,7 +56,7 @@ namespace BigQuery.Linq.Query
             return CreateThenBy(keySelector, isDescending: true);
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
             throw new NotImplementedException();
         }

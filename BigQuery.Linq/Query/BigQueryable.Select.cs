@@ -9,7 +9,10 @@ namespace BigQuery.Linq.Query
     internal class SelectBigQueryable<TSource, TResult> : ExecutableBigQueryableBase<TResult>, ISelectBigQueryable<TResult>, ISelectAfterOrderByBigQueryable<TResult>
     {
         readonly Expression<Func<TSource, TResult>> selector;
-
+        internal override int Order
+        {
+            get { return 0; }
+        }
         internal SelectBigQueryable(IBigQueryable parent, Expression<Func<TSource, TResult>> selector)
             : base(parent)
         {
@@ -22,27 +25,16 @@ namespace BigQuery.Linq.Query
             return QueryContext.Query<TResult>(queryString).GetEnumerator();
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
-            if (depth < 1) throw new ArgumentOutOfRangeException("depth:" + depth);
+            var command = (selector != null)
+                ? BigQueryTranslateVisitor.BuildQuery(depth + 1, QueryContext.IndentSize, selector)
+                : Indent(depth + 1) + "*";
 
             var sb = new StringBuilder();
-            var command = BigQueryTranslateVisitor.BuildQuery("SELECT", depth, indentSize, option, selector);
-
+            sb.Append(Indent(depth));
+            sb.AppendLine("SELECT");
             sb.Append(command);
-
-            if (Parent != null)
-            {
-                if (option == FormatOption.Indent)
-                {
-                    sb.AppendLine();
-                }
-                else
-                {
-                    sb.Append(" ");
-                }
-                sb.Append(Parent.ToString(depth, indentSize, option));
-            }
 
             return sb.ToString();
         }

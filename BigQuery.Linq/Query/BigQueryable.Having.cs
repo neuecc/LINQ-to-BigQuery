@@ -10,6 +10,10 @@ namespace BigQuery.Linq.Query
     internal class HavingBigQueryable<TSource> : ExecutableBigQueryableBase<TSource>, IHavingBigQueryable<TSource>
     {
         readonly Expression<Func<TSource, bool>> predicate;
+        internal override int Order
+        {
+            get { return 5; }
+        }
 
         internal HavingBigQueryable(IBigQueryable parent, Expression<Func<TSource, bool>> predicate)
             : base(parent)
@@ -17,7 +21,7 @@ namespace BigQuery.Linq.Query
             this.predicate = predicate;
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
             throw new NotImplementedException();
         }

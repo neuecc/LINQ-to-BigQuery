@@ -15,13 +15,13 @@ namespace BigQuery.Linq.Tests.Functions
         {
             var context = new BigQueryContext();
 
-            context.Select<string>(() => BqFunc.Host("http://www.google.com/")).ToSql()
+            context.Select<string>(() => BqFunc.Host("http://www.google.com/")).ToFlatSql()
                 .Is("SELECT HOST('http://www.google.com/')");
 
-            context.Select<string>(() => BqFunc.Domain("http://www.google.com/")).ToSql()
+            context.Select<string>(() => BqFunc.Domain("http://www.google.com/")).ToFlatSql()
                 .Is("SELECT DOMAIN('http://www.google.com/')");
 
-            context.Select<string>(() => BqFunc.Tld("http://www.google.com/")).ToSql()
+            context.Select<string>(() => BqFunc.Tld("http://www.google.com/")).ToFlatSql()
                 .Is("SELECT TLD('http://www.google.com/')");
         }
     }

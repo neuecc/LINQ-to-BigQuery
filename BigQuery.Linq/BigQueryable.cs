@@ -27,17 +27,12 @@ namespace BigQuery.Linq
     public interface IBigQueryable
     {
         BigQueryContext QueryContext { get; }
-
-        string ToString();
-
-        string ToString(FormatOption option);
-
-        string ToString(int indentSize, FormatOption option);
-        string ToString(int depth, int indentSize, FormatOption option);
     }
 
     internal abstract class BigQueryable : IBigQueryable
     {
+        internal abstract int Order { get; }
+
         internal IBigQueryable Parent { get; private set; }
 
         public BigQueryContext QueryContext { get; private set; }
@@ -54,33 +49,33 @@ namespace BigQuery.Linq
             this.QueryContext = context;
         }
 
-        public sealed override string ToString()
+        public override string ToString()
         {
-            return ToString(1, QueryContext.IndentSize, QueryContext.FormatOption);
+            return BuildQueryString(1);
         }
 
-        public string ToString(FormatOption option)
-        {
-            return ToString(1, QueryContext.IndentSize, option);
-        }
+        public abstract string BuildQueryString(int depth);
 
-        public string ToString(int indentSize, FormatOption option)
+        protected string Indent(int depth)
         {
-            return ToString(1, indentSize, option);
+            return new string(' ', QueryContext.IndentSize * depth);
         }
-
-        public abstract string ToString(int depth, int indentSize, FormatOption option);
     }
 
     internal class RootBigQueryable<T> : BigQueryable
     {
+        internal override int Order
+        {
+            get { return -1; }
+        }
+
         public RootBigQueryable(BigQueryContext context)
             : base(context)
         {
 
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
             return "";
         }
@@ -105,6 +100,42 @@ namespace BigQuery.Linq
 
         }
 
+        public override string ToString()
+        {
+            return ToQueryString(depth: 0);
+        }
+
+        internal string ToQueryString(int depth)
+        {
+            var list = new List<BigQueryable>();
+            var parent = this as BigQueryable;
+            while (parent != null)
+            {
+                list.Add(parent);
+                parent = parent.Parent as BigQueryable;
+            }
+
+            var aliasName = default(string);
+            var join = list.OfType<IJoinBigQueryable>().FirstOrDefault();
+            if (join != null)
+            {
+                aliasName = join.GetAliasNames().First(); // from is first!
+            }
+
+            list = list.Where(x => x.Order != -1).OrderBy(x => x.Order).ToList();
+
+            var queryString = string.Join(Environment.NewLine, list.Select(x =>
+            {
+                if (aliasName != null && x is IFromBigQueryable)
+                {
+                    return ((IFromBigQueryable)x).BuildQueryStringWithAlias(depth, aliasName);
+                }
+                return x.BuildQueryString(depth);
+            }));
+
+            return queryString;
+        }
+
         public T[] ToArray()
         {
             return AsEnumerable().ToArray();
@@ -112,8 +143,7 @@ namespace BigQuery.Linq
 
         public IEnumerable<T> AsEnumerable()
         {
-            var queryString = ToString();
-            return QueryContext.Query<T>(queryString);
+            return QueryContext.Query<T>(ToString());
         }
 
         public ISubqueryBigQueryable<T> AsSubquery()
@@ -320,10 +350,29 @@ namespace BigQuery.Linq
             return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: true);
         }
 
+        public static IOrderByAfterSelectBigQueryable<TSource> OrderBy<TSource, TKey>(this IGroupByBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: false);
+        }
+
+        public static IOrderByAfterSelectBigQueryable<TSource> OrderByDescending<TSource, TKey>(this IGroupByBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: true);
+        }
+
+        public static IOrderByAfterSelectBigQueryable<TSource> OrderBy<TSource, TKey>(this IHavingBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: false);
+        }
+
+        public static IOrderByAfterSelectBigQueryable<TSource> OrderByDescending<TSource, TKey>(this IHavingBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector)
+        {
+            return new OrderByBigQueryable<TSource, TKey>(source, keySelector, isDescending: true);
+        }
 
         public static ISelectBigQueryable<TSource> Select<TSource>(this IWhereBigQueryable<TSource> source)
         {
-            return new SelectBigQueryable<TSource, TSource>(source, x => x);
+            return new SelectBigQueryable<TSource, TSource>(source, null);
         }
 
         public static ISelectBigQueryable<TResult> Select<TSource, TResult>(this IWhereBigQueryable<TSource> source, Expression<Func<TSource, TResult>> selector)

@@ -8,5 +8,8 @@ namespace BigQuery.Linq
 {
     public static partial class BqFunc
     {
+
+
+
     }
 }

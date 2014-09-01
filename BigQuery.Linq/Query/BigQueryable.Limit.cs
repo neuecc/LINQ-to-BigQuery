@@ -11,6 +11,10 @@ namespace BigQuery.Linq.Query
     internal class LimitBigQueryable<T> : ExecutableBigQueryableBase<T>, ILimitBigQueryable<T>
     {
         readonly int numRows;
+        internal override int Order
+        {
+            get { return 7; }
+        }
 
         internal LimitBigQueryable(IBigQueryable parent, int numRows)
             : base(parent)
@@ -18,11 +22,10 @@ namespace BigQuery.Linq.Query
             this.numRows = numRows;
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
-            // TODO:set depth, indentSize, option
-            var command = "LIMIT " + numRows;
-            return Parent.ToString(depth, indentSize, option) + Environment.NewLine + command;
+            var command = Indent(depth) + "LIMIT " + numRows;
+            return command;
         }
     }
 }

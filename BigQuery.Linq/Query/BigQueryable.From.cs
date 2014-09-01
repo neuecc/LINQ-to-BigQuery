@@ -6,9 +6,18 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
 {
-    internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>
+    internal interface IFromBigQueryable
+    {
+        string BuildQueryStringWithAlias(int depth, string aliasName);
+    }
+
+    internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>, IFromBigQueryable
     {
         internal readonly string tableName;
+        internal override int Order
+        {
+            get { return 1; }
+        }
 
         internal FromBigQueryable(string tableName, IBigQueryable parent)
             : base(parent)
@@ -16,20 +25,30 @@ namespace BigQuery.Linq.Query
             this.tableName = tableName.EscapeBq();
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
-            return "FROM" + Environment.NewLine + "  " + tableName;
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + tableName;
+        }
+
+        public string BuildQueryStringWithAlias(int depth, string aliasName)
+        {
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + tableName + " AS " + aliasName;
         }
     }
 
     internal class SubqueryBigQueryable<T> : BigQueryable, ISubqueryBigQueryable<T>
     {
-        readonly IExecutableBigQueryable<T> typedInner;
+        readonly ExecutableBigQueryableBase<T> typedInner;
+
+        internal override int Order
+        {
+            get { return 1; }
+        }
 
         internal SubqueryBigQueryable(IExecutableBigQueryable<T> subselect)
             : base(subselect)
         {
-            this.typedInner = subselect;
+            this.typedInner = subselect as ExecutableBigQueryableBase<T>;
         }
 
         public IExecutableBigQueryable<T> Unwrap()
@@ -52,9 +71,10 @@ namespace BigQuery.Linq.Query
             return this;
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
-            return "(" + Parent.ToString() + ")";
+            return "(" + Environment.NewLine +
+                typedInner.ToQueryString(depth + 1) + Environment.NewLine + ")";
         }
     }
 }

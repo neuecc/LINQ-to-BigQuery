@@ -14,13 +14,13 @@ namespace BigQuery.Linq
     {
         // connection
 
+        // TODO:IgnoreCase = false?
+
         public int IndentSize { get; set; }
-        public FormatOption FormatOption { get; set; }
 
         public BigQueryContext()
         {
             IndentSize = 2;
-            FormatOption = Linq.FormatOption.Indent;
         }
 
         public IFromBigQueryable<T> From<T>()

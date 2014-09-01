@@ -33,7 +33,7 @@ namespace BigQuery.Linq
         {
             public string Format(System.Linq.Expressions.MethodCallExpression node)
             {
-                var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+                var innerTranslator = new BigQueryTranslateVisitor();
                 var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
                 var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
                 var expr3 = innerTranslator.VisitAndClearBuffer(node.Arguments[2]);

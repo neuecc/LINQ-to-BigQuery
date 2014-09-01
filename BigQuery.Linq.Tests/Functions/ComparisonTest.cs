@@ -16,7 +16,7 @@ namespace BigQuery.Linq.Tests.Functions
             var context = new BigQueryContext();
             var x = 1000;
 
-            context.Select<bool>(() => BqFunc.Between(x, BqFunc.Abs(10), 100)).ToSql()
+            context.Select<bool>(() => BqFunc.Between(x, BqFunc.Abs(10), 100)).ToFlatSql()
                 .Is("SELECT [x] BETWEEN ABS(10) AND 100");
         }
 
@@ -26,10 +26,10 @@ namespace BigQuery.Linq.Tests.Functions
             var context = new BigQueryContext();
 
             var x = "hogehoge";
-            context.Select<string>(() => x ?? "hugahuga").ToSql()
+            context.Select<string>(() => x ?? "hugahuga").ToFlatSql()
                 .Is("SELECT IFNULL([x], 'hugahuga')");
 
-            context.Select<string>(() => BqFunc.String(null) ?? "hugahuga").ToSql()
+            context.Select<string>(() => BqFunc.String(null) ?? "hugahuga").ToFlatSql()
                 .Is("SELECT IFNULL(STRING(NULL), 'hugahuga')");
         }
     }

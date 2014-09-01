@@ -21,6 +21,10 @@ namespace BigQuery.Linq.Query
         readonly TimeSpan? relativeTime2;
         readonly DateTimeOffset? absoluteTime1;
         readonly DateTimeOffset? absoluteTime2;
+        internal override int Order
+        {
+            get { return 1; }
+        }
 
         internal TableDecoratorBigQueryable(IFromBigQueryable<T> parent, DecorateType type, DateTimeOffset? absoluteTime1 = null, DateTimeOffset? absoluteTime2 = null, TimeSpan? relativeTime1 = null, TimeSpan? relativeTime2 = null)
             : base(parent)
@@ -32,7 +36,7 @@ namespace BigQuery.Linq.Query
             this.relativeTime2 = relativeTime2;
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
             var parent = (FromBigQueryable<T>)Parent;
 

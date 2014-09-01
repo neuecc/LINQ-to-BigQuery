@@ -18,7 +18,7 @@ namespace BigQuery.Linq
             return s.Replace("\r\n", " ").Trim('\r', '\n', ' ');
         }
 
-        public static string ToSql(this IBigQueryable q)
+        public static string ToFlatSql<T>(this IExecutableBigQueryable<T> q)
         {
             return q.ToString().TrimFlat();
         }

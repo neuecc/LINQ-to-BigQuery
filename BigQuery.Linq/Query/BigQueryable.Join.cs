@@ -23,6 +23,11 @@ namespace BigQuery.Linq
         LeftOuterEach = 3,
         Cross = 4
     }
+
+    internal interface IJoinBigQueryable
+    {
+        string[] GetAliasNames();
+    }
 }
 
 namespace BigQuery.Linq.Query
@@ -30,13 +35,24 @@ namespace BigQuery.Linq.Query
     // [[INNER|LEFT OUTER|CROSS] JOIN [EACH] table_2|(subselect2) [[AS] tablealias2]
     // ON join_condition_1 [... AND join_condition_N ...]]+
 
-    internal class JoinBigQueryable<TOuter, TInner, TResult> : BigQueryable, IJoinBigQueryable<TResult>
+    internal class JoinBigQueryable<TOuter, TInner, TResult> : BigQueryable, IJoinBigQueryable<TResult>, IJoinBigQueryable
     {
         readonly InternalJoinType joinType;
         readonly string joinTableName;
         readonly ISubqueryBigQueryable<TInner> joinTable;
         readonly Expression<Func<TOuter, TInner, TResult>> aliasSelector;
         readonly Expression<Func<TResult, bool>> joinCondition;
+
+        internal override int Order
+        {
+            get { return 2; }
+        }
+
+        public string[] GetAliasNames()
+        {
+            var aliasExpr = aliasSelector.Body as NewExpression;
+            return aliasExpr.Members.Select(x => x.Name).ToArray();
+        }
 
         internal JoinBigQueryable(
             IBigQueryable parent,
@@ -62,7 +78,7 @@ namespace BigQuery.Linq.Query
             this.joinCondition = joinCondition;
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
             var sb = new StringBuilder();
             switch (joinType)
@@ -95,11 +111,7 @@ namespace BigQuery.Linq.Query
             }
             else if (joinTable != null)
             {
-                sb.Append("(");
-
-                sb.Append(joinTable.ToString()); // depth &indent?
-
-                sb.Append(")");
+                sb.Append((joinTable as BigQueryable).BuildQueryString(depth));
             }
             else
             {
@@ -109,12 +121,15 @@ namespace BigQuery.Linq.Query
             // alias select
             // 1.same type, 2.another name, 3.last
             // TODO:not yet done!
+            var aliasExpr = aliasSelector.Body as NewExpression;
+            var aliasName = aliasExpr.Members.Last().Name;
+            sb.Append(" AS " + aliasName);
 
             // join condition
             if (joinType != InternalJoinType.Cross)
             {
-                sb.Append("ON ");
-                var on = BigQueryTranslateVisitor.BuildQuery("", 0, 0, FormatOption.Flat, joinCondition);
+                sb.Append(" ON ");
+                var on = BigQueryTranslateVisitor.BuildQuery(0, 0, joinCondition);
                 sb.Append(on);
             }
 

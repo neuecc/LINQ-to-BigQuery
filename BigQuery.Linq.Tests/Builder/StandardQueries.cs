@@ -29,6 +29,13 @@ namespace BigQuery.Linq.Tests.Builder
         public int wp_namespace { get; set; }
     }
 
+    [TableName("[publicdata:samples.shakespeare]")]
+    class Shakespeare
+    {
+        public string word { get; set; }
+        public string corpus { get; set; }
+    }
+
     class Repository
     {
         public bool has_downloads { get; set; }
@@ -69,9 +76,9 @@ namespace BigQuery.Linq.Tests.Builder
   [title],
   [wp_namespace]
 FROM
-  tablewikipedia
+  [tablewikipedia]
 WHERE
-  [wp_namespace] = 100");
+  ([wp_namespace] = 100)");
         }
 
         [TestMethod]
@@ -90,9 +97,9 @@ WHERE
   [title],
   [wp_namespace]
 FROM
-  tablewikipedia
+  [tablewikipedia]
 WHERE
-  [wp_namespace] = 100 AND [title] IS NOT NULL AND [title] = 'AiUeo'");
+  ((([wp_namespace] = 100) AND ([title] IS NOT NULL)) AND ([title] = 'AiUeo'))");
         }
 
         [TestMethod]
@@ -100,9 +107,29 @@ WHERE
         {
             var context = new BigQuery.Linq.BigQueryContext();
 
-            var s = context.From<Wikipedia>("tablewikipedia")
-                .Join(context.From<Wikipedia>("aaa").Select(), (kp, tp) => new { kp, tp },
-                x => x.tp.title == "");
+            var query1 = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
+                .Join(context.From<Wikipedia>("[publicdata:samples.wikipedia]").Select(x => new { x.title, x.wp_namespace }).Limit(1000),
+                    (kp, tp) => new { kp, tp },
+                    x => x.tp.title == x.kp.title)
+                .Select(x => new { x.kp.title, x.tp.wp_namespace })
+                .Limit(100)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [kp.title] AS [title],
+  [tp.wp_namespace] AS [wp_namespace]
+FROM
+  [publicdata:samples.wikipedia] AS kp
+INNER JOIN (
+  SELECT
+    [title],
+    [wp_namespace]
+  FROM
+    [publicdata:samples.wikipedia]
+  LIMIT 1000
+) AS tp ON ([tp.title] = [kp.title])
+LIMIT 100".TrimSmart());
         }
 
         [TestMethod]
@@ -127,12 +154,43 @@ WHERE
 SELECT
   [title],
   HASH([title]) AS [hash_value],
-  IF(ABS(HASH([title])) % 2 = 1, 'True', 'False') AS [included_in_sample]
+  IF(((ABS(HASH([title])) % 2) = 1), 'True', 'False') AS [included_in_sample]
 FROM
   [publicdata:samples.wikipedia]
 WHERE
-  [wp_namespace] = 0
+  ([wp_namespace] = 0)
 LIMIT 5".TrimStart());
+        }
+
+        [TestMethod]
+        public void SampleFirstCase()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.word.Contains("th"))
+                .Select(x => new
+                {
+                    x.word,
+                    x.corpus,
+                    count = BqFunc.Count(x.word)
+                })
+                .GroupBy(x => new { x.word, x.corpus })
+                .ToString()
+                .TrimSmart();
+
+            query1.Is(@"
+SELECT
+  [word],
+  [corpus],
+  COUNT([word]) AS [count]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  [word] CONTAINS 'th'
+GROUP BY
+  [word],
+  [corpus]".TrimSmart());
         }
     }
 }

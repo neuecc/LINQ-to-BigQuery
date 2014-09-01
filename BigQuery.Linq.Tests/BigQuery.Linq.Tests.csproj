@@ -54,6 +54,8 @@
     <Compile Include="Builder\TableDecoratorTest.cs" />
     <Compile Include="ChainingAssertion.MSTest.cs" />
     <Compile Include="Builder\StandardQueries.cs" />
+    <Compile Include="Functions\RegularExpressionTest.cs" />
+    <Compile Include="Functions\StringTest.cs" />
     <Compile Include="Functions\ComparisonTest.cs" />
     <Compile Include="Functions\UrlTest.cs" />
     <Compile Include="Functions\BitwiseTest.cs" />

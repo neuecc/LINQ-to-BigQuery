@@ -11,48 +11,36 @@ namespace BigQuery.Linq
     // Expression to BigQuery Query Translater
     internal class BigQueryTranslateVisitor : ExpressionVisitor
     {
+        static readonly MethodInfo StringContains = typeof(string).GetMethod("Contains");
+
         readonly int depth = 1;
         readonly int indentSize = 2;
-        readonly FormatOption option;
 
         StringBuilder sb = new StringBuilder();
 
-        public BigQueryTranslateVisitor(int depth, int indentSize, FormatOption option)
+        public BigQueryTranslateVisitor()
+        {
+            this.depth = 0;
+            this.indentSize = 0;
+        }
+
+        public BigQueryTranslateVisitor(int depth, int indentSize)
         {
             this.depth = depth;
             this.indentSize = indentSize;
-            this.option = option;
         }
 
         // EntryPoint
-        public static string BuildQuery(string command, int depth, int indentSize, FormatOption option, Expression expression, bool forceIndent = false)
+        public static string BuildQuery(int depth, int indentSize, Expression expression)
         {
-            var visitor = new BigQueryTranslateVisitor(depth, indentSize, option);
-
-            visitor.sb.Append(command);
-            if (option == FormatOption.Indent)
-            {
-                visitor.sb.Append(Environment.NewLine);
-                if (forceIndent)
-                {
-                    visitor.AppendIndent();
-                }
-            }
-            else
-            {
-                visitor.sb.Append(" ");
-            }
-
+            var visitor = new BigQueryTranslateVisitor(depth, indentSize);
             visitor.Visit(expression);
             return visitor.sb.ToString();
         }
 
-        void AppendIndent()
+        string BuildIndent()
         {
-            if (option == FormatOption.Indent)
-            {
-                sb.Append(new string(' ', indentSize * depth));
-            }
+            return new string(' ', indentSize * depth);
         }
 
         public string VisitAndClearBuffer(Expression node)
@@ -65,8 +53,8 @@ namespace BigQuery.Linq
 
         protected override Expression VisitNew(NewExpression node)
         {
-            var indent = new string(' ', depth * indentSize);
-            var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+            var indent = BuildIndent();
+            var innerTranslator = new BigQueryTranslateVisitor(0, 0);
 
             var merge = node.Members.Zip(node.Arguments, (x, y) =>
             {
@@ -292,8 +280,21 @@ namespace BigQuery.Linq
             return node;
         }
 
+
+
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
+            // special case, String.Contains
+            if (node.Method == StringContains)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr1 = innerTranslator.VisitAndClearBuffer(node.Object);
+                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                sb.Append(expr1 + " CONTAINS " + expr2);
+                return node;
+            }
+
+
             var attr = node.Method.GetCustomAttributes<FunctionNameAttribute>().FirstOrDefault();
             if (attr == null) throw new InvalidOperationException("Not support method:" + node.Method.DeclaringType.Name + "." + node.Method.Name + " Method can only call BigQuery.Linq.Functions.*");
 
@@ -306,7 +307,7 @@ namespace BigQuery.Linq
             {
                 sb.Append(attr.Name + "(");
 
-                var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+                var innerTranslator = new BigQueryTranslateVisitor();
                 var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
                 sb.Append(args);
@@ -319,7 +320,7 @@ namespace BigQuery.Linq
 
         protected override Expression VisitConditional(ConditionalExpression node)
         {
-            var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+            var innerTranslator = new BigQueryTranslateVisitor();
 
             // case when ... then ... ... else .. end
             // TODO:need more clean format

@@ -12,6 +12,10 @@ namespace BigQuery.Linq.Query
     {
         readonly Expression<Func<TSource, TKey>> keySelector;
         readonly bool each;
+        internal override int Order
+        {
+            get { return 4; }
+        }
 
         internal GroupByBigQueryable(IBigQueryable parent, Expression<Func<TSource, TKey>> keySelector, bool each)
             : base(parent)
@@ -20,10 +24,16 @@ namespace BigQuery.Linq.Query
             this.each = each;
         }
 
-        public override string ToString(int depth, int indentSize, FormatOption option)
+        public override string BuildQueryString(int depth)
         {
-            return "GROUP " + ((each) ? "EACH BY " : "BY ")
-                + Environment.NewLine;
+            var command = BigQueryTranslateVisitor.BuildQuery(depth + 1, QueryContext.IndentSize, keySelector);
+
+            var sb = new StringBuilder();
+            sb.Append(Indent(depth));
+            sb.AppendLine("GROUP " + ((each) ? "EACH BY" : "BY"));
+            sb.Append(command);
+
+            return sb.ToString();
         }
     }
 }

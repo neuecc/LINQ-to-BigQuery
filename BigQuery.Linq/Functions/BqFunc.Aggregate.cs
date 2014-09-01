@@ -85,7 +85,7 @@ namespace BigQuery.Linq
         {
             public string Format(MethodCallExpression node)
             {
-                var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+                var innerTranslator = new BigQueryTranslateVisitor();
                 var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
                 return "COUNT(" + args + ")";
@@ -96,7 +96,7 @@ namespace BigQuery.Linq
         {
             public string Format(MethodCallExpression node)
             {
-                var innerTranslator = new BigQueryTranslateVisitor(0, 0, FormatOption.Flat);
+                var innerTranslator = new BigQueryTranslateVisitor();
                 var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
                 return "COUNT(DISTINCT " + args + ")";
