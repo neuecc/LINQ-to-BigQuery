@@ -82,10 +82,10 @@ namespace BigQuery.Linq.ConsoleApp
             var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(@"")
             {
                 Scopes = new[]
-		{
-			BigqueryService.Scope.Bigquery,
-			BigqueryService.Scope.BigqueryInsertdata,
-		}
+		        {
+			        BigqueryService.Scope.Bigquery,
+			        BigqueryService.Scope.BigqueryInsertdata,
+		        }
             }.FromCertificate(certificate));
 
             var bigquery = new BigqueryService(new BaseClientService.Initializer
@@ -95,6 +95,8 @@ namespace BigQuery.Linq.ConsoleApp
             });
 
             var queryResponse = bigquery.Jobs.Query(queryRequest, projectId).Execute();
+
+
 
             // schema?
 

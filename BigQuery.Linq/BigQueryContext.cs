@@ -17,13 +17,19 @@ namespace BigQuery.Linq
 {
     public class BigQueryContext
     {
-        // connection
-
         public int IndentSize { get; set; }
+        public BigqueryService BigQueryService { get; set; }
+        public string ProjectId { get; set; }
 
         public BigQueryContext()
         {
-            IndentSize = 2;
+            this.IndentSize = 2;
+        }
+
+        public BigQueryContext(BigqueryService service, string projectId)
+        {
+            this.BigQueryService = service;
+            this.ProjectId = projectId;
         }
 
         public IFromBigQueryable<T> From<T>()
@@ -100,33 +106,12 @@ namespace BigQuery.Linq
 
         public IEnumerable<T> Query<T>(string query)
         {
-            var queryRequest = new QueryRequest { Query = query };
+            // TODO:Option
+            var body = new QueryRequest { Query = query };
+            var request = BigQueryService.Jobs.Query(body, ProjectId);
 
-            // TODO:Authenticate
-            var projectId = "";
-            var service = new BigqueryService();
+            var queryResponse = request.Execute();
 
-            var certificate = new X509Certificate2(@"", "", X509KeyStorageFlags.Exportable);
-
-            var credential = new ServiceAccountCredential(new ServiceAccountCredential.Initializer(@"")
-            {
-                Scopes = new[]
-		{
-			BigqueryService.Scope.Bigquery,
-			BigqueryService.Scope.BigqueryInsertdata,
-		}
-            }.FromCertificate(certificate));
-
-            var bigquery = new BigqueryService(new BaseClientService.Initializer
-            {
-                ApplicationName = "",
-                HttpClientInitializer = credential
-            });
-
-            var queryResponse = bigquery.Jobs.Query(queryRequest, projectId).Execute();
-
-            // schema?
-            // queryResponse.Schema.Fields[0].
             queryResponse.Rows.Select(row => row.F.Select(cell =>
             {
                 // TODO:Deserialize
