@@ -154,7 +154,7 @@ namespace BigQuery.Linq
 
     // method chain marker
     /*
-    From(+TableDecorate) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit
+    From(+TableDecorate) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit -> IgnoreCase
                                            | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) |
                                                        | -> OrderBy(ThenBy) ->                   |
     */
@@ -186,30 +186,34 @@ namespace BigQuery.Linq
         IOrderByBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
     }
 
-    public interface IOrderByAfterSelectBigQueryable<TSource> : IExecutableBigQueryable<TSource> // ThenBy, ThenByDescending, Limit, Execute
+    public interface IOrderByAfterSelectBigQueryable<TSource> : ILimitBigQueryable<TSource> // ThenBy, ThenByDescending, Limit, IgnoreCase, Execute
     {
         IOrderByAfterSelectBigQueryable<TSource> ThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
         IOrderByAfterSelectBigQueryable<TSource> ThenByDescending<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector);
     }
 
-    public interface ISelectAfterOrderByBigQueryable<T> : IExecutableBigQueryable<T> // Limit
+    public interface ISelectAfterOrderByBigQueryable<T> : ILimitBigQueryable<T> // Limit, IgnoreCase, Execute
     {
     }
 
-    public interface ISelectBigQueryable<T> : IExecutableBigQueryable<T> // GroupBy, OrderBy, Limit, Execute
+    public interface ISelectBigQueryable<T> : ILimitBigQueryable<T> // GroupBy, OrderBy, Limit, IgnoreCase, Execute
     {
     }
 
-    public interface IGroupByBigQueryable<T> : IExecutableBigQueryable<T> // Having, OrderBy, Limit, Execute
+    public interface IGroupByBigQueryable<T> : ILimitBigQueryable<T> // Having, OrderBy, Limit, IgnoreCase, Execute
     {
     }
 
-    public interface IHavingBigQueryable<T> : IGroupByBigQueryable<T> // Having, OrderBy, Limit, Execute
+    public interface IHavingBigQueryable<T> : IGroupByBigQueryable<T> // Having, OrderBy, Limit, IgnoreCase, Execute
     {
         // Having
     }
 
-    public interface ILimitBigQueryable<T> : IExecutableBigQueryable<T> // Execute
+    public interface ILimitBigQueryable<T> : IIgnoreCaseBigQueryable<T> // IgnoreCase, Execute
+    {
+    }
+
+    public interface IIgnoreCaseBigQueryable<T> : IExecutableBigQueryable<T> // Execute
     {
     }
 
@@ -426,6 +430,11 @@ namespace BigQuery.Linq
             if (numRows < 0) throw new ArgumentOutOfRangeException("numRows:" + numRows);
 
             return new LimitBigQueryable<T>(source, numRows);
+        }
+
+        public static IIgnoreCaseBigQueryable<T> IgnoreCase<T>(this ILimitBigQueryable<T> source)
+        {
+            return new IgnoreCaseBigQueryable<T>(source);
         }
     }
 }

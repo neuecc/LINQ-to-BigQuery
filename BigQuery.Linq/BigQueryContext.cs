@@ -14,8 +14,6 @@ namespace BigQuery.Linq
     {
         // connection
 
-        // TODO:IgnoreCase = false?
-
         public int IndentSize { get; set; }
 
         public BigQueryContext()

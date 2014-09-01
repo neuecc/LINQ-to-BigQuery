@@ -30,7 +30,7 @@ namespace BigQuery.Linq.Query
         OrderByBigQueryable<TSource, TThenByKey> CreateThenBy<TThenByKey>(Expression<Func<TSource, TThenByKey>> keySelector, bool isDescending)
         {
             var newContainer = new Tuple<Expression, bool>[this.keySelectors.Length + 1];
-            Array.Copy(this.keySelectors, newContainer, 0);
+            Array.Copy(this.keySelectors, newContainer, this.keySelectors.Length);
 
             newContainer[newContainer.Length - 1] = Tuple.Create<Expression, bool>(keySelector, isDescending);
             return new OrderByBigQueryable<TSource, TThenByKey>(this.Parent, newContainer);
@@ -58,7 +58,19 @@ namespace BigQuery.Linq.Query
 
         public override string BuildQueryString(int depth)
         {
-            throw new NotImplementedException();
+            var fields = keySelectors.Select(x =>
+            {
+                var field = BigQueryTranslateVisitor.BuildQuery(0, 0, x.Item1);
+                return field + ((x.Item2) ? " DESC" : "");
+            });
+
+            var sb = new StringBuilder();
+            sb.Append(Indent(depth));
+            sb.AppendLine("ORDER BY");
+            sb.Append(Indent(depth + 1));
+            sb.Append(string.Join(", ", fields));
+
+            return sb.ToString();
         }
     }
 }

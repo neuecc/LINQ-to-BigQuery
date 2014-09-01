@@ -103,7 +103,7 @@ WHERE
         }
 
         [TestMethod]
-        public void TodoJoin()
+        public void Join()
         {
             var context = new BigQuery.Linq.BigQueryContext();
 
@@ -112,7 +112,10 @@ WHERE
                     (kp, tp) => new { kp, tp },
                     x => x.tp.title == x.kp.title)
                 .Select(x => new { x.kp.title, x.tp.wp_namespace })
+                .OrderBy(x => x.title)
+                .ThenByDescending(x => x.wp_namespace)
                 .Limit(100)
+                .IgnoreCase()
                 .ToString();
 
             query1.Is(@"
@@ -129,7 +132,10 @@ INNER JOIN (
     [publicdata:samples.wikipedia]
   LIMIT 1000
 ) AS tp ON ([tp.title] = [kp.title])
-LIMIT 100".TrimSmart());
+ORDER BY
+  [title], [wp_namespace] DESC
+LIMIT 100
+IGNORE CASE".TrimSmart());
         }
 
         [TestMethod]

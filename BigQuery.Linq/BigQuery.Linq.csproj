@@ -61,6 +61,7 @@
     <Compile Include="Functions\BqFunc.Arithmetic.cs" />
     <Compile Include="MetaTable.cs" />
     <Compile Include="Query\BigQueryable.Join.cs" />
+    <Compile Include="Query\BigQueryable.IgnoreCase.cs" />
     <Compile Include="Query\BigQueryable.Limit.cs" />
     <Compile Include="Query\BigQueryable.OrderBy.cs" />
     <Compile Include="Query\BigQueryable.Where.cs" />
