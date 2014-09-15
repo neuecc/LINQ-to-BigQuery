@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Google.Apis.Bigquery.v2.Data;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,8 +35,7 @@ namespace BigQuery.Linq
                 case TypeCode.String:
                     return "\'" + value + "\'";
                 case TypeCode.DateTime:
-                    // TODO:if value is DateTime, need format!
-                    return value.ToString();
+                    return "\'" + string.Format("{0:yyyy-MM-dd hh:mm:ss.ffffff}", value) + "\'";
                 case TypeCode.DBNull:
                 case TypeCode.Empty:
                     return "NULL";
@@ -57,8 +59,11 @@ namespace BigQuery.Linq
                         return value.ToString();
                     }
                 case TypeCode.Object:
-                    // TODO:it's record?
-                    return "";
+                    if (value.GetType() == typeof(DateTimeOffset))
+                    {
+                        return "\'" + string.Format("{0:yyyy-MM-dd hh:mm:ss.ffffff}", value) + "\'";
+                    }
+                    throw new NotImplementedException("Currently not supported object(as record?)");
                 default:
                     throw new InvalidOperationException();
             }

@@ -19,12 +19,6 @@ namespace BigQuery.Linq.Query
             this.selector = selector;
         }
 
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            var queryString = ToString();
-            return QueryContext.Query<TResult>(queryString).GetEnumerator();
-        }
-
         public override string BuildQueryString(int depth)
         {
             var command = (selector != null)

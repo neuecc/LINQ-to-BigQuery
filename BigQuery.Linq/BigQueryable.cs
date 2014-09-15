@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BigQuery.Linq
 {
@@ -87,7 +89,13 @@ namespace BigQuery.Linq
 
         T[] ToArray();
 
-        // Run, RunAsync
+        Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default(CancellationToken));
+
+        QueryResponse<T> Run();
+
+        QueryResponse<T> RunDry();
+
+        Task<QueryResponse<T>> RunAsync(CancellationToken cancellationToken = default(CancellationToken));
 
         ISubqueryBigQueryable<T> AsSubquery();
     }
@@ -138,12 +146,36 @@ namespace BigQuery.Linq
 
         public T[] ToArray()
         {
-            return AsEnumerable().ToArray();
+            return QueryContext.Query<T>(ToString());
+        }
+
+        public Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return QueryContext.QueryAsync<T>(ToString(), cancellationToken);
+        }
+
+        public QueryResponse<T> Run()
+        {
+            return QueryContext.Run<T>(ToString());
+        }
+
+        public Task<QueryResponse<T>> RunAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return QueryContext.RunAsync<T>(ToString(), cancellationToken);
+        }
+
+        public QueryResponse<T> RunDry()
+        {
+            return QueryContext.RunDry<T>(ToString());
         }
 
         public IEnumerable<T> AsEnumerable()
         {
-            return QueryContext.Query<T>(ToString());
+            // lazy execution
+            foreach (var item in ToArray())
+            {
+                yield return item;
+            }
         }
 
         public ISubqueryBigQueryable<T> AsSubquery()

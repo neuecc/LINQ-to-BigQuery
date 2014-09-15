@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BigQuery.Linq.Query
@@ -64,6 +65,24 @@ namespace BigQuery.Linq.Query
         public T[] ToArray()
         {
             return typedInner.ToArray();
+        }
+        public Task<T[]> ToArrayAsync(System.Threading.CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return typedInner.ToArrayAsync(cancellationToken);
+        }
+
+        public QueryResponse<T> Run()
+        {
+            return typedInner.Run();
+        }
+        public QueryResponse<T> RunDry()
+        {
+            return typedInner.RunDry();
+        }
+
+        public Task<QueryResponse<T>> RunAsync(System.Threading.CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return typedInner.RunAsync(cancellationToken);
         }
 
         public ISubqueryBigQueryable<T> AsSubquery()

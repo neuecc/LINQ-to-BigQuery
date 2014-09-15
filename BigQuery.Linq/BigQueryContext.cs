@@ -12,6 +12,7 @@ using Google.Apis.Bigquery.v2;
 using System.Security.Cryptography.X509Certificates;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
+using System.Threading;
 
 namespace BigQuery.Linq
 {
@@ -20,6 +21,15 @@ namespace BigQuery.Linq
         public int IndentSize { get; set; }
         public BigqueryService BigQueryService { get; set; }
         public string ProjectId { get; set; }
+
+        // QueryOptions
+        public bool? DryRun { get; set; }
+        public string ETag { get; set; }
+        public string Kind { get; set; }
+        public long? MaxResults { get; set; }
+        public bool? PreserveNulls { get; set; }
+        public long? TimeoutMs { get; set; }
+        public bool? UseQueryCache { get; set; }
 
         public BigQueryContext()
         {
@@ -98,27 +108,60 @@ namespace BigQuery.Linq
 
         public MetaTable[] GetAllTableInfo(string dataset)
         {
-            var query = "SELECT " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
-            return Query<MetaTable>(query).ToArray();
+            var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
+            return Query<MetaTable>(query);
         }
 
-        // Run
+        // Execute
 
-        public IEnumerable<T> Query<T>(string query)
+        JobsResource.QueryRequest BuildRequest(string query, bool isForceDry)
         {
-            // TODO:Option
-            var body = new QueryRequest { Query = query };
-            var request = BigQueryService.Jobs.Query(body, ProjectId);
-
-            var queryResponse = request.Execute();
-
-            queryResponse.Rows.Select(row => row.F.Select(cell =>
+            var body = new QueryRequest
             {
-                // TODO:Deserialize
-                return cell;
-            }));
+                Query = query,
+                DryRun = (isForceDry) ? true : DryRun,
+                ETag = ETag,
+                Kind = Kind,
+                MaxResults = MaxResults,
+                PreserveNulls = PreserveNulls,
+                TimeoutMs = TimeoutMs,
+                UseQueryCache = UseQueryCache
+            };
+            var request = BigQueryService.Jobs.Query(body, ProjectId);
+            request.PrettyPrint = false;
+            return request;
+        }
 
-            throw new NotImplementedException();
+        public QueryResponse<T> Run<T>(string query)
+        {
+            var queryResponse = BuildRequest(query, isForceDry: false).Execute();
+            var response = new QueryResponse<T>(query, queryResponse);
+            return response;
+        }
+
+        public QueryResponse<T> RunDry<T>(string query)
+        {
+            var queryResponse = BuildRequest(query, isForceDry: true).Execute();
+            var response = new QueryResponse<T>(query, queryResponse);
+            return response;
+        }
+
+        public async Task<QueryResponse<T>> RunAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var queryResponse = await BuildRequest(query, isForceDry: false).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            var response = new QueryResponse<T>(query, queryResponse);
+            return response;
+        }
+
+        public T[] Query<T>(string query)
+        {
+            return Run<T>(query).Rows;
+        }
+
+        public async Task<T[]> QueryAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var response = await RunAsync<T>(query, cancellationToken).ConfigureAwait(false);
+            return response.Rows;
         }
     }
 }

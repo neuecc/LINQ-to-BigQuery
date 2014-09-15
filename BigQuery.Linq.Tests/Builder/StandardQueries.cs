@@ -26,7 +26,7 @@ namespace BigQuery.Linq.Tests.Builder
     {
         public string title { get; set; }
 
-        public int wp_namespace { get; set; }
+        public long? wp_namespace { get; set; }
     }
 
     [TableName("[publicdata:samples.shakespeare]")]

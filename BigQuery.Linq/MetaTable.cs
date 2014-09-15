@@ -22,5 +22,19 @@ namespace BigQuery.Linq
         public long size_bytes { get; set; }
         /// <summary>whether it is a view (2) or regular table (1).</summary>
         public long type { get; set; }
+
+        public string ToFullTableName()
+        {
+            var tableInfo = string.Format("[{0}:{1}.{2}]", project_id, dataset_id, table_id);
+            return tableInfo;
+        }
+
+        public override string ToString()
+        {
+            var tableInfo = string.Format("[{0}:{1}.{2}]", project_id, dataset_id, table_id);
+            var sizeInfo = string.Format("Size:{0}, RowCount:{1}", size_bytes.ToHumanReadableSize(), row_count);
+            var time = string.Format("Created:{0}, LastModified:{1}", creation_time.FromTimestampMilliSeconds(), last_modified_time.FromTimestampMilliSeconds());
+            return tableInfo + sizeInfo + ", " + time;
+        }
     }
 }
