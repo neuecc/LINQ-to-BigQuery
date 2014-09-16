@@ -10,12 +10,9 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq
 {
-    internal class Deserializer<T>
+    internal static class _Deserializer
     {
-        readonly TableSchema schema;
-        readonly Dictionary<string, PropertyInfo> typeInfo;
-        readonly Dictionary<string, FieldInfo> fallbackFieldInfo;
-        static readonly HashSet<Type> ParsableType = new HashSet<Type>
+        public static readonly HashSet<Type> ParsableType = new HashSet<Type>
         {
             typeof(Int16),
             typeof(Int32),
@@ -45,7 +42,14 @@ namespace BigQuery.Linq
             typeof(Nullable<DateTimeOffset>),
             typeof(String),
         };
-        static readonly Regex ExtractAnonymousFieldNameRegex = new Regex("<(.+)>", RegexOptions.Compiled);
+        public static readonly Regex ExtractAnonymousFieldNameRegex = new Regex("<(.+)>", RegexOptions.Compiled);
+    }
+
+    internal class Deserializer<T>
+    {
+        readonly TableSchema schema;
+        readonly Dictionary<string, PropertyInfo> typeInfo;
+        readonly Dictionary<string, FieldInfo> fallbackFieldInfo;
 
         public Deserializer(TableSchema schema)
         {
@@ -54,7 +58,7 @@ namespace BigQuery.Linq
                 .ToDictionary(x => x.Name);
             this.fallbackFieldInfo = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.SetField | BindingFlags.Instance)
                 .Where(x => x.Name.StartsWith("<"))
-                .ToDictionary(x => ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value);
+                .ToDictionary(x => _Deserializer.ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value);
         }
 
         object Parse(string type, string value)
@@ -94,7 +98,7 @@ namespace BigQuery.Linq
 
                 var parsedValue = Parse(field.Type, (string)value);
 
-                if (row.F.Count == 1 && ParsableType.Contains(typeof(T)))
+                if (row.F.Count == 1 && _Deserializer.ParsableType.Contains(typeof(T)))
                 {
                     object v = (parsedValue == null) ? null
                         : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
