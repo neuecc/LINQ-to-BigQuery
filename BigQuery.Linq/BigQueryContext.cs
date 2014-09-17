@@ -42,6 +42,14 @@ namespace BigQuery.Linq
             this.ProjectId = projectId;
         }
 
+        public IExecutableBigQueryable<T> Select<T>(Expression<Func<T>> selector)
+        {
+            var unusedParameter = Expression.Parameter(typeof(T), "_");
+            var wrapped = Expression.Lambda<Func<T, T>>(selector.Body, unusedParameter);
+
+            return new SelectBigQueryable<T, T>(new RootBigQueryable<T>(this), wrapped);
+        }
+
         public IFromBigQueryable<T> From<T>()
         {
             var attr = typeof(T).GetCustomAttribute<TableNameAttribute>();
@@ -65,7 +73,12 @@ namespace BigQuery.Linq
             return new SubqueryBigQueryable<T>(nestedSource);
         }
 
-        public IFromBigQueryable<T> FromDateRange<T>(DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        // Table wildcard functions
+
+        /// <summary>
+        /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
             if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
@@ -73,38 +86,66 @@ namespace BigQuery.Linq
             return FromDateRange<T>(attr.TablePrefix, timestampFrom, timestampTo);
         }
 
-        public IFromBigQueryable<T> FromDateRange<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        /// <summary>
+        /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
-            throw new NotImplementedException();
+            return new FromDateRangeBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
         }
 
-        public IFromBigQueryable<T> FromDateRangeStrict<T>(DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        /// <summary>
+        /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(string prefix, T dynamicSchema, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        {
+            return new FromDateRangeBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
+        }
+
+        /// <summary>
+        /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
             if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
 
-            throw new NotImplementedException();
+            return FromDateRangeStrict<T>(attr.TablePrefix, timestampFrom, timestampTo);
         }
 
-        public IFromBigQueryable<T> FromDateRangeStrict<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        /// <summary>
+        /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
-            throw new NotImplementedException();
+            return new FromDateRangeStrictBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
         }
 
-        public IFromBigQueryable<T> FromTableQuery<T>(string dataset, Expression<Func<MetaTable, bool>> tableMatchCondition)
+        /// <summary>
+        /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(string prefix, T dynamicSchema, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
-            FromTableQuery<int>("aaa", x => x.table_id.Contains("hogehoge"));
-
-            throw new NotImplementedException();
+            return new FromDateRangeStrictBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
         }
 
-        public IExecutableBigQueryable<T> Select<T>(Expression<Func<T>> selector)
+        /// <summary>
+        /// Queries tables whose names match the supplied expr. The expr parameter must be represented as a string and must contain an expression to evaluate.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromTableQuery<T>(string dataset, Expression<Func<MetaTable, bool>> tableMatchCondition)
         {
-            var unusedParameter = Expression.Parameter(typeof(T), "_");
-            var wrapped = Expression.Lambda<Func<T, T>>(selector.Body, unusedParameter);
-
-            return new SelectBigQueryable<T, T>(new RootBigQueryable<T>(this), wrapped);
+            return new FromTableQueryBigQueryable<T>(dataset, tableMatchCondition, new RootBigQueryable<T>(this));
         }
+
+        /// <summary>
+        /// Queries tables whose names match the supplied expr. The expr parameter must be represented as a string and must contain an expression to evaluate.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromTableQuery<T>(string dataset, T dynamicSchema, Expression<Func<MetaTable, bool>> tableMatchCondition)
+        {
+            return new FromTableQueryBigQueryable<T>(dataset, tableMatchCondition, new RootBigQueryable<T>(this));
+        }
+
+        // Util Methods
 
         public MetaTable[] GetAllTableInfo(string dataset)
         {

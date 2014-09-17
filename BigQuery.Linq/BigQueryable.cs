@@ -134,9 +134,9 @@ namespace BigQuery.Linq
 
             var queryString = string.Join(Environment.NewLine, list.Select(x =>
             {
-                if (aliasName != null && x is IFromBigQueryable)
+                if (aliasName != null && x is IWithAlias)
                 {
-                    return ((IFromBigQueryable)x).BuildQueryStringWithAlias(depth, aliasName);
+                    return ((IWithAlias)x).BuildQueryStringWithAlias(depth, aliasName);
                 }
                 return x.BuildQueryString(depth);
             }));
@@ -200,6 +200,10 @@ namespace BigQuery.Linq
     }
 
     public interface ITableDecoratorBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
+    {
+    }
+
+    public interface IFromTableWildcardBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
     {
     }
 

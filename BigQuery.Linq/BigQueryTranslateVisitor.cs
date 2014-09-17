@@ -231,60 +231,11 @@ namespace BigQuery.Linq
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            string expr = "";
-            var typeCode = (node.Value == null)
-                ? TypeCode.Empty
-                : Type.GetTypeCode(node.Value.GetType());
-            switch (typeCode)
-            {
-                case TypeCode.Boolean:
-                    var b = (bool)node.Value;
-                    expr = (b == true) ? "true" : "false";
-                    break;
-                case TypeCode.Char:
-                case TypeCode.String:
-                    expr = "\'" + node.Value + "\'";
-                    break;
-                case TypeCode.DateTime:
-                    // TODO:if value is DateTime, need format!
-                    expr = node.Value.ToString();
-                    break;
-                case TypeCode.DBNull:
-                case TypeCode.Empty:
-                    sb.Append("NULL");
-                    break;
-                case TypeCode.Decimal:
-                case TypeCode.Single:
-                case TypeCode.Double:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.Byte:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    if (node.Value.GetType().IsEnum)
-                    {
-                        sb.Append("\'" + node.Value + "\'");
-                    }
-                    else
-                    {
-                        sb.Append(node.Value);
-                    }
-                    break;
-                case TypeCode.Object:
-                    // TODO:it's record?
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
-
+            var expr = DataTypeFormatter.Format(node.Value);
             sb.Append(expr);
+
             return node;
         }
-
-
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
