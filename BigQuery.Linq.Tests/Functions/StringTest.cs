@@ -18,5 +18,10 @@ namespace BigQuery.Linq.Tests.Functions
             Ctx.Select<bool>(() => "aaa".Contains("bbb")).ToFlatSql().Is("SELECT 'aaa' CONTAINS 'bbb'");
         }
 
+        [TestMethod]
+        public void Contains2()
+        {
+            Ctx.Select<bool>(() => BqFunc.Contains("aaa", "bbb")).ToFlatSql().Is("SELECT 'aaa' CONTAINS 'bbb'");
+        }
     }
 }
