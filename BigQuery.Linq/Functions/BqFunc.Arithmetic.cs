@@ -9,7 +9,8 @@ namespace BigQuery.Linq
     public static partial class BqFunc
     {
         /// <summary>Returns the number of bits that are set in numeric_expr.</summary>
-        public static int BitCount(int numericExpression)
+        [FunctionName("BIT_COUNT")]
+        public static int BitCount(long numericExpression)
         {
             throw Invalid();
         }

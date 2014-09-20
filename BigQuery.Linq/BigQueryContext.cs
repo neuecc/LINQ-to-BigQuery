@@ -42,7 +42,7 @@ namespace BigQuery.Linq
             this.ProjectId = projectId;
         }
 
-        public IExecutableBigQueryable<T> Select<T>(Expression<Func<T>> selector)
+        public ISelectAfterOrderByBigQueryable<T> Select<T>(Expression<Func<T>> selector)
         {
             var unusedParameter = Expression.Parameter(typeof(T), "_");
             var wrapped = Expression.Lambda<Func<T, T>>(selector.Body, unusedParameter);

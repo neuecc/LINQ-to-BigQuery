@@ -70,6 +70,7 @@ FROM
         public void FromSubQuery()
         {
             // TODO
+
             Assert.Fail();
         }
 
@@ -195,7 +196,16 @@ SELECT
   [age]
 FROM
   (TABLE_QUERY([mydata], ""([table_id] CONTAINS 'oo' AND (LENGTH([table_id]) >= 4))""))".TrimSmart());
-        }
 
+            // more example
+            ctx.FromTableQuery<MetaTable>("mydata", x => BqFunc.RegexpMatch(x.table_id, @"^boo[\d]{3,5}"))
+                .Select(x => new { x.table_id })
+                .ToString()
+                .Is(@"
+SELECT
+  [table_id]
+FROM
+  (TABLE_QUERY([mydata], ""REGEXP_MATCH([table_id], r'^boo[\d]{3,5}')""))".TrimSmart());
+        }
     }
 }

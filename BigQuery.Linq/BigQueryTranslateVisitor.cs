@@ -54,7 +54,7 @@ namespace BigQuery.Linq
         protected override Expression VisitNew(NewExpression node)
         {
             var indent = BuildIndent();
-            var innerTranslator = new BigQueryTranslateVisitor(0, 0);
+            var innerTranslator = new BigQueryTranslateVisitor(depth, indentSize);
 
             var merge = node.Members.Zip(node.Arguments, (x, y) =>
             {
@@ -303,20 +303,28 @@ namespace BigQuery.Linq
             var innerTranslator = new BigQueryTranslateVisitor();
 
             // case when ... then ... ... else .. end
-            // TODO:need more clean format
             if (node.IfFalse is ConditionalExpression)
             {
+                /*
+                 * CASE
+                   __WHEN cond THEN value
+                 * __WHEN cond THEN value
+                 * __ELSE value
+                 * END
+                 */
+                var whenIndent = new string(' ', indentSize * (depth + 1));
+
                 sb.Append("CASE");
+                sb.AppendLine();
 
-                sb.Append(Environment.NewLine);
-
+                // WHEN
                 Expression right = node;
                 while (right is ConditionalExpression)
                 {
                     var rightNode = right as ConditionalExpression;
 
-                    // left
-                    sb.Append(" WHEN ");
+                    sb.Append(whenIndent);
+                    sb.Append("WHEN ");
                     {
                         sb.Append(innerTranslator.VisitAndClearBuffer(rightNode.Test));
                     }
@@ -327,12 +335,17 @@ namespace BigQuery.Linq
                     }
 
                     right = rightNode.IfFalse;
+                    sb.AppendLine();
                 }
 
-                sb.Append(" ELSE ");
+                sb.Append(whenIndent);
+                sb.Append("ELSE ");
                 sb.Append(innerTranslator.VisitAndClearBuffer(right));
 
-                sb.Append(" END");
+                // END
+                sb.AppendLine();
+                sb.Append(BuildIndent());
+                sb.Append("END");
             }
             else
             {

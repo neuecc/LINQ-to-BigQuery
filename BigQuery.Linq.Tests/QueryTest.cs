@@ -45,7 +45,7 @@ namespace BigQuery.Linq.Tests
         }
 
         [TestMethod]
-        public void MyTestMethod()
+        public void ConnectTest()
         {
             var result = context.From<Wikipedia>()
                 .Select(x => new { x.title, x.wp_namespace })
@@ -54,7 +54,7 @@ namespace BigQuery.Linq.Tests
         }
 
         [TestMethod]
-        public void MyTestMethod2()
+        public void ConnectTest2()
         {
             var meta = context.GetAllTableInfo("publicdata:samples");
         }
