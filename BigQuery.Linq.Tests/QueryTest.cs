@@ -58,5 +58,11 @@ namespace BigQuery.Linq.Tests
         {
             var meta = context.GetAllTableInfo("publicdata:samples");
         }
+
+        [TestMethod]
+        public void NANMapping()
+        {
+            // SELECT ATANH(10)
+        }
     }
 }

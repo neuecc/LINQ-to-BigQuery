@@ -108,6 +108,7 @@
     <Compile Include="ChainingAssertion.MSTest.cs" />
     <Compile Include="Builder\StandardQueries.cs" />
     <Compile Include="Functions\ArithmeticTest.cs" />
+    <Compile Include="Functions\MathematicalTest.cs" />
     <Compile Include="Functions\RegularExpressionTest.cs" />
     <Compile Include="Functions\OtherTest.cs" />
     <Compile Include="Functions\StringTest.cs" />
