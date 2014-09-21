@@ -73,6 +73,18 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
+        [FunctionName("MAX")]
+        public static long Max(object field)
+        {
+            throw Invalid();
+        }
+
+        [FunctionName("MIN")]
+        public static long Min(object field)
+        {
+            throw Invalid();
+        }
+
         class CountAllFormatter : ISpeficiedFormatter
         {
             public string Format(MethodCallExpression node)

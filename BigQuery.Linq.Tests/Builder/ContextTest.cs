@@ -69,9 +69,24 @@ FROM
         [TestMethod]
         public void FromSubQuery()
         {
-            // TODO
+            var bqcx = new BigQueryContext();
 
-            Assert.Fail();
+            bqcx.From<MyClass>()
+                .Select(x => new { x.age, hoge = 10 })
+                .AsSubquery()
+                .Select(x => new { x.hoge })
+                .ToString()
+                .Is(@"
+SELECT
+  [hoge]
+FROM
+(
+  SELECT
+    [age],
+    10 AS [hoge]
+  FROM
+    [aaa:bbb.ccc]
+)".TrimSmart());
         }
 
         [TestMethod]

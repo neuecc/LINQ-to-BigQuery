@@ -194,7 +194,7 @@ namespace BigQuery.Linq
     {
     }
 
-    public interface ISubqueryBigQueryable<T> : ITableDecoratorBigQueryable<T>, IExecutableBigQueryable<T> // Join, Where, OrderBy, Select
+    public interface ISubqueryBigQueryable<T> : ITableDecoratorBigQueryable<T> // Join, Where, OrderBy, Select
     {
         IExecutableBigQueryable<T> Unwrap();
     }

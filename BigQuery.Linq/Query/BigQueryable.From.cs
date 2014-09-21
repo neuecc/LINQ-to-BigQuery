@@ -150,7 +150,7 @@ namespace BigQuery.Linq.Query
         }
 
         internal SubqueryBigQueryable(IExecutableBigQueryable<T> subselect)
-            : base(subselect)
+            : base(new RootBigQueryable<T>(subselect.QueryContext))
         {
             this.typedInner = subselect as ExecutableBigQueryableBase<T>;
         }
@@ -160,43 +160,17 @@ namespace BigQuery.Linq.Query
             return typedInner;
         }
 
-        public IEnumerable<T> AsEnumerable()
-        {
-            return typedInner.AsEnumerable();
-        }
-
         public T[] ToArray()
         {
             return typedInner.ToArray();
         }
-        public Task<T[]> ToArrayAsync(System.Threading.CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return typedInner.ToArrayAsync(cancellationToken);
-        }
-
-        public QueryResponse<T> Run()
-        {
-            return typedInner.Run();
-        }
-        public QueryResponse<T> RunDry()
-        {
-            return typedInner.RunDry();
-        }
-
-        public Task<QueryResponse<T>> RunAsync(System.Threading.CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return typedInner.RunAsync(cancellationToken);
-        }
-
-        public ISubqueryBigQueryable<T> AsSubquery()
-        {
-            return this;
-        }
 
         public override string BuildQueryString(int depth)
         {
-            return "(" + Environment.NewLine +
-                typedInner.ToQueryString(depth + 1) + Environment.NewLine + ")";
+            return Indent(depth) + "FROM" + Environment.NewLine
+                + Indent(depth) + "(" + Environment.NewLine
+                + typedInner.ToQueryString(depth + 1) + Environment.NewLine
+                + Indent(depth) + ")";
         }
     }
 }

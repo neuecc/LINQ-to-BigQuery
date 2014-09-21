@@ -26,7 +26,19 @@ namespace BigQuery.Linq.Query
 
         public override string BuildQueryString(int depth)
         {
-            var command = BigQueryTranslateVisitor.BuildQuery(depth + 1, QueryContext.IndentSize, keySelector);
+            var command = "";
+            if (keySelector == null)
+            {
+                command = Indent(depth + 1) + "*";
+            }
+            else
+            {
+                if (keySelector.Body.NodeType != ExpressionType.New)
+                {
+                    command = Indent(depth + 1);
+                }
+                command += BigQueryTranslateVisitor.BuildQuery(depth + 1, QueryContext.IndentSize, keySelector);
+            }
 
             var sb = new StringBuilder();
             sb.Append(Indent(depth));

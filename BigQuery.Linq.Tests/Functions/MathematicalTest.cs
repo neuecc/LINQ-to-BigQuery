@@ -10,6 +10,18 @@ namespace BigQuery.Linq.Tests.Functions
     [TestClass]
     public class MathematicalTest
     {
+        [TableName("weather_geo.table")]
+        class WeatherGeoTable
+        {
+            public double mean_temp { get; set; }
+            public double min_temperature { get; set; }
+            public double max_temperature { get; set; }
+            public double lat { get; set; }
+            public double @long { get; set; }
+            public long year { get; set; }
+            public long month { get; set; }
+        }
+
         public BigQueryContext Ctx { get { return new BigQueryContext(); } }
 
         [TestMethod]
@@ -35,7 +47,7 @@ namespace BigQuery.Linq.Tests.Functions
             Ctx.Select(() => BqFunc.Tan(2.3)).ToFlatSql().Is("SELECT TAN(2.3)");
             Ctx.Select(() => BqFunc.Tanh(2.3)).ToFlatSql().Is("SELECT TANH(2.3)");
 
-             Ctx.Select(() => BqFunc.Atan2(2.4, 1.2)).ToFlatSql().Is("SELECT ATAN2(2.4, 1.2)");
+            Ctx.Select(() => BqFunc.Atan2(2.4, 1.2)).ToFlatSql().Is("SELECT ATAN2(2.4, 1.2)");
         }
 
         [TestMethod]
@@ -85,6 +97,97 @@ namespace BigQuery.Linq.Tests.Functions
         public void Sqrt()
         {
             Ctx.Select(() => BqFunc.Sqrt(2.4)).ToFlatSql().Is("SELECT SQRT(2.4)");
+        }
+
+        [TestMethod]
+        public void AdvancedExample1_BoundingBoxQuery()
+        {
+            Ctx.From<WeatherGeoTable>()
+               .Where(x => x.lat / 1000 > 37.46
+                        && x.lat / 1000 < 37.65
+                        && x.@long / 1000 > -122.5
+                        && x.@long / 1000 < -122.3)
+               .Select(x => new
+               {
+                   x.year,
+                   x.month,
+                   avg_temp = BqFunc.Average(x.mean_temp),
+                   min_temp = BqFunc.Min(x.min_temperature),
+                   max_temp = BqFunc.Max(x.max_temperature)
+               })
+               .GroupBy(x => new { x.year, x.month })
+               .OrderBy(x => x.year)
+               .ThenBy(x => x.month)
+               .ToString()
+               .Is(@"
+SELECT
+  [year],
+  [month],
+  AVG([mean_temp]) AS [avg_temp],
+  MIN([min_temperature]) AS [min_temp],
+  MAX([max_temperature]) AS [max_temp]
+FROM
+  [weather_geo.table]
+WHERE
+  ((((([lat] / 1000) > 37.46) AND (([lat] / 1000) < 37.65)) AND (([long] / 1000) > -122.5)) AND (([long] / 1000) < -122.3))
+GROUP BY
+  [year],
+  [month]
+ORDER BY
+  [year], [month]
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void AdvancedExample2_ApproximateBoundingCircleQuery()
+        {
+            Ctx.From<WeatherGeoTable>()
+               .Where(x => x.month == 1)
+               .Select(x => new
+               {
+                   distance = (BqFunc.Acos(BqFunc.Sin(39.737567 * BqFunc.PI() / 180)
+                                        * BqFunc.Sin((x.lat / 1000) * BqFunc.PI() / 180)
+                                        + BqFunc.Cos(39.737567 * BqFunc.PI() / 180)
+                                        * BqFunc.Cos((x.lat / 1000) * BqFunc.PI() / 180)
+                                        * BqFunc.Cos((-104.9847179 - (x.@long / 1000)) * BqFunc.PI() / 180)) * 180 / BqFunc.PI())
+                                * 60 * 1.1515,
+                   temp = BqFunc.Average(x.mean_temp),
+                   lat = BqFunc.Average(x.lat / 1000),
+                   @long = BqFunc.Average(x.@long / 1000)
+               })
+               .GroupBy(x => x.distance)
+               .AsSubquery()
+               .Where(x => x.distance < 100)
+               .Select(x => new { x.distance, x.lat, x.@long, x.temp })
+               .OrderBy(x => x.distance)
+               .Limit(100)
+               .ToString()
+               .Is(@"
+SELECT
+  [distance],
+  [lat],
+  [long],
+  [temp]
+FROM
+(
+  SELECT
+    ((((ACOS(((SIN(((39.737567 * PI()) / 180)) * SIN(((([lat] / 1000) * PI()) / 180))) + ((COS(((39.737567 * PI()) / 180)) * COS(((([lat] / 1000) * PI()) / 180))) * COS((((-104.9847179 - ([long] / 1000)) * PI()) / 180))))) * 180) / PI()) * 60) * 1.1515) AS [distance],
+    AVG([mean_temp]) AS [temp],
+    AVG(([lat] / 1000)) AS [lat],
+    AVG(([long] / 1000)) AS [long]
+  FROM
+    [weather_geo.table]
+  WHERE
+    ([month] = 1)
+  GROUP BY
+    [distance]
+)
+WHERE
+  ([distance] < 100)
+ORDER BY
+  [distance]
+LIMIT 100
+".TrimSmart());
         }
     }
 }
