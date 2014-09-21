@@ -23,7 +23,15 @@ namespace BigQuery.Linq.Query
 
         public override string BuildQueryString(int depth)
         {
-            throw new NotImplementedException();
+            var command = BigQueryTranslateVisitor.BuildQuery(depth + 1, QueryContext.IndentSize, predicate);
+
+            var sb = new StringBuilder();
+            sb.Append(Indent(depth));
+            sb.AppendLine("HAVING");
+            sb.Append(Indent(depth + 1));
+            sb.Append(command);
+
+            return sb.ToString();
         }
     }
 
