@@ -16,6 +16,7 @@ namespace BigQuery.Linq.Query
     {
         public static DateTimeOffset Zero = DateTimeOffset.MinValue;
 
+        readonly IFromBigQueryable<T> typedParent;
         readonly DecorateType type;
         readonly TimeSpan? relativeTime1;
         readonly TimeSpan? relativeTime2;
@@ -27,9 +28,10 @@ namespace BigQuery.Linq.Query
         }
 
         internal TableDecoratorBigQueryable(IFromBigQueryable<T> parent, DecorateType type, DateTimeOffset? absoluteTime1 = null, DateTimeOffset? absoluteTime2 = null, TimeSpan? relativeTime1 = null, TimeSpan? relativeTime2 = null)
-            : base(parent)
+            : base(new RootBigQueryable<T>(parent.QueryContext))
         {
             this.type = type;
+            this.typedParent = parent;
             this.absoluteTime1 = absoluteTime1;
             this.absoluteTime2 = absoluteTime2;
             this.relativeTime1 = relativeTime1;
@@ -38,12 +40,10 @@ namespace BigQuery.Linq.Query
 
         public override string BuildQueryString(int depth)
         {
-            var parent = (FromBigQueryable<T>)Parent;
-
             var sb = new StringBuilder();
 
             sb.AppendLine("FROM");
-            sb.Append(Indent(depth));
+            sb.Append(Indent(depth + 1));
             sb.Append(GetTableName());
 
             return sb.ToString();
@@ -51,7 +51,7 @@ namespace BigQuery.Linq.Query
 
         public string GetTableName()
         {
-            var parent = (FromBigQueryable<T>)Parent;
+            var parent = (FromBigQueryable<T>)typedParent;
 
             var sb = new StringBuilder();
 
