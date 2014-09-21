@@ -13,33 +13,43 @@ namespace BigQuery.Linq.Query
         string BuildQueryStringWithAlias(int depth, string aliasName);
     }
 
-    internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>, IWithAlias
+    internal interface ITableName
     {
-        internal readonly string tableName; // for TableDecorator
+        string GetTableName();
+    }
+
+    internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>, IWithAlias, ITableName
+    {
+        internal readonly string[] tableNames; // for TableDecorator
         internal override int Order
         {
             get { return 1; }
         }
 
-        internal FromBigQueryable(string tableName, IBigQueryable parent)
+        internal FromBigQueryable(string[] tableNames, IBigQueryable parent)
             : base(parent)
         {
-            this.tableName = tableName.EscapeBq();
+            this.tableNames = tableNames.Select(x => x.EscapeBq()).ToArray();
         }
 
         public override string BuildQueryString(int depth)
         {
-            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + tableName;
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + string.Join(", ", tableNames);
         }
 
         public string BuildQueryStringWithAlias(int depth, string aliasName)
         {
-            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + tableName + " AS " + aliasName;
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + string.Join(", ", tableNames) + " AS " + aliasName.EscapeBq();
+        }
+
+        public string GetTableName()
+        {
+            return string.Join(", ", tableNames);
         }
     }
 
     // Currently, DateRange is not supported with Table Decorator. : http://stackoverflow.com/questions/22740774/use-of-table-date-range-function-with-table-decorators
-    internal class FromDateRangeBigQueryable<T> : BigQueryable, IFromTableWildcardBigQueryable<T>, IWithAlias
+    internal class FromDateRangeBigQueryable<T> : BigQueryable, IFromTableWildcardBigQueryable<T>, IWithAlias, ITableName
     {
         readonly string prefix;
         readonly DateTimeOffset timestampFrom;
@@ -64,16 +74,21 @@ namespace BigQuery.Linq.Query
 
         public string BuildQueryStringWithAlias(int depth, string aliasName)
         {
-            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + RangeFormat() + " AS " + aliasName;
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + RangeFormat() + " AS " + aliasName.EscapeBq();
         }
 
         string RangeFormat()
         {
             return string.Format("(TABLE_DATE_RANGE({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}')))", prefix, timestampFrom.ToString("yyyy-MM-dd"), timestampTo.ToString("yyyy-MM-dd"));
         }
+
+        public string GetTableName()
+        {
+            return RangeFormat();
+        }
     }
 
-    internal class FromDateRangeStrictBigQueryable<T> : BigQueryable, IFromTableWildcardBigQueryable<T>, IWithAlias
+    internal class FromDateRangeStrictBigQueryable<T> : BigQueryable, IFromTableWildcardBigQueryable<T>, IWithAlias, ITableName
     {
         readonly string prefix;
         readonly DateTimeOffset timestampFrom;
@@ -98,16 +113,21 @@ namespace BigQuery.Linq.Query
 
         public string BuildQueryStringWithAlias(int depth, string aliasName)
         {
-            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + RangeFormat() + " AS " + aliasName;
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + RangeFormat() + " AS " + aliasName.EscapeBq();
         }
 
         string RangeFormat()
         {
             return string.Format("(TABLE_DATE_RANGE_STRICT({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}')))", prefix, timestampFrom.ToString("yyyy-MM-dd"), timestampTo.ToString("yyyy-MM-dd"));
         }
+
+        public string GetTableName()
+        {
+            return RangeFormat();
+        }
     }
 
-    internal class FromTableQueryBigQueryable<T> : BigQueryable, IFromTableWildcardBigQueryable<T>, IWithAlias
+    internal class FromTableQueryBigQueryable<T> : BigQueryable, IFromTableWildcardBigQueryable<T>, IWithAlias, ITableName
     {
         readonly string dataset;
         readonly Expression<Func<MetaTable, bool>> tableMatchCondition;
@@ -130,7 +150,7 @@ namespace BigQuery.Linq.Query
 
         public string BuildQueryStringWithAlias(int depth, string aliasName)
         {
-            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + QueryFormat() + " AS " + aliasName;
+            return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + QueryFormat() + " AS " + aliasName.EscapeBq();
         }
 
         string QueryFormat()
@@ -138,9 +158,14 @@ namespace BigQuery.Linq.Query
             var expr = BigQueryTranslateVisitor.BuildQuery(0, 0, tableMatchCondition);
             return string.Format("(TABLE_QUERY({0}, \"{1}\"))", dataset, expr);
         }
+
+        public string GetTableName()
+        {
+            return QueryFormat();
+        }
     }
 
-    internal class SubqueryBigQueryable<T> : BigQueryable, ISubqueryBigQueryable<T>
+    internal class SubqueryBigQueryable<T> : BigQueryable, ISubqueryBigQueryable<T>, IWithAlias
     {
         readonly ExecutableBigQueryableBase<T> typedInner;
 
@@ -171,6 +196,18 @@ namespace BigQuery.Linq.Query
                 + Indent(depth) + "(" + Environment.NewLine
                 + typedInner.ToQueryString(depth + 1) + Environment.NewLine
                 + Indent(depth) + ")";
+        }
+
+        public string BuildQueryStringWithoutFrom(int depth)
+        {
+            return Indent(depth) + "(" + Environment.NewLine
+                + typedInner.ToQueryString(depth + 1) + Environment.NewLine
+                + Indent(depth) + ")";
+        }
+
+        public string BuildQueryStringWithAlias(int depth, string aliasName)
+        {
+            return BuildQueryString(depth) + " AS" + aliasName.EscapeBq();
         }
     }
 }

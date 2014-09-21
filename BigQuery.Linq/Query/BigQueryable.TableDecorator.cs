@@ -12,7 +12,7 @@ namespace BigQuery.Linq.Query
         Range
     }
 
-    internal class TableDecoratorBigQueryable<T> : BigQueryable, ITableDecoratorBigQueryable<T>
+    internal class TableDecoratorBigQueryable<T> : BigQueryable, ITableDecoratorBigQueryable<T>, ITableName
     {
         public static DateTimeOffset Zero = DateTimeOffset.MinValue;
 
@@ -42,47 +42,72 @@ namespace BigQuery.Linq.Query
 
             var sb = new StringBuilder();
 
-            var tableName = parent.tableName.Trim('[', ']');
+            sb.AppendLine("FROM");
+            sb.Append(Indent(depth));
+            sb.Append(GetTableName());
 
-            sb.AppendLine("FROM").Append("  [").Append(tableName).Append("@");
+            return sb.ToString();
+        }
 
-            if (type == DecorateType.Snapshot)
+        public string GetTableName()
+        {
+            var parent = (FromBigQueryable<T>)Parent;
+
+            var sb = new StringBuilder();
+
+            var isFirst = true;
+            foreach (var item in parent.tableNames)
             {
-                if (relativeTime1 != null)
+                if (isFirst)
                 {
-                    sb.Append("-").Append(Math.Floor(relativeTime1.Value.TotalMilliseconds));
-                }
-                else if (absoluteTime1 == Zero)
-                {
-                    sb.Append("0");
+                    isFirst = false;
                 }
                 else
                 {
-                    sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
+                    sb.Append(", ");
                 }
-            }
-            else
-            {
-                if (relativeTime1 != null)
-                {
-                    sb.Append("-").Append(Math.Floor(relativeTime1.Value.TotalMilliseconds));
-                }
-                else if (absoluteTime1.HasValue)
-                {
-                    sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
-                }
-                sb.Append("-");
-                if (relativeTime2 != null)
-                {
-                    sb.Append("-").Append(Math.Floor(relativeTime2.Value.TotalMilliseconds));
-                }
-                else if (absoluteTime2.HasValue)
-                {
-                    sb.Append(absoluteTime2.Value.ToBigQueryTimestamp());
-                }
-            }
 
-            sb.Append("]");
+                var tablename = item.Trim('[', ']');
+                sb.Append("[").Append(tablename).Append("@");
+
+                if (type == DecorateType.Snapshot)
+                {
+                    if (relativeTime1 != null)
+                    {
+                        sb.Append("-").Append(Math.Floor(relativeTime1.Value.TotalMilliseconds));
+                    }
+                    else if (absoluteTime1 == Zero)
+                    {
+                        sb.Append("0");
+                    }
+                    else
+                    {
+                        sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
+                    }
+                }
+                else
+                {
+                    if (relativeTime1 != null)
+                    {
+                        sb.Append("-").Append(Math.Floor(relativeTime1.Value.TotalMilliseconds));
+                    }
+                    else if (absoluteTime1.HasValue)
+                    {
+                        sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
+                    }
+                    sb.Append("-");
+                    if (relativeTime2 != null)
+                    {
+                        sb.Append("-").Append(Math.Floor(relativeTime2.Value.TotalMilliseconds));
+                    }
+                    else if (absoluteTime2.HasValue)
+                    {
+                        sb.Append(absoluteTime2.Value.ToBigQueryTimestamp());
+                    }
+                }
+
+                sb.Append("]");
+            }
 
             return sb.ToString();
         }

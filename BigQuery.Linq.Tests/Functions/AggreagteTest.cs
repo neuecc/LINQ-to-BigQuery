@@ -191,6 +191,7 @@ FROM
 ".TrimSmart());
         }
 
+        [Ignore]
         [TestMethod]
         public void Nth()
         {

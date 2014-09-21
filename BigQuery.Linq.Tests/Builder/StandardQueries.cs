@@ -124,15 +124,16 @@ SELECT
   [kp.title] AS [title],
   [tp.wp_namespace] AS [wp_namespace]
 FROM
-  [publicdata:samples.wikipedia] AS kp
-INNER JOIN (
+  [publicdata:samples.wikipedia] AS [kp]
+INNER JOIN
+(
   SELECT
     [title],
     [wp_namespace]
   FROM
     [publicdata:samples.wikipedia]
   LIMIT 1000
-) AS tp ON ([tp.title] = [kp.title])
+) AS [tp] ON ([tp.title] = [kp.title])
 ORDER BY
   [title], [wp_namespace] DESC
 LIMIT 100

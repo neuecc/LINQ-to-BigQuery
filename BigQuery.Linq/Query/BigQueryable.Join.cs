@@ -39,7 +39,7 @@ namespace BigQuery.Linq.Query
     {
         readonly InternalJoinType joinType;
         readonly string joinTableName;
-        readonly ISubqueryBigQueryable<TInner> joinTable;
+        readonly SubqueryBigQueryable<TInner> joinTable;
         readonly Expression<Func<TOuter, TInner, TResult>> aliasSelector;
         readonly Expression<Func<TResult, bool>> joinCondition;
 
@@ -65,14 +65,14 @@ namespace BigQuery.Linq.Query
         {
             this.joinType = joinType;
             this.joinTableName = joinTableName;
-            var sub = joinTable as ISubqueryBigQueryable<TInner>;
+            var sub = joinTable as SubqueryBigQueryable<TInner>;
             if (sub != null)
             {
                 this.joinTable = sub;
             }
             else if (joinTable != null)
             {
-                this.joinTable = joinTable.AsSubquery();
+                this.joinTable = joinTable.AsSubquery() as SubqueryBigQueryable<TInner>;
             }
             this.aliasSelector = aliasSelector;
             this.joinCondition = joinCondition;
@@ -102,16 +102,17 @@ namespace BigQuery.Linq.Query
                     throw new InvalidOperationException();
             }
 
-            sb.Append(" ");
-
             // table select
             if (joinTableName != null)
             {
+                sb.AppendLine();
+                sb.Append(Indent(depth + 1));
                 sb.Append(joinTableName);
             }
             else if (joinTable != null)
             {
-                sb.Append((joinTable as BigQueryable).BuildQueryString(depth));
+                sb.AppendLine();
+                sb.Append(joinTable.BuildQueryStringWithoutFrom(depth));
             }
             else
             {
@@ -121,7 +122,7 @@ namespace BigQuery.Linq.Query
             // alias select
             var aliasExpr = aliasSelector.Body as NewExpression;
             var aliasName = aliasExpr.Members.Last().Name;
-            sb.Append(" AS " + aliasName);
+            sb.Append(" AS " + aliasName.EscapeBq());
 
             // join condition
             if (joinType != InternalJoinType.Cross)

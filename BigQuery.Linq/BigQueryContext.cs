@@ -55,17 +55,22 @@ namespace BigQuery.Linq
             var attr = typeof(T).GetCustomAttribute<TableNameAttribute>();
             if (attr == null) throw new ArgumentException("T should use TableNameAttribute");
 
-            return new FromBigQueryable<T>(attr.TableName, new RootBigQueryable<T>(this));
+            return new FromBigQueryable<T>(new[] { attr.TableName }, new RootBigQueryable<T>(this));
         }
 
-        public IFromBigQueryable<T> From<T>(string tableName)
+        public IFromBigQueryable<T> From<T>(params string[] tableNames)
         {
-            return new FromBigQueryable<T>(tableName, new RootBigQueryable<T>(this));
+            return new FromBigQueryable<T>(tableNames, new RootBigQueryable<T>(this));
         }
 
         public IFromBigQueryable<T> From<T>(string tableName, T dynamicSchema)
         {
-            return new FromBigQueryable<T>(tableName, new RootBigQueryable<T>(this));
+            return new FromBigQueryable<T>(new[] { tableName }, new RootBigQueryable<T>(this));
+        }
+
+        public IFromBigQueryable<T> From<T>(string[] tableNames, T dynamicSchema)
+        {
+            return new FromBigQueryable<T>(tableNames, new RootBigQueryable<T>(this));
         }
 
         public ISubqueryBigQueryable<T> From<T>(IExecutableBigQueryable<T> nestedSource)

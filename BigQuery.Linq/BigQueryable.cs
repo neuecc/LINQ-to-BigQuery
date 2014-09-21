@@ -129,8 +129,22 @@ namespace BigQuery.Linq
             {
                 aliasName = join.GetAliasNames().First(); // from is first!
             }
+            var joinLookup = list.ToLookup(x => x is IJoinBigQueryable)[true].Reverse();
 
-            list = list.Where(x => x.Order != -1).OrderBy(x => x.Order).ToList();
+            list = list.Where(x => x.Order != -1)
+                .OrderBy(x => x.Order)
+                .SelectMany(x =>
+                {
+                    if (x is IJoinBigQueryable)
+                    {
+                        var jl = joinLookup;
+                        joinLookup = null;
+                        if (jl != null) return jl;
+                        else return Enumerable.Empty<BigQueryable>();
+                    }
+                    else return Enumerable.Repeat(x, 1);
+                })
+                .ToList();
 
             var queryString = string.Join(Environment.NewLine, list.Select(x =>
             {
@@ -328,6 +342,17 @@ namespace BigQuery.Linq
 
             return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, null, joinTable, aliasSelector, joinCondition);
         }
+        public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
+            ITableDecoratorBigQueryable<TInner> joinTable,
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector,
+            Expression<Func<TResult, bool>> joinCondition)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            var tb = joinTable as ITableName;
+            if (tb == null) throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, tb.GetTableName(), null, aliasSelector, joinCondition);
+        }
 
         public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
             JoinType joinType,
@@ -340,6 +365,19 @@ namespace BigQuery.Linq
             return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, null, joinTable, aliasSelector, joinCondition);
         }
 
+        public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
+            JoinType joinType,
+            ITableDecoratorBigQueryable<TInner> joinTable,
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector,
+            Expression<Func<TResult, bool>> joinCondition)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            var tb = joinTable as ITableName;
+            if (tb == null) throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, tb.GetTableName(), null, aliasSelector, joinCondition);
+        }
+
         public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
             JoinType joinType,
             IExecutableBigQueryable<TInner> joinTable,
@@ -348,6 +386,18 @@ namespace BigQuery.Linq
             if (source == null) throw new ArgumentNullException("source");
 
             return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, joinTable, aliasSelector, null);
+        }
+
+        public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
+            JoinType joinType,
+            ITableDecoratorBigQueryable<TInner> joinTable,
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            var tb = joinTable as ITableName;
+            if (tb == null) throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, tb.GetTableName(), null, aliasSelector, null);
         }
 
         /// <summary>
