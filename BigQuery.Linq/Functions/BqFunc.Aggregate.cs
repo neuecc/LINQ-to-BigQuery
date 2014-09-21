@@ -85,6 +85,21 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
+        // TODO
+        [FunctionName("SUM")]
+        public static long Sum(object field)
+        {
+            throw Invalid();
+        }
+
+
+        // TODO:needs more overload
+        [FunctionName("TOP")]
+        public static long Top(object field, long maxRecords)
+        {
+            throw Invalid();
+        }
+
         class CountAllFormatter : ISpeficiedFormatter
         {
             public string Format(MethodCallExpression node)
