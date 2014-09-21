@@ -26,24 +26,51 @@ namespace BigQuery.Linq
         [FunctionName("IN", SpecifiedFormatterType = typeof(InFormatter))]
         public static bool In(object expr, params object[] exprs) { throw Invalid(); }
 
-        // TODO:GREATEST
+        /// <summary>
+        /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
+        /// </summary>
+        [FunctionName("GREATEST", SpecifiedFormatterType = typeof(GreatestFormatter))]
+        public static long Greatest(params long[] exprs)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
+        /// </summary>
+        [FunctionName("GREATEST", SpecifiedFormatterType = typeof(GreatestFormatter))]
+        public static double Greatest(params double[] exprs)
+        {
+            throw Invalid();
+        }
 
         /// <summary>Returns true if numeric_expr is positive or negative infinity.</summary>
         [FunctionName("IS_INF")]
-        public static bool IsInfinity(long numericExpr) { throw Invalid(); }
-        /// <summary>Returns true if numeric_expr is positive or negative infinity.</summary>
-        [FunctionName("IS_INF")]
         public static bool IsInfinity(double numericExpr) { throw Invalid(); }
-        [FunctionName("IS_NAN")]
-        /// <summary>Returns true if numeric_expr is the special NaN numeric value.</summary>
-        public static bool IsNAN(long numericExpr) { throw Invalid(); }
+
         /// <summary>Returns true if numeric_expr is the special NaN numeric value.</summary>
         [FunctionName("IS_NAN")]
         public static bool IsNAN(double numericExpr) { throw Invalid(); }
 
         // IS_EXPLICITLY_DEFINED is Deprecated, expr IS NOT NULL instead.
 
-        // TODO:LEAST
+        /// <summary>
+        /// Returns the smallest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
+        /// </summary>
+        [FunctionName("LEAST", SpecifiedFormatterType = typeof(LeastFormatter))]
+        public static long Least(params long[] exprs)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// Returns the smallest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
+        /// </summary>
+        [FunctionName("LEAST", SpecifiedFormatterType = typeof(LeastFormatter))]
+        public static double Least(params double[] exprs)
+        {
+            throw Invalid();
+        }
 
         class BetweenFormatter : ISpeficiedFormatter
         {
@@ -68,6 +95,30 @@ namespace BigQuery.Linq
                 var expr2 = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
                 return string.Format("{0} IN({1})", expr1, expr2);
+            }
+        }
+
+        class GreatestFormatter : ISpeficiedFormatter
+        {
+            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var arg = node.Arguments[0] as NewArrayExpression;
+                var expr = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
+
+                return string.Format("GREATEST({0})", expr);
+            }
+        }
+
+        class LeastFormatter : ISpeficiedFormatter
+        {
+            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var arg = node.Arguments[0] as NewArrayExpression;
+                var expr = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
+
+                return string.Format("LEAST({0})", expr);
             }
         }
     }
