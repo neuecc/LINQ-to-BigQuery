@@ -29,8 +29,27 @@ namespace BigQuery.Linq.Tests.Functions
             context.Select<string>(() => x ?? "hugahuga").ToFlatSql()
                 .Is("SELECT IFNULL([x], 'hugahuga')");
 
-            context.Select<string>(() => BqFunc.String(100) ?? "hugahuga").ToFlatSql()
-                .Is("SELECT IFNULL(STRING(100), 'hugahuga')");
+            context.Select(() => BqFunc.Integer("a") ?? -1L).ToFlatSql()
+                .Is("SELECT IFNULL(INTEGER('a'), -1)");
+        }
+
+        [TestMethod]
+        public void In()
+        {
+            var context = new BigQueryContext();
+            context.Select(() => new { value = 100 })
+                .AsSubquery()
+                .Select(x => (BqFunc.In(x.value, 10, 20, 50, 1000)) ? 10000 : -10)
+                .ToString()
+                .Is(@"
+SELECT
+  IF([value] IN(10, 20, 50, 1000), 10000, -10)
+FROM
+(
+  SELECT
+    100 AS [value]
+)
+".TrimSmart());
         }
     }
 }
