@@ -25,7 +25,7 @@ namespace BigQuery.Linq
         /// Returns the portion of str that matches the capturing group within the regular expression.
         /// </summary>
         [FunctionName("REGEXP_EXTRACT", SpecifiedFormatterType = typeof(RegexpExtractFormatter))]
-        public static bool RegexpExtract(string str, string regexp)
+        public static string RegexpExtract(string str, string regexp)
         {
             throw Invalid();
         }
@@ -35,7 +35,7 @@ namespace BigQuery.Linq
         /// <para>For example, REGEXP_REPLACE ('Hello', 'lo', 'p') returns Help.</para>
         /// </summary>
         [FunctionName("REGEXP_REPLACE", SpecifiedFormatterType = typeof(RegexpReplaceFormatter))]
-        public static bool RegexpReplace(string originalStr, string regexp, string replaceStr)
+        public static string RegexpReplace(string originalStr, string regexp, string replaceStr)
         {
             throw Invalid();
         }
