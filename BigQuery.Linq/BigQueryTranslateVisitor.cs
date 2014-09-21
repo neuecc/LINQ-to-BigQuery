@@ -51,8 +51,41 @@ namespace BigQuery.Linq
             return result;
         }
 
+        static readonly PropertyInfo now = typeof(DateTime).GetProperty("Now");
+        static readonly PropertyInfo utcNow = typeof(DateTime).GetProperty("UtcNow");
+        static readonly PropertyInfo nowOffset = typeof(DateTimeOffset).GetProperty("Now");
+        static readonly PropertyInfo utcNowOffset = typeof(DateTimeOffset).GetProperty("UtcNow");
+        bool FormatIfExprIsDateTime(Expression expr)
+        {
+            if (expr is NewExpression)
+            {
+                var node = expr as NewExpression;
+                if (node.Constructor.DeclaringType == typeof(DateTime) || node.Constructor.DeclaringType == typeof(DateTimeOffset))
+                {
+                    var parameters = node.Arguments.Select(x => (x as ConstantExpression).Value).ToArray();
+                    var datetime = node.Constructor.Invoke(parameters);
+                    var v = DataTypeFormatter.Format(datetime);
+                    sb.Append(v);
+                    return true;
+                }
+            }
+            if (expr is MemberExpression)
+            {
+                var node = expr as MemberExpression;
+                if (node.Member == now) { sb.Append(DataTypeFormatter.Format(DateTime.Now)); return true; }
+                if (node.Member == utcNow) { sb.Append(DataTypeFormatter.Format(DateTime.UtcNow)); return true; }
+                if (node.Member == nowOffset) { sb.Append(DataTypeFormatter.Format(DateTimeOffset.Now)); return true; }
+                if (node.Member == utcNowOffset) { sb.Append(DataTypeFormatter.Format(DateTimeOffset.UtcNow)); return true; }
+            }
+
+            return false;
+        }
+
         protected override Expression VisitNew(NewExpression node)
         {
+            // specialize for DateTime
+            if (FormatIfExprIsDateTime(node)) return node;
+
             var indent = BuildIndent();
             var innerTranslator = new BigQueryTranslateVisitor(depth, indentSize);
 
@@ -180,8 +213,7 @@ namespace BigQuery.Linq
         {
             if (node.NodeType == ExpressionType.Convert)
             {
-                // cast do nothing, use BqFunc.Boolean,Float, etc...
-
+                // cast do nothing, If need BigQuery specified cast then use BqFunc.Boolean,Float, etc...
                 return base.VisitUnary(node);
             }
             else if (node.NodeType == ExpressionType.Not)
@@ -207,6 +239,9 @@ namespace BigQuery.Linq
         // append field access
         protected override Expression VisitMember(MemberExpression node)
         {
+            // specialize for DateTime
+            if (FormatIfExprIsDateTime(node)) return node;
+
             var nodes = new List<MemberExpression>();
             var next = node;
             while (next != null)
@@ -219,6 +254,10 @@ namespace BigQuery.Linq
             for (int i = nodes.Count - 1; i >= 0; i--)
             {
                 sb.Append(nodes[i].Member.Name);
+
+                // If Nullable don't emit .Value
+                if (nodes[i].Type.IsNullable()) break;
+
                 if (nodes.Count != 1 && i != 0)
                 {
                     sb.Append(".");

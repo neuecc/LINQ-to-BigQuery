@@ -35,7 +35,7 @@ namespace BigQuery.Linq
                 case TypeCode.String:
                     return "\'" + value + "\'";
                 case TypeCode.DateTime:
-                    return "\'" + string.Format("{0:yyyy-MM-dd hh:mm:ss.ffffff}", value) + "\'";
+                    return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", value) + "\'";
                 case TypeCode.DBNull:
                 case TypeCode.Empty:
                     return "NULL";
@@ -61,7 +61,7 @@ namespace BigQuery.Linq
                 case TypeCode.Object:
                     if (value.GetType() == typeof(DateTimeOffset))
                     {
-                        return "\'" + string.Format("{0:yyyy-MM-dd hh:mm:ss.ffffff}", value) + "\'";
+                        return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", value) + "\'";
                     }
                     throw new NotImplementedException("Currently not supported object(as record?)");
                 default:

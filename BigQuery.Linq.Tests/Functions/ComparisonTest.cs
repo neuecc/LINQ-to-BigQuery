@@ -29,8 +29,8 @@ namespace BigQuery.Linq.Tests.Functions
             context.Select<string>(() => x ?? "hugahuga").ToFlatSql()
                 .Is("SELECT IFNULL([x], 'hugahuga')");
 
-            context.Select<string>(() => BqFunc.String(null) ?? "hugahuga").ToFlatSql()
-                .Is("SELECT IFNULL(STRING(NULL), 'hugahuga')");
+            context.Select<string>(() => BqFunc.String(100) ?? "hugahuga").ToFlatSql()
+                .Is("SELECT IFNULL(STRING(100), 'hugahuga')");
         }
     }
 }
