@@ -106,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigQueryable.cs" />
+    <Compile Include="MetaTableSchema.cs" />
     <Compile Include="Utils\Deserializer.cs" />
     <Compile Include="Functions\BqFunc.Window.cs" />
     <Compile Include="Functions\BqFunc.Url.cs" />

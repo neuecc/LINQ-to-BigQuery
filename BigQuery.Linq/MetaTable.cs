@@ -1,4 +1,8 @@
 ﻿
+using Google.Apis.Bigquery.v2;
+using Google.Apis.Bigquery.v2.Data;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 namespace BigQuery.Linq
 {
     /// <summary>
@@ -22,6 +26,30 @@ namespace BigQuery.Linq
         public long size_bytes { get; set; }
         /// <summary>whether it is a view (2) or regular table (1).</summary>
         public long type { get; set; }
+
+        public MetaTable()
+        {
+
+        }
+
+        public MetaTable(string project_id, string dataset_id, string table_id)
+        {
+            this.project_id = project_id;
+            this.dataset_id = dataset_id;
+            this.table_id = table_id;
+        }
+
+        public MetaTableSchema GetTableSchema(BigqueryService service)
+        {
+            var response = service.Tables.Get(project_id, dataset_id, table_id).Execute();
+            return new MetaTableSchema(this, response.Schema.Fields);
+        }
+
+        public async Task<MetaTableSchema> GetTableSchemaAsync(BigqueryService service)
+        {
+            var response = await service.Tables.Get(project_id, dataset_id, table_id).ExecuteAsync().ConfigureAwait(false);
+            return new MetaTableSchema(this, response.Schema.Fields);
+        }
 
         public string ToFullTableName()
         {
