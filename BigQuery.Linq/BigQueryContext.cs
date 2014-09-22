@@ -37,6 +37,7 @@ namespace BigQuery.Linq
         }
 
         public BigQueryContext(BigqueryService service, string projectId)
+            : this()
         {
             this.BigQueryService = service;
             this.ProjectId = projectId;
@@ -180,22 +181,28 @@ namespace BigQuery.Linq
 
         public QueryResponse<T> Run<T>(string query)
         {
+            var sw = Stopwatch.StartNew();
             var queryResponse = BuildRequest(query, isForceDry: false).Execute();
-            var response = new QueryResponse<T>(query, queryResponse);
+            sw.Stop();
+            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
             return response;
         }
 
         public QueryResponse<T> RunDry<T>(string query)
         {
+            var sw = Stopwatch.StartNew();
             var queryResponse = BuildRequest(query, isForceDry: true).Execute();
-            var response = new QueryResponse<T>(query, queryResponse);
+            sw.Stop();
+            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
             return response;
         }
 
         public async Task<QueryResponse<T>> RunAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
         {
+            var sw = Stopwatch.StartNew();
             var queryResponse = await BuildRequest(query, isForceDry: false).ExecuteAsync(cancellationToken).ConfigureAwait(false);
-            var response = new QueryResponse<T>(query, queryResponse);
+            sw.Stop();
+            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
             return response;
         }
 

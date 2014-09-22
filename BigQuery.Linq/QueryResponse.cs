@@ -18,9 +18,10 @@ namespace BigQuery.Linq
         public long? TotalBytesProcessed { get; private set; }
         public string TotalBytesProcessedFormatted { get; private set; }
         public ulong? TotalRows { get; private set; }
+        public TimeSpan ExecutionTime { get; private set; }
         public IList<TableFieldSchema> TableFieldSchemas { get; private set; }
 
-        internal QueryResponse(string query, QueryResponse queryResponse)
+        internal QueryResponse(string query, TimeSpan executionTime, QueryResponse queryResponse)
         {
             var deserializer = new Deserializer<T>(queryResponse.Schema);
             var rows = (queryResponse.Rows == null)
@@ -38,6 +39,7 @@ namespace BigQuery.Linq
             this.Rows = rows;
             this.TotalBytesProcessed = queryResponse.TotalBytesProcessed;
             this.TotalRows = queryResponse.TotalRows;
+            this.ExecutionTime = executionTime;
             this.TableFieldSchemas = schemas;
 
             this.TotalBytesProcessedFormatted = queryResponse.TotalBytesProcessed.ToHumanReadableSize();
