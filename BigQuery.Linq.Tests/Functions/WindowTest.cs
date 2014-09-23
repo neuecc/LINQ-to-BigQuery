@@ -32,6 +32,7 @@ namespace BigQuery.Linq.Tests.Functions
                     cume_dist = BqFunc.CumulativeDistribution(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -63,6 +64,7 @@ LIMIT 5
                     dense_rank = BqFunc.DenseRank(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -94,6 +96,7 @@ LIMIT 5
                     lag = BqFunc.Lag(x, y => y.word, 1)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -119,6 +122,7 @@ LIMIT 5
                     lag = BqFunc.Lag(x, y => y.word, 1, "defv")
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -150,6 +154,7 @@ LIMIT 5
                     lead = BqFunc.Lead(x, y => y.word, 1)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -175,6 +180,7 @@ LIMIT 5
                     lead = BqFunc.Lead(x, y => y.word, 1, "defv")
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -206,6 +212,7 @@ LIMIT 5
                     nth = BqFunc.NthValue(x, y => y.word, 1)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -237,6 +244,7 @@ LIMIT 5
                     ntile = BqFunc.Ntile(x, 2)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -268,6 +276,7 @@ LIMIT 5
                     prank = BqFunc.PercentRank(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -299,6 +308,7 @@ LIMIT 5
                     p_cont = BqFunc.PercentileCont(x, 0.5)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -324,6 +334,7 @@ LIMIT 5
                     p_disc = BqFunc.PercentileDisc(x, 0.5)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -355,6 +366,7 @@ LIMIT 5
                     rank = BqFunc.Rank(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -386,6 +398,7 @@ LIMIT 5
                     r_to_r = BqFunc.RatioToReport(x, y => y.word_count)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -404,6 +417,12 @@ LIMIT 5
         }
 
         [TestMethod]
+        public void RatioToReport2()
+        {
+
+        }
+
+        [TestMethod]
         public void Rownumber()
         {
             var context = new BigQuery.Linq.BigQueryContext();
@@ -417,6 +436,7 @@ LIMIT 5
                     row_num = BqFunc.RowNumber(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();

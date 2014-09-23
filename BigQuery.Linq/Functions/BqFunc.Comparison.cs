@@ -13,6 +13,30 @@ namespace BigQuery.Linq
         // =, !=, >, <, >=, <=, IS NULL, IFNULL is in BigQueryTranslateVisitor.VisitBinary
 
         /// <summary>
+        /// &gt;. Returns true if expr1 is greater than expr2.
+        /// </summary>
+        [FunctionName(">", SpecifiedFormatterType = typeof(GreaterThanFormatter))]
+        public static bool GreaterThan(string expr1, string epr2) { throw Invalid(); }
+
+        /// <summary>
+        /// &gt;=. Returns true if expr1 is greater than or equal to expr2.
+        /// </summary>
+        [FunctionName(">=", SpecifiedFormatterType = typeof(GreaterThanEqualFormatter))]
+        public static bool GreaterThanEqual(string expr1, string epr2) { throw Invalid(); }
+
+        /// <summary>
+        /// &lt;. Returns true if expr1 is less than expr2.
+        /// </summary>
+        [FunctionName("<", SpecifiedFormatterType = typeof(LessThanFormatter))]
+        public static bool LessThan(string expr1, string epr2) { throw Invalid(); }
+
+        /// <summary>
+        /// &lt;=. Returns true if expr1 is less than or equal to expr2.
+        /// </summary>
+        [FunctionName("<=", SpecifiedFormatterType = typeof(LessThanEqualFormatter))]
+        public static bool LessThanEqual(string expr1, string epr2) { throw Invalid(); }
+
+        /// <summary>
         /// Returns true if the value of expr1 is greater than or equal to expr2, and less than or equal to expr3.
         /// </summary>
         [FunctionName("BETWEEN", SpecifiedFormatterType = typeof(BetweenFormatter))]
@@ -70,6 +94,50 @@ namespace BigQuery.Linq
         public static double Least(params double[] exprs)
         {
             throw Invalid();
+        }
+
+        class GreaterThanFormatter : ISpeficiedFormatter
+        {
+            public string Format(MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
+                return expr1 + " > " + expr2;
+            }
+        }
+
+        class GreaterThanEqualFormatter : ISpeficiedFormatter
+        {
+            public string Format(MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
+                return expr1 + " >= " + expr2;
+            }
+        }
+
+        class LessThanFormatter : ISpeficiedFormatter
+        {
+            public string Format(MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
+                return expr1 + " < " + expr2;
+            }
+        }
+
+        class LessThanEqualFormatter : ISpeficiedFormatter
+        {
+            public string Format(MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
+                return expr1 + " <= " + expr2;
+            }
         }
 
         class BetweenFormatter : ISpeficiedFormatter

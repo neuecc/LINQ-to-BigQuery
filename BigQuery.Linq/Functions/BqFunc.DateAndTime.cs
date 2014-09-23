@@ -145,7 +145,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Converts a date string to a UNIX timestamp in microseconds. date_string must have the format YYYY-MM-DD HH:MM:SS[.uuuuuu]. The fractional part of the second can be up to 6 digits long or can be omitted.</para>
+        /// <para>Converts a date string to a UNIX timestamp in microseconds.</para>
+        /// <para>date_string must have the format YYYY-MM-DD HH:MM:SS[.uuuuuu].</para>
+        /// <para>The fractional part of the second can be up to 6 digits long or can be omitted.</para>
         /// <para>TIMESTAMP_TO_USEC is an equivalent function that converts a TIMESTAMP data type argument instead of a date string.</para>
         /// </summary>
         [FunctionName("PARSE_UTC_USEC")]

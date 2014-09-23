@@ -123,7 +123,7 @@ namespace BigQuery.Linq
         /// Returns the last sequential value in the scope of the function. The LAST function works only with the WITHIN keyword.
         /// </summary>
         [Obsolete("Currently Not Supported, available will be soon.")]
-        public static void Last()
+        public static void Last(object field)
         {
             throw Invalid();
         }

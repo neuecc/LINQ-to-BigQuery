@@ -90,44 +90,44 @@ namespace BigQuery.Linq
 
         public T Deserialize(TableRow row)
         {
+            if (row.F.Count == 1 && ParsableType.Contains(typeof(T)))
+            {
+                var field = schema.Fields[0];
+                var value = row.F[0].V;
+                var parsedValue = Parse(field.Type, (string)value);
+
+                object v = (parsedValue == null) ? null
+                    : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
+                    : typeof(T).IsNullable() ? Convert.ChangeType(parsedValue, typeof(T).GetGenericArguments()[0])
+                    : Convert.ChangeType(parsedValue, typeof(T));
+                return (T)v;
+            }
+
             var result = (T)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(T));
 
             for (int i = 0; i < row.F.Count; i++)
             {
                 var field = schema.Fields[i];
                 var value = row.F[i].V;
-
                 var parsedValue = Parse(field.Type, (string)value);
 
-                if (row.F.Count == 1 && ParsableType.Contains(typeof(T)))
+                PropertyInfo propertyInfo;
+                if (typeInfo.TryGetValue(field.Name, out propertyInfo))
                 {
                     object v = (parsedValue == null) ? null
                         : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
-                        : typeof(T).IsNullable() ? Convert.ChangeType(parsedValue, typeof(T).GetGenericArguments()[0])
-                        : Convert.ChangeType(parsedValue, typeof(T));
-                    result = (T)v;
-                }
-                else
-                {
+                        : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0])
+                        : Convert.ChangeType(parsedValue, propertyInfo.PropertyType);
 
-                    PropertyInfo propertyInfo;
-                    if (typeInfo.TryGetValue(field.Name, out propertyInfo))
+                    if (propertyInfo.GetSetMethod(true) != null)
                     {
-                        object v = (parsedValue == null) ? null
-                            : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
-                            : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0])
-                            : Convert.ChangeType(parsedValue, propertyInfo.PropertyType);
-
-                        if (propertyInfo.GetSetMethod(true) != null)
-                        {
-                            propertyInfo.SetValue(result, v);
-                        }
-                        else
-                        {
-                            // for anonymous type
-                            var fieldInfo = fallbackFieldInfo[field.Name];
-                            fieldInfo.SetValue(result, v);
-                        }
+                        propertyInfo.SetValue(result, v);
+                    }
+                    else
+                    {
+                        // for anonymous type
+                        var fieldInfo = fallbackFieldInfo[field.Name];
+                        fieldInfo.SetValue(result, v);
                     }
                 }
             }

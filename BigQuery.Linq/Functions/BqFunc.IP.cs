@@ -40,7 +40,8 @@ namespace BigQuery.Linq
         public static string FormatPackedIP(string packedIP) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns an IP address in binary format packed in a string. If the input string is not a valid IPv4 or IPv6 address, PARSE_PACKED_IP will return NULL.</para>
+        /// <para>Returns an IP address in binary format packed in a string.</para>
+        /// <para>If the input string is not a valid IPv4 or IPv6 address, PARSE_PACKED_IP will return NULL.</para>
         /// <para>Examples:</para>
         /// <para>PARSE_PACKED_IP('48.49.50.51') returns '0123'</para>
         /// <para>PARSE_PACKED_IP('3031:3233:3435:3637:3839:4041:4243:4445') returns '0123456789@ABCDE'</para>

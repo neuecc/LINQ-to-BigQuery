@@ -23,8 +23,13 @@ namespace BigQuery.Linq
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     internal class WindowFunctionAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    internal class WindowFunctionAlertAttribute : Attribute
     {
     }
 

@@ -239,6 +239,34 @@ namespace BigQuery.Linq
         // append field access
         protected override Expression VisitMember(MemberExpression node)
         {
+            // WindowFunction, relieve property call and compile.
+            if (node.Member.GetCustomAttributes<WindowFunctionAttribute>().Any())
+            {
+                var methodNode = node.Expression as MethodCallExpression;
+
+                MethodCallExpression root;
+                var paritionBy = (MethodCallExpression)methodNode.Object;
+                if (paritionBy == null)
+                {
+                    root = methodNode;
+                }
+                else
+                {
+                    root = (MethodCallExpression)paritionBy.Object;
+                    if (root == null)
+                    {
+                        root = paritionBy;
+                    }
+                }
+
+                var para = root.Arguments[0] as ParameterExpression;
+                var windowFunction = Expression.Lambda(methodNode, para);
+                var compiledWindowFunction = windowFunction.Compile();
+                var windowQuery = compiledWindowFunction.DynamicInvoke(new object[1]);
+                sb.Append(windowQuery.ToString());
+                return node;
+            }
+
             // specialize for DateTime
             if (FormatIfExprIsDateTime(node)) return node;
 
@@ -289,29 +317,9 @@ namespace BigQuery.Linq
             }
 
             // window function
-            if (node.Method.GetCustomAttributes<WindowFunctionAttribute>().Any())
+            if (node.Method.GetCustomAttributes<WindowFunctionAlertAttribute>().Any())
             {
-                MethodCallExpression root;
-                var paritionBy = (MethodCallExpression)node.Object;
-                if (paritionBy == null)
-                {
-                    root = node;
-                }
-                else
-                {
-                    root = (MethodCallExpression)paritionBy.Object;
-                    if (root == null)
-                    {
-                        root = paritionBy;
-                    }
-                }
-
-                var para = root.Arguments[0] as ParameterExpression;
-                var windowFunction = Expression.Lambda(node, para);
-                var compiledWindowFunction = windowFunction.Compile();
-                var windowQuery = compiledWindowFunction.DynamicInvoke(new object[1]);
-                sb.Append(windowQuery.ToString());
-                return node;
+                throw new InvalidOperationException("WindowFunction must call .Value property");
             }
 
             var attr = node.Method.GetCustomAttributes<FunctionNameAttribute>().FirstOrDefault();

@@ -19,10 +19,10 @@ namespace BigQuery.Linq
         /// <para>Tied values return the same cumulative distribution value.</para>
         /// <para>This window function requires ORDER BY in the OVER clause.</para>
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> CumulativeDistribution<T>(T fieldSource)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> CumulativeDistribution<T>(T fieldSource)
         {
-            return new FirstWindowFunction<T>("CUME_DIST", "");
+            return new FirstWindowFunction<T, double>("CUME_DIST", "");
         }
 
         /// <summary>
@@ -30,79 +30,129 @@ namespace BigQuery.Linq
         /// <para>Tied values display as the same rank. The rank of the next value is incremented by 1. For example, if two values tie for rank 2, the next ranked value is 3. If you prefer a gap in the ranking list, use rank().</para>
         /// <para>This window function requires ORDER BY in the OVER clause.</para>
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> DenseRank<T>(T fieldSource)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> DenseRank<T>(T fieldSource)
         {
-            return new FirstWindowFunction<T>("DENSE_RANK", "");
+            return new FirstWindowFunction<T, long>("DENSE_RANK", "");
         }
 
         /// <summary>
         /// Returns the value of [expr] for the row located [offset] rows before the current row. If the row doesn't exist, [default_value] returns.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> Lag<T, TK>(T fieldSource, Expression<Func<T, TK>> expr, int offset)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lag<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector, int offset)
         {
-            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, expr);
-            return new FirstWindowFunction<T>("LAG", arg1 + ", " + offset);
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("LAG", arg1 + ", " + offset);
         }
 
         /// <summary>
         /// Returns the value of [expr] for the row located [offset] rows before the current row. If the row doesn't exist, [default_value] returns.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> Lag<T, TK>(T fieldSource, Expression<Func<T, TK>> expr, int offset, TK defaultValue)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lag<T, TColumn>(T fieldSource, string columnName, int offset)
         {
-            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, expr);
-            return new FirstWindowFunction<T>("LAG", arg1 + ", " + offset + ", " + DataTypeFormatter.Format(defaultValue));
+            var arg1 = columnName.EscapeBq();
+            return new FirstWindowFunction<T, TColumn>("LAG", columnName + ", " + offset);
+        }
+
+        /// <summary>
+        /// Returns the value of [expr] for the row located [offset] rows before the current row. If the row doesn't exist, [default_value] returns.
+        /// </summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lag<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector, int offset, TColumn defaultValue)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("LAG", arg1 + ", " + offset + ", " + DataTypeFormatter.Format(defaultValue));
+        }
+
+        /// <summary>
+        /// Returns the value of [expr] for the row located [offset] rows before the current row. If the row doesn't exist, [default_value] returns.
+        /// </summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lag<T, TColumn>(T fieldSource, string columnName, int offset, TColumn defaultValue)
+        {
+            var arg1 = columnName.EscapeBq();
+            return new FirstWindowFunction<T, TColumn>("LAG", arg1 + ", " + offset + ", " + DataTypeFormatter.Format(defaultValue));
         }
 
         /// <summary>
         /// Returns the value of [expr] for the row located [offset] rows after the current row. If the row doesn't exist, [default_value] returns.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> Lead<T, TK>(T fieldSource, Expression<Func<T, TK>> expr, int offset)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lead<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector, int offset)
         {
-            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, expr);
-            return new FirstWindowFunction<T>("LEAD", arg1 + ", " + offset);
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("LEAD", arg1 + ", " + offset);
         }
 
         /// <summary>
         /// Returns the value of [expr] for the row located [offset] rows after the current row. If the row doesn't exist, [default_value] returns.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> Lead<T, TK>(T fieldSource, Expression<Func<T, TK>> expr, int offset, TK defaultValue)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lead<T, TColumn>(T fieldSource, string columnName, int offset)
         {
-            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, expr);
-            return new FirstWindowFunction<T>("LEAD", arg1 + ", " + offset + ", " + DataTypeFormatter.Format(defaultValue));
+            var arg1 = columnName.EscapeBq();
+            return new FirstWindowFunction<T, TColumn>("LEAD", arg1 + ", " + offset);
+        }
+
+        /// <summary>
+        /// Returns the value of [expr] for the row located [offset] rows after the current row. If the row doesn't exist, [default_value] returns.
+        /// </summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lead<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector, int offset, TColumn defaultValue)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("LEAD", arg1 + ", " + offset + ", " + DataTypeFormatter.Format(defaultValue));
+        }
+
+        /// <summary>
+        /// Returns the value of [expr] for the row located [offset] rows after the current row. If the row doesn't exist, [default_value] returns.
+        /// </summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Lead<T, TColumn>(T fieldSource, string columnName, int offset, TColumn defaultValue)
+        {
+            var arg1 = columnName.EscapeBq();
+            return new FirstWindowFunction<T, TColumn>("LEAD", arg1 + ", " + offset + ", " + DataTypeFormatter.Format(defaultValue));
         }
 
         /// <summary>
         /// Returns the value of [expr] at position [n] of the window frame, where [n] is a one-based index.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> NthValue<T, TK>(T fieldSource, Expression<Func<T, TK>> expr, int n)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> NthValue<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector, int n)
         {
-            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, expr);
-            return new FirstWindowFunction<T>("NTH_VALUE", arg1 + ", " + n);
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("NTH_VALUE", arg1 + ", " + n);
+        }
+
+        /// <summary>
+        /// Returns the value of [expr] at position [n] of the window frame, where [n] is a one-based index.
+        /// </summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> NthValue<T, TColumn>(T fieldSource, string columnName, int n)
+        {
+            var arg1 = columnName.EscapeBq();
+            return new FirstWindowFunction<T, TColumn>("NTH_VALUE", arg1 + ", " + n);
         }
 
         /// <summary>
         /// Divides a sequence of rows into [num_buckets] buckets and assigns a corresponding bucket number, as an integer, with each row. The ntile() function assigns the bucket numbers as equally as possible and returns a value from 1 to [num_buckets] for each row.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> Ntile<T>(T fieldSource, int numBuckets)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> Ntile<T>(T fieldSource, int numBuckets)
         {
-            return new FirstWindowFunction<T>("NTILE", numBuckets.ToString());
+            return new FirstWindowFunction<T, long>("NTILE", numBuckets.ToString());
         }
 
         /// <summary>
         /// Returns the rank of the current row, relative to the other rows in the partition. Returned values range between 0 and 1, inclusively. The first value returned is 0.0.
         /// <para>This window function requires ORDER BY in the OVER clause.</para>
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> PercentRank<T>(T fieldSource)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> PercentRank<T>(T fieldSource)
         {
-            return new FirstWindowFunction<T>("PERCENT_RANK", "");
+            return new FirstWindowFunction<T, double>("PERCENT_RANK", "");
         }
 
         /// <summary>
@@ -110,10 +160,10 @@ namespace BigQuery.Linq
         /// <para>[percentile] must be between 0 and 1.</para>
         /// <para>This window function requires ORDER BY in the OVER clause.</para>
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> PercentileCont<T>(T fieldSource, double percentile)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> PercentileCont<T>(T fieldSource, double percentile)
         {
-            return new FirstWindowFunction<T>("PERCENTILE_CONT", percentile.ToString());
+            return new FirstWindowFunction<T, long>("PERCENTILE_CONT", percentile.ToString());
         }
 
         /// <summary>
@@ -121,10 +171,10 @@ namespace BigQuery.Linq
         /// <para>[percentile] must be between 0 and 1.</para>
         /// <para>This window function requires ORDER BY in the OVER clause.</para>
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> PercentileDisc<T>(T fieldSource, double percentile)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> PercentileDisc<T>(T fieldSource, double percentile)
         {
-            return new FirstWindowFunction<T>("PERCENTILE_DISC", percentile.ToString());
+            return new FirstWindowFunction<T, long>("PERCENTILE_DISC", percentile.ToString());
         }
 
         /// <summary>
@@ -132,33 +182,159 @@ namespace BigQuery.Linq
         /// <para>Tied values display as the same rank. The rank of the next value is incremented according to how many tied values occurred before it. For example, if two values tie for rank 2, the next ranked value is 4, not 3. If you prefer no gaps in the ranking list, use dense_rank().</para>
         /// <para>This window function requires ORDER BY in the OVER clause.</para>
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> Rank<T>(T fieldSource)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> Rank<T>(T fieldSource)
         {
-            return new FirstWindowFunction<T>("RANK", "");
+            return new FirstWindowFunction<T, long>("RANK", "");
         }
 
         /// <summary>
         /// Returns the ratio of each value to the sum of the values, as a double between 0 and 1.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> RatioToReport<T, TK>(T fieldSource, Expression<Func<T, TK>> columnSelector)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> RatioToReport<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
         {
             var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
-            return new FirstWindowFunction<T>("RATIO_TO_REPORT", arg1);
+            return new FirstWindowFunction<T, double>("RATIO_TO_REPORT", arg1);
+        }
+
+        /// <summary>
+        /// Returns the ratio of each value to the sum of the values, as a double between 0 and 1.
+        /// </summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> RatioToReport<T>(T fieldSource, string columnName)
+        {
+            return new FirstWindowFunction<T, double>("RATIO_TO_REPORT", columnName.EscapeBq());
         }
 
         /// <summary>
         /// Returns the current row number of the query result, starting with 1.
         /// </summary>
-        [WindowFunction]
-        public static FirstWindowFunction<T> RowNumber<T>(T fieldSource)
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> RowNumber<T>(T fieldSource)
         {
-            return new FirstWindowFunction<T>("ROW_NUMBER", "");
+            return new FirstWindowFunction<T, long>("ROW_NUMBER", "");
+        }
+
+        // more window functions it's Undocumented(at 204-09-23)
+        // but already added from September 18, 2013
+        // http://googlecloudplatform.blogspot.jp/2013/09/google-bigquery-goes-real-time-with-streaming-inserts-time-based-queries-and-more.html
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> FirstValue<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("FIRST_VALUE", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> FirstValue<T, TColumn>(T fieldSource, string columnName, TColumn typeInferenceDummy)
+        {
+            return new FirstWindowFunction<T, TColumn>("FIRST_VALUE", columnName.EscapeBq());
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> LastValue<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("LAST_VALUE", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> LastValue<T, TColumn>(T fieldSource, string columnName, TColumn typeInferenceDummy)
+        {
+            return new FirstWindowFunction<T, TColumn>("LAST_VALUE", columnName.EscapeBq());
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> Sum<T, TColumn>(T fieldSource, Expression<Func<T, long>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, long>("SUM", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> Sum<T, TColumn>(T fieldSource, Expression<Func<T, double>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, double>("SUM", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> Sum<T>(T fieldSource, string columnName)
+        {
+            return new FirstWindowFunction<T, double>("SUM", columnName.EscapeBq());
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> Count<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, long>("COUNT", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, long> Count<T, TColumn>(T fieldSource, string columnName)
+        {
+            return new FirstWindowFunction<T, long>("COUNT", columnName.EscapeBq());
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> Average<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, double>("AVG", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, double> Average<T, TColumn>(T fieldSource, string columnName)
+        {
+            return new FirstWindowFunction<T, double>("AVG", columnName.EscapeBq());
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Min<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("MIN", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Min<T, TColumn>(T fieldSource, string columnName, TColumn typeInferenceDummy)
+        {
+            return new FirstWindowFunction<T, TColumn>("MIN", columnName.EscapeBq());
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Max<T, TColumn>(T fieldSource, Expression<Func<T, TColumn>> columnSelector)
+        {
+            var arg1 = BigQueryTranslateVisitor.BuildQuery(0, 0, columnSelector);
+            return new FirstWindowFunction<T, TColumn>("MAX", arg1);
+        }
+
+        /// <summary>Window and analytics function.</summary>
+        [WindowFunctionAlert]
+        public static FirstWindowFunction<T, TColumn> Max<T, TColumn>(T fieldSource, string columnName, TColumn typeInferenceDummy)
+        {
+            return new FirstWindowFunction<T, TColumn>("MAX", columnName.EscapeBq());
         }
     }
 
-    public sealed class FirstWindowFunction<TSource>
+    public sealed class FirstWindowFunction<TSource, TResult>
     {
         readonly string methodName;
         readonly string argument;
@@ -170,21 +346,24 @@ namespace BigQuery.Linq
         }
 
         [WindowFunction]
-        public SecondWindowFunction<TSource, TPartitionKey> PartitionBy<TPartitionKey>(Expression<Func<TSource, TPartitionKey>> partitionKeySelector)
+        public TResult Value { get { throw new InvalidOperationException("Property is marker for Query Analyze. Can't call directly."); } }
+
+        [WindowFunctionAlert]
+        public SecondWindowFunction<TSource, TResult, TPartitionKey> PartitionBy<TPartitionKey>(Expression<Func<TSource, TPartitionKey>> partitionKeySelector)
         {
-            return new SecondWindowFunction<TSource, TPartitionKey>(methodName, argument, partitionKeySelector);
+            return new SecondWindowFunction<TSource, TResult, TPartitionKey>(methodName, argument, partitionKeySelector);
         }
 
-        [WindowFunction]
-        public FullWindowFunction<TSource, TSource, TOrderKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        [WindowFunctionAlert]
+        public FullWindowFunction<TSource, TResult, TSource, TOrderKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TSource, TOrderKey>(methodName, argument, null, keySelector, false);
+            return new FullWindowFunction<TSource, TResult, TSource, TOrderKey>(methodName, argument, null, keySelector, false);
         }
 
-        [WindowFunction]
-        public FullWindowFunction<TSource, TSource, TOrderKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        [WindowFunctionAlert]
+        public FullWindowFunction<TSource, TResult, TSource, TOrderKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TSource, TOrderKey>(methodName, argument, null, keySelector, true);
+            return new FullWindowFunction<TSource, TResult, TSource, TOrderKey>(methodName, argument, null, keySelector, true);
         }
 
         public override string ToString()
@@ -196,7 +375,7 @@ namespace BigQuery.Linq
         }
     }
 
-    public sealed class SecondWindowFunction<TSource, TPartitionKey>
+    public sealed class SecondWindowFunction<TSource, TResult, TPartitionKey>
     {
         readonly string methodName;
         readonly string argument;
@@ -210,15 +389,18 @@ namespace BigQuery.Linq
         }
 
         [WindowFunction]
-        public FullWindowFunction<TSource, TPartitionKey, TOrderKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        public TResult Value { get { throw new InvalidOperationException("Property is marker for Query Analyze. Can't call directly."); } }
+
+        [WindowFunctionAlert]
+        public FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TPartitionKey, TOrderKey>(methodName, argument, partitionKeySelector, keySelector, false);
+            return new FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey>(methodName, argument, partitionKeySelector, keySelector, false);
         }
 
-        [WindowFunction]
-        public FullWindowFunction<TSource, TPartitionKey, TOrderKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        [WindowFunctionAlert]
+        public FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TPartitionKey, TOrderKey>(methodName, argument, partitionKeySelector, keySelector, true);
+            return new FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey>(methodName, argument, partitionKeySelector, keySelector, true);
         }
 
         public override string ToString()
@@ -231,7 +413,7 @@ namespace BigQuery.Linq
         }
     }
 
-    public sealed class FullWindowFunction<TSource, TPartitionKey, TOrderKey>
+    public sealed class FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey>
     {
         readonly string methodName;
         readonly string argument;
@@ -247,6 +429,9 @@ namespace BigQuery.Linq
             this.orderKeySelector = orderKeySelector;
             this.isDescending = isDescending;
         }
+
+        [WindowFunction]
+        public TResult Value { get { throw new InvalidOperationException("Property is marker for Query Analyze. Can't call directly."); } }
 
         public override string ToString()
         {

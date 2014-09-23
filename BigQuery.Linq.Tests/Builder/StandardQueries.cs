@@ -215,6 +215,7 @@ GROUP BY
                     cume_dist = BqFunc.CumulativeDistribution(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -243,6 +244,7 @@ LIMIT 5".TrimSmart());
                     lag = BqFunc.Lag(x, y => y.word, 1, "aaa")
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -268,7 +270,7 @@ LIMIT 5".TrimSmart());
                 .Select(x => new
                 {
                     x.word,
-                    lag = BqFunc.RowNumber(x)
+                    lag = BqFunc.RowNumber(x).Value
                     //.PartitionBy(y => y.corpus)
                     //.OrderByDescending(y => y.word_count)
                 })
@@ -297,7 +299,7 @@ LIMIT 5".TrimSmart());
                 {
                     x.word,
                     lag = BqFunc.RowNumber(x)
-                      .PartitionBy(y => y.corpus)
+                      .PartitionBy(y => y.corpus).Value
                     //.OrderByDescending(y => y.word_count)
                 })
                 .Limit(5)
@@ -327,6 +329,7 @@ LIMIT 5".TrimSmart());
                     lag = BqFunc.RowNumber(x)
                         //.PartitionBy(y => y.corpus)
                     .OrderByDescending(y => y.word_count)
+                    .Value
                 })
                 .Limit(5)
                 .ToString();
@@ -355,6 +358,7 @@ LIMIT 5".TrimSmart());
                     lag = BqFunc.RowNumber(x)
                         .PartitionBy(y => y.corpus)
                         .OrderByDescending(y => y.word_count)
+                        .Value
                 })
                 .Limit(5)
                 .ToString();

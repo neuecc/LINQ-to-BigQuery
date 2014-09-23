@@ -472,7 +472,7 @@ namespace BigQuery.Linq
 
         public static ISelectAfterOrderByBigQueryable<TSource> Select<TSource>(this IOrderByBigQueryable<TSource> source)
         {
-            return new SelectBigQueryable<TSource, TSource>(source, x => x);
+            return new SelectBigQueryable<TSource, TSource>(source, null);
         }
 
         public static ISelectAfterOrderByBigQueryable<TResult> Select<TSource, TResult>(this IOrderByBigQueryable<TSource> source, Expression<Func<TSource, TResult>> selector)
