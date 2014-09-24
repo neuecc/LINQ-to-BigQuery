@@ -37,6 +37,13 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.Apis, Version=1.8.2.23762, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

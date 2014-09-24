@@ -201,7 +201,7 @@ namespace BigQuery.Linq
     // method chain marker
     /*
     From(+TableDecorate) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit -> IgnoreCase
-                                           | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) |
+                                           | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) | -> IgnoreCase
                                                        | -> OrderBy(ThenBy) ->                   |
     */
     public interface IFromBigQueryable<T> : ITableDecoratorBigQueryable<T> // TableDecorate, Join, Where, OrderBy, Select
