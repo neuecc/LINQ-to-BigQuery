@@ -1,13 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.30516.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigQuery.Linq", "BigQuery.Linq\BigQuery.Linq.csproj", "{5DFCDDDB-5A06-4752-96C3-2B8C2B7F1C51}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigQuery.Linq.Tests", "BigQuery.Linq.Tests\BigQuery.Linq.Tests.csproj", "{A9F6CA40-11A5-47F6-8AD5-0975E360986F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigQuery.Linq.ConsoleApp", "BigQuery.Linq.ConsoleApp\BigQuery.Linq.ConsoleApp.csproj", "{66C52852-2145-4DDC-B88D-F318B649FAD8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{44CCD70F-B182-4694-97FE-C4B341F4C168}"
+	ProjectSection(SolutionItems) = preProject
+		NuGet\LINQ-to-BigQuery.nuspec = NuGet\LINQ-to-BigQuery.nuspec
+		NuGet\pack.bat = NuGet\pack.bat
+		NuGet\push.bat = NuGet\push.bat
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

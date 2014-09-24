@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>LINQ-to-BigQuery</id>
+        <version>0.1.0</version>
+        <title>LINQ to BigQuery</title>
+        <authors>neuecc</authors>
+        <owners>neuecc</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
+        <language>en-US</language>
+        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+        <projectUrl>https://github.com/neuecc/LINQ-to-BigQuery</projectUrl>
+        <tags>LINQ BigQuery</tags>
+        <dependencies>
+            <dependency id="Google.Apis.Bigquery.v2" version="1.8.1.1670" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\BigQuery.Linq\bin\Release\BigQuery.Linq.dll" target="lib" />
+        <file src="..\BigQuery.Linq\bin\Release\BigQuery.Linq.xml" target="lib" />
+    </files>
+</package>

@@ -1,10 +1,10 @@
 LINQ-to-BigQuery
 ================
-LINQ to BigQuery is C# LINQ Provider for [Google BigQuery](https://cloud.google.com/bigquery/). It also enables Desktop query editor and dump to chart with LINQPad.
+LINQ to BigQuery is C# LINQ Provider for [Google BigQuery](https://cloud.google.com/bigquery/). It also enables Desktop query editor and dump to chart with [LINQPad](http://www.linqpad.net).
 
 Installation
 ---
-binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuery/)
+binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuery)
 
 ```
 PM> Install-Package LINQ-to-BigQuery

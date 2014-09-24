@@ -1,0 +1,1 @@
+nuget pack LINQ-to-BigQuery.nuspec
