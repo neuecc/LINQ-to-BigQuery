@@ -291,7 +291,7 @@ public static class Query
             context = new BigQueryContext(bigquery, "write your project id");
         }
         // Timeout or other options
-        context.TimeoutMs = TimeSpan.FromMinutes(1);
+        context.TimeoutMs = (long)TimeSpan.FromMinutes(1).TotalMilliseconds;
         return context;
     }
 }
