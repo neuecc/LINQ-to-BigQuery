@@ -37,7 +37,7 @@ namespace BigQuery.Linq.Tests.Functions
             var x = 1000;
 
             context.Select<bool>(() => BqFunc.Between(x, BqFunc.Abs(10), 100)).ToFlatSql()
-                .Is("SELECT [x] BETWEEN ABS(10) AND 100");
+                .Is("SELECT ([x] BETWEEN ABS(10) AND 100)");
         }
 
         [TestMethod]

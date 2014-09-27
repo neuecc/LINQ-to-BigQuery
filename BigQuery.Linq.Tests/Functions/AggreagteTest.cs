@@ -191,12 +191,60 @@ FROM
 ".TrimSmart());
         }
 
-        [Ignore]
         [TestMethod]
         public void Nth()
         {
-            // not implemented yet.
-            Assert.Fail();
+            var context = new BigQueryContext();
+            var r = context.From<wikipedia>()
+                .Where(x => x.contributor_ip != null)
+                .Select(x => new
+                {
+                    clientIpNum = BqFunc.Integer(BqFunc.ParseIP(x.contributor_ip)),
+                    classB = BqFunc.Integer(BqFunc.ParseIP(x.contributor_ip) / (256 * 256))
+                })
+                .AsSubquery()
+                .Join(JoinType.InnerEach, context.From<geolite_city_bq_b2b>(), (a, b) => new { a, b }, x => x.a.classB == x.b.classB)
+                .Where(x => BqFunc.Between(x.a.clientIpNum, x.b.startIpNum, x.b.endIpNum) && x.b.city != "")
+                .Select(x => new
+                {
+                    c = BqFunc.Count(),
+                    x.b.city,
+                    x.b.countryLabel,
+                    lat = BqFunc.Nth(1, x.b.latitude),
+                    lng = BqFunc.Nth(1, x.b.longitude)
+                })
+                .GroupBy(x => new { x.city, x.countryLabel })
+                .OrderByDescending(x => x.c)
+                .ToString();
+
+            r.Is(@"
+SELECT
+  COUNT(*) AS [c],
+  [b.city] AS [city],
+  [b.countryLabel] AS [countryLabel],
+  NTH(1, [b.latitude]) AS [lat],
+  NTH(1, [b.longitude]) AS [lng]
+FROM
+(
+  SELECT
+    INTEGER(PARSE_IP([contributor_ip])) AS [clientIpNum],
+    INTEGER((PARSE_IP([contributor_ip]) / 65536)) AS [classB]
+  FROM
+    [publicdata:samples.wikipedia]
+  WHERE
+    ([contributor_ip] IS NOT NULL)
+) AS [a]
+INNER JOIN EACH
+  [fh-bigquery:geocode.geolite_city_bq_b2b] AS [b] ON ([a.classB] = [b.classB])
+WHERE
+  (([a.clientIpNum] BETWEEN [b.startIpNum] AND [b.endIpNum]) AND ([b.city] != ''))
+GROUP BY
+  [city],
+  [countryLabel]
+ORDER BY
+  [c] DESC
+".TrimSmart());
+
         }
 
         [TestMethod]
@@ -303,7 +351,7 @@ GROUP BY
                     sex = (x.is_male) ? "Male" : "Female",
                     cnt = BqFunc.Count()
                 })
-                .GroupBy(x => new { x.state, x.sex})
+                .GroupBy(x => new { x.state, x.sex })
                 .Having(x => x.cnt > 3000000)
                 .OrderByDescending(x => x.cnt)
                 .ToString()

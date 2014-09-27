@@ -125,7 +125,7 @@ namespace BigQuery.Linq
                 var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
                 var expr3 = innerTranslator.VisitAndClearBuffer(node.Arguments[2]);
 
-                return string.Format("{0} BETWEEN {1} AND {2}", expr1, expr2, expr3);
+                return string.Format("({0} BETWEEN {1} AND {2})", expr1, expr2, expr3);
             }
         }
 

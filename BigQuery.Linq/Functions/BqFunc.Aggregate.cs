@@ -159,7 +159,7 @@ namespace BigQuery.Linq
         /// <summary>
         /// Returns the nth sequential value in the scope of the function, where n is a constant. The NTH function starts counting at 1, so there is no zeroth term. If the scope of the function has less than n values, the function returns NULL.
         /// </summary>
-        [Obsolete("Currently Not Supported, available will be soon.")]
+        [FunctionName("NTH")]
         public static T Nth<T>(long n, T field)
         {
             throw Invalid();

@@ -207,7 +207,7 @@ namespace BigQuery.Linq.Query
 
         public string BuildQueryStringWithAlias(int depth, string aliasName)
         {
-            return BuildQueryString(depth) + " AS" + aliasName.EscapeBq();
+            return BuildQueryString(depth) + " AS " + aliasName.EscapeBq();
         }
     }
 }

@@ -101,9 +101,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="geolitecity.cs" />
     <Compile Include="github_timeline.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="wikipedia.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -126,6 +126,7 @@
     <Compile Include="Functions\AggreagteTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryTest.cs" />
+    <Compile Include="SampleTables\geolitecity.cs" />
     <Compile Include="SampleTables\github_timeline.cs" />
     <Compile Include="SampleTables\gsod.cs" />
     <Compile Include="SampleTables\natality.cs" />
