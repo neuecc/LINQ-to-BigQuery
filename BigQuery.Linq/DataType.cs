@@ -19,6 +19,52 @@ namespace BigQuery.Linq
         Record // object
     }
 
+    public static class DataTypeUtility
+    {
+        public static DataType ToDataType(string dataType)
+        {
+            switch (dataType)
+            {
+                case "STRING":
+                    return DataType.String;
+                case "INTEGER":
+                    return DataType.Integer;
+                case "FLOAT":
+                    return DataType.Float;
+                case "BOOLEAN":
+                    return DataType.Boolean;
+                case "TIMESTAMP":
+                    return DataType.Timestamp;
+                case "RECORD":
+                    return DataType.Record;
+                default:
+                    throw new ArgumentException("invalid type:" + dataType);
+            }
+        }
+
+        // //     FLOAT, BOOLEAN, TIMESTAMP or RECORD (where RECORD indicates that the field
+        public static string ToIdentifier(this DataType type)
+        {
+            switch (type)
+            {
+                case DataType.String:
+                    return "STRING";
+                case DataType.Integer:
+                    return "INTEGER";
+                case DataType.Float:
+                    return "FLOAT";
+                case DataType.Boolean:
+                    return "BOOLEAN";
+                case DataType.Timestamp:
+                    return "TIMESTAMP";
+                case DataType.Record:
+                    return "RECORD";
+                default:
+                    throw new ArgumentException("invalid type:" + type);
+            }
+        }
+    }
+
     internal static class DataTypeFormatter
     {
         internal static string Format(object value)

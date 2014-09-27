@@ -1,8 +1,13 @@
-﻿
-using Google.Apis.Bigquery.v2;
+﻿using Google.Apis.Bigquery.v2;
 using Google.Apis.Bigquery.v2.Data;
+using Google.Apis.Util;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+
 namespace BigQuery.Linq
 {
     /// <summary>
@@ -49,6 +54,113 @@ namespace BigQuery.Linq
         {
             var response = await service.Tables.Get(project_id, dataset_id, table_id).ExecuteAsync().ConfigureAwait(false);
             return new MetaTableSchema(this, response.Schema.Fields);
+        }
+
+        /// <param name="description">[Optional] A user-friendly description of this table.</param>
+        /// <param name="expirationTime">
+        /// <para>[Optional] The time when this table expires, in milliseconds since the epoch.</para>
+        /// <para>If not present, the table will persist indefinitely. Expired tables will</para>
+        /// <para>be deleted and their storage reclaimed.</para>
+        /// </param>
+        /// <param name="friendlyName">[Optional] A descriptive name for this table.</param>
+        public void CreateTable(BigqueryService service, TableFieldSchema[] fields, string description = null, long? expirationTime = null, string friendlyName = null)
+        {
+            var r = service.Tables.Insert(new Table()
+            {
+                Description = description,
+                ExpirationTime = expirationTime,
+                FriendlyName = friendlyName,
+                TableReference = new TableReference
+                {
+                    ProjectId = this.project_id,
+                    DatasetId = this.dataset_id,
+                    TableId = this.table_id,
+                },
+                Schema = new TableSchema()
+                {
+                    Fields = fields
+                }
+            }, this.project_id, this.dataset_id).Execute();
+
+            this.creation_time = r.CreationTime.Value;
+            this.last_modified_time = r.LastModifiedTime.Value;
+        }
+
+        /// <param name="description">[Optional] A user-friendly description of this table.</param>
+        /// <param name="expirationTime">
+        /// <para>[Optional] The time when this table expires, in milliseconds since the epoch.</para>
+        /// <para>If not present, the table will persist indefinitely. Expired tables will</para>
+        /// <para>be deleted and their storage reclaimed.</para>
+        /// </param>
+        /// <param name="friendlyName">[Optional] A descriptive name for this table.</param>
+        public async Task CreateTableAsync(BigqueryService service, TableFieldSchema[] fields, string description = null, long? expirationTime = null, string friendlyName = null)
+        {
+            var r = await service.Tables.Insert(new Table()
+            {
+                Description = description,
+                ExpirationTime = expirationTime,
+                FriendlyName = friendlyName,
+                TableReference = new TableReference
+                {
+                    ProjectId = this.project_id,
+                    DatasetId = this.dataset_id,
+                    TableId = this.table_id,
+                },
+                Schema = new TableSchema()
+                {
+                    Fields = fields
+                }
+            }, this.project_id, this.dataset_id).ExecuteAsync().ConfigureAwait(false);
+
+            this.creation_time = r.CreationTime.Value;
+            this.last_modified_time = r.LastModifiedTime.Value;
+        }
+
+        /// <param name="retryStrategy">If not null, try retry.</param>
+        public async Task InsertAllAsync<T>(BigqueryService service, IEnumerable<T> data, IBackOff retryStrategy = null)
+        {
+            var rows = data.Select(x => new Google.Apis.Bigquery.v2.Data.TableDataInsertAllRequest.RowsData
+            {
+                InsertId = Guid.NewGuid().ToString(),
+                Json = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(x))
+            });
+
+            var request = service.Tabledata.InsertAll(new TableDataInsertAllRequest
+            {
+                Rows = rows.ToArray()
+            }, this.project_id, this.dataset_id, this.table_id);
+
+            var retry = 0;
+            TableDataInsertAllResponse response = null;
+            do
+            {
+                response = await request.ExecuteAsync().ConfigureAwait(false);
+
+                if (retryStrategy == null) break;
+                if (response.InsertErrors == null) break;
+
+                retry++;
+                var nextDelay = retryStrategy.GetNextBackOff(retry);
+                if (nextDelay == TimeSpan.MinValue) break;
+
+                await Task.Delay(nextDelay).ConfigureAwait(false);
+            } while (true);
+
+            if (response.InsertErrors != null && response.InsertErrors.Any())
+            {
+                var errorMessages = response.InsertErrors.Select(x =>
+                {
+                    return x.Index + ":" + x.Errors.Select(e => string.Format(@"
+DebugInfo:{0}
+ETag:{1}
+Location:{2}
+Message:{3}
+Reason:{4}
+", e.DebugInfo, e.ETag, e.Location, e.Message, e.Reason));
+                });
+
+                throw new Exception("Can't insert data. RetryCount:" + retry + " " + string.Join(Environment.NewLine, errorMessages));
+            }
         }
 
         public string ToFullTableName()

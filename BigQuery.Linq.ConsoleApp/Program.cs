@@ -17,15 +17,12 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.ConsoleApp
 {
 
-
-
     class Program
     {
 
         static void Main(string[] args)
         {
-
-
+ 
 
         }
     }
