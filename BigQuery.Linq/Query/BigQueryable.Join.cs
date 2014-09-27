@@ -81,6 +81,8 @@ namespace BigQuery.Linq.Query
         public override string BuildQueryString(int depth)
         {
             var sb = new StringBuilder();
+            sb.Append(Indent(depth));
+
             switch (joinType)
             {
                 case InternalJoinType.Inner:

@@ -160,12 +160,13 @@ namespace BigQuery.Linq
 
         public T[] ToArray()
         {
-            return QueryContext.Query<T>(ToString());
+            return QueryContext.Query<T>(ToString()).Rows;
         }
 
-        public Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return QueryContext.QueryAsync<T>(ToString(), cancellationToken);
+            var response = await QueryContext.QueryAsync<T>(ToString(), cancellationToken).ConfigureAwait(false);
+            return response.Rows;
         }
 
         public QueryResponse<T> Run()

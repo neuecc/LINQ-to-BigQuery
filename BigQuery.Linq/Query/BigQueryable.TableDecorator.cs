@@ -42,6 +42,7 @@ namespace BigQuery.Linq.Query
         {
             var sb = new StringBuilder();
 
+            sb.Append(Indent(depth));
             sb.AppendLine("FROM");
             sb.Append(Indent(depth + 1));
             sb.Append(GetTableName());
