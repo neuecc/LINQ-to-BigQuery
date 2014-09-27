@@ -184,6 +184,11 @@ namespace BigQuery.Linq
             var sw = Stopwatch.StartNew();
             var queryResponse = BuildRequest(query, isForceDry: false).Execute();
             sw.Stop();
+            if (queryResponse.JobComplete == false)
+            {
+                throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
+            }
+
             var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
             return response;
         }
@@ -193,6 +198,11 @@ namespace BigQuery.Linq
             var sw = Stopwatch.StartNew();
             var queryResponse = await BuildRequest(query, isForceDry: false).ExecuteAsync(cancellationToken).ConfigureAwait(false);
             sw.Stop();
+            if (queryResponse.JobComplete == false)
+            {
+                throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
+            }
+
             var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
             return response;
         }
@@ -202,6 +212,11 @@ namespace BigQuery.Linq
             var sw = Stopwatch.StartNew();
             var queryResponse = BuildRequest(query, isForceDry: true).Execute();
             sw.Stop();
+            if (queryResponse.JobComplete == false)
+            {
+                throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
+            }
+
             var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
             return response;
         }
