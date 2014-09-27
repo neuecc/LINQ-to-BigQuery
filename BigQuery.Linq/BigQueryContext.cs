@@ -74,9 +74,9 @@ namespace BigQuery.Linq
             return new FromBigQueryable<T>(tableNames, new RootBigQueryable<T>(this));
         }
 
-        public ISubqueryBigQueryable<T> From<T>(IExecutableBigQueryable<T> nestedSource)
+        public ISubqueryBigQueryable<T> From<T>(IExecutableBigQueryable<T> nestedSource, params IExecutableBigQueryable<T>[] unionSources)
         {
-            return new SubqueryBigQueryable<T>(nestedSource);
+            return new SubqueryBigQueryable<T>(new[] { nestedSource }.Concat(unionSources).ToArray());
         }
 
         // Table wildcard functions

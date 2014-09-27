@@ -220,7 +220,6 @@ namespace BigQuery.Linq
 
     public interface ISubqueryBigQueryable<T> : ITableDecoratorBigQueryable<T> // Flatten, Join, Where, OrderBy, Select
     {
-        IExecutableBigQueryable<T> Unwrap();
     }
 
     public interface IFromTableWildcardBigQueryable<T> : ITableDecoratorBigQueryable<T> // Flatten, Join, Where, OrderBy, Select

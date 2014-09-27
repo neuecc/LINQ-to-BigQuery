@@ -104,6 +104,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Builder\ContextTest.cs" />
+    <Compile Include="Builder\SubQueryTest.cs" />
     <Compile Include="Builder\JoinTest.cs" />
     <Compile Include="Builder\FlattenTest.cs" />
     <Compile Include="Builder\TableDecoratorTest.cs" />

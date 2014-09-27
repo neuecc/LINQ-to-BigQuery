@@ -172,46 +172,57 @@ namespace BigQuery.Linq.Query
 
     internal class SubqueryBigQueryable<T> : BigQueryable, ISubqueryBigQueryable<T>, IWithAlias, IWithoutFrom
     {
-        readonly ExecutableBigQueryableBase<T> typedInner;
+        readonly ExecutableBigQueryableBase<T>[] typedInners;
 
         internal override int Order
         {
             get { return 1; }
         }
 
-        internal SubqueryBigQueryable(IExecutableBigQueryable<T> subselect)
-            : base(new RootBigQueryable<T>(subselect.QueryContext))
+        internal SubqueryBigQueryable(IExecutableBigQueryable<T>[] subselects)
+            : base(new RootBigQueryable<T>(subselects[0].QueryContext))
         {
-            this.typedInner = subselect as ExecutableBigQueryableBase<T>;
-        }
-
-        public IExecutableBigQueryable<T> Unwrap()
-        {
-            return typedInner;
-        }
-
-        public T[] ToArray()
-        {
-            return typedInner.ToArray();
+            this.typedInners = subselects.OfType<ExecutableBigQueryableBase<T>>().ToArray();
         }
 
         public override string BuildQueryString(int depth)
         {
-            return Indent(depth) + "FROM" + Environment.NewLine
-                + Indent(depth) + "(" + Environment.NewLine
-                + typedInner.ToQueryString(depth + 1) + Environment.NewLine
-                + Indent(depth) + ")";
+            var fromHeader = Indent(depth) + "FROM" + Environment.NewLine;
+
+            return fromHeader + BuildQueryStringWithoutFrom(depth);
         }
 
         public string BuildQueryStringWithoutFrom(int depth)
         {
-            return Indent(depth) + "(" + Environment.NewLine
-                + typedInner.ToQueryString(depth + 1) + Environment.NewLine
-                + Indent(depth) + ")";
+            var sb = new StringBuilder();
+            var isFirst = true;
+            foreach (var item in typedInners)
+            {
+                if (isFirst)
+                {
+                    isFirst = false;
+                }
+                else
+                {
+                    sb.Append(",");
+                    sb.AppendLine();
+                }
+
+                sb.AppendLine(Indent(depth) + "(");
+                sb.AppendLine(item.ToQueryString(depth + 1));
+                sb.Append(Indent(depth) + ")");
+            }
+
+            return sb.ToString();
         }
 
         public string BuildQueryStringWithAlias(int depth, string aliasName)
         {
+            if (typedInners.Length > 1)
+            {
+                throw new InvalidOperationException("JOIN cannot be applied directly to a table union or to a table wildcard function. Consider wrapping the table union or table wildcard function in a subquery (e.g., SELECT *).");
+            }
+
             return BuildQueryString(depth) + " AS " + aliasName.EscapeBq();
         }
     }
