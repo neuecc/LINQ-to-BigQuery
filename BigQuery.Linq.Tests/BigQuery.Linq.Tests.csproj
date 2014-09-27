@@ -108,6 +108,7 @@
     <Compile Include="Builder\TableDecoratorTest.cs" />
     <Compile Include="ChainingAssertion.MSTest.cs" />
     <Compile Include="Builder\StandardQueries.cs" />
+    <Compile Include="Functions\LinqUtilTest.cs" />
     <Compile Include="Functions\WindowTest.cs" />
     <Compile Include="Functions\ArithmeticTest.cs" />
     <Compile Include="Functions\CastingTest.cs" />

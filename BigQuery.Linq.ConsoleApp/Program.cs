@@ -23,7 +23,6 @@ namespace BigQuery.Linq.ConsoleApp
         static void Main(string[] args)
         {
  
-
         }
     }
 

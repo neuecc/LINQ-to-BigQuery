@@ -155,6 +155,7 @@
     <Compile Include="Query\BigQueryable.Having.cs" />
     <Compile Include="Functions\BqFunc.Aggregate.cs" />
     <Compile Include="Functions\BqFunc.Other.cs" />
+    <Compile Include="Functions\BqFunc.LinqUtil.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
