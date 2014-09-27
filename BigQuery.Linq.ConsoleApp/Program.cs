@@ -27,4 +27,15 @@ namespace BigQuery.Linq.ConsoleApp
         }
     }
 
+
+    [TableName("publicdata:samples.trigrams")]
+    public class trigrams
+    {
+        public cell cell { get; set; }
+    }
+
+    public class cell
+    {
+        public string value { get; set; }
+    }
 }

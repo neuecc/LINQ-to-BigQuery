@@ -100,7 +100,7 @@ namespace BigQuery.Linq
         ISubqueryBigQueryable<T> AsSubquery();
     }
 
-    internal abstract class ExecutableBigQueryableBase: BigQueryable
+    internal abstract class ExecutableBigQueryableBase : BigQueryable
     {
         public ExecutableBigQueryableBase(IBigQueryable parent)
             : base(parent)
@@ -210,24 +210,28 @@ namespace BigQuery.Linq
 
     // method chain marker
     /*
-    From(+TableDecorate) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit -> IgnoreCase
-                                           | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) | -> IgnoreCase
-                                                       | -> OrderBy(ThenBy) ->                   |
+    From((+TableDecorate)+Flatten) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit -> IgnoreCase
+                                                     | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) | -> IgnoreCase
+                                                                 | -> OrderBy(ThenBy) ->                   |
     */
-    public interface IFromBigQueryable<T> : ITableDecoratorBigQueryable<T> // TableDecorate, Join, Where, OrderBy, Select
+    public interface IFromBigQueryable<T> : ITableDecoratorBigQueryable<T> // TableDecorate, Flatten, Join, Where, OrderBy, Select
     {
     }
 
-    public interface ISubqueryBigQueryable<T> : ITableDecoratorBigQueryable<T> // Join, Where, OrderBy, Select
+    public interface ISubqueryBigQueryable<T> : ITableDecoratorBigQueryable<T> // Flatten, Join, Where, OrderBy, Select
     {
         IExecutableBigQueryable<T> Unwrap();
     }
 
-    public interface ITableDecoratorBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
+    public interface IFromTableWildcardBigQueryable<T> : ITableDecoratorBigQueryable<T> // Flatten, Join, Where, OrderBy, Select
     {
     }
 
-    public interface IFromTableWildcardBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
+    public interface ITableDecoratorBigQueryable<T> : IFlattenBigQueryable<T> // Flatten, Join, Where, OrderBy, Select
+    {
+    }
+
+    public interface IFlattenBigQueryable<T> : IJoinBigQueryable<T> // Join, Where, OrderBy, Select
     {
     }
 
@@ -343,6 +347,22 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom, relativeTime2: relativeTimeTo);
         }
 
+        /// <summary>
+        /// <para>Note:Flatten with Table decorators is works fine.</para>
+        /// <para>But Flatten with Table wildcard currently BigQuery reports error.</para>
+        /// <para>see: https://code.google.com/p/google-bigquery/issues/detail?id=113</para>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="fieldSelector"></param>
+        /// <returns></returns>
+        public static IFlattenBigQueryable<T> Flatten<T>(this ITableDecoratorBigQueryable<T> source, Expression<Func<T, object>> fieldSelector)
+        {
+            if (source == null) throw new ArgumentNullException("source");
+
+            return new FlattenBigQueryable<T>(source, fieldSelector);
+        }
+
         public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
             IExecutableBigQueryable<TInner> joinTable,
             Expression<Func<TOuter, TInner, TResult>> aliasSelector,
@@ -350,18 +370,29 @@ namespace BigQuery.Linq
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, null, joinTable, aliasSelector, joinCondition);
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, null, joinTable, null, aliasSelector, joinCondition);
         }
         public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
-            ITableDecoratorBigQueryable<TInner> joinTable,
+            IFlattenBigQueryable<TInner> joinTable,
             Expression<Func<TOuter, TInner, TResult>> aliasSelector,
             Expression<Func<TResult, bool>> joinCondition)
         {
             if (source == null) throw new ArgumentNullException("source");
 
             var tb = joinTable as ITableName;
-            if (tb == null) throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, tb.GetTableName(), null, aliasSelector, joinCondition);
+            if (tb == null)
+            {
+                var flatten = joinTable as IFlattenBigQueryable<TInner>;
+                if (flatten == null)
+                {
+                    throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
+                }
+                else
+                {
+                    return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, null, null, flatten, aliasSelector, joinCondition);
+                }
+            }
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Inner, tb.GetTableName(), null, null, aliasSelector, joinCondition);
         }
 
         public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
@@ -372,20 +403,31 @@ namespace BigQuery.Linq
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, null, joinTable, aliasSelector, joinCondition);
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, null, joinTable, null, aliasSelector, joinCondition);
         }
 
         public static IJoinBigQueryable<TResult> Join<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
             JoinType joinType,
-            ITableDecoratorBigQueryable<TInner> joinTable,
+            IFlattenBigQueryable<TInner> joinTable,
             Expression<Func<TOuter, TInner, TResult>> aliasSelector,
             Expression<Func<TResult, bool>> joinCondition)
         {
             if (source == null) throw new ArgumentNullException("source");
 
             var tb = joinTable as ITableName;
-            if (tb == null) throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, tb.GetTableName(), null, aliasSelector, joinCondition);
+            if (tb == null)
+            {
+                var flatten = joinTable as IFlattenBigQueryable<TInner>;
+                if (flatten == null)
+                {
+                    throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
+                }
+                else
+                {
+                    return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, null, null, flatten, aliasSelector, joinCondition);
+                }
+            }
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (InternalJoinType)joinType, tb.GetTableName(), null, null, aliasSelector, joinCondition);
         }
 
         public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
@@ -395,19 +437,30 @@ namespace BigQuery.Linq
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, joinTable, aliasSelector, null);
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, joinTable, null, aliasSelector, null);
         }
 
         public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
             JoinType joinType,
-            ITableDecoratorBigQueryable<TInner> joinTable,
+            IFlattenBigQueryable<TInner> joinTable,
             Expression<Func<TOuter, TInner, TResult>> aliasSelector)
         {
             if (source == null) throw new ArgumentNullException("source");
 
             var tb = joinTable as ITableName;
-            if (tb == null) throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, tb.GetTableName(), null, aliasSelector, null);
+            if (tb == null)
+            {
+                var flatten = joinTable as IFlattenBigQueryable<TInner>;
+                if (flatten == null)
+                {
+                    throw new ArgumentException("not supports joinTable Type:" + joinTable.GetType());
+                }
+                else
+                {
+                    return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, null, flatten, aliasSelector, null);
+                }
+            }
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, tb.GetTableName(), null, null, aliasSelector, null);
         }
 
         /// <summary>

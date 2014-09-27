@@ -40,6 +40,7 @@ namespace BigQuery.Linq.Query
         readonly InternalJoinType joinType;
         readonly string joinTableName;
         readonly SubqueryBigQueryable<TInner> joinTable;
+        readonly FlattenBigQueryable<TInner> joinFlattenTable;
         readonly Expression<Func<TOuter, TInner, TResult>> aliasSelector;
         readonly Expression<Func<TResult, bool>> joinCondition;
 
@@ -59,12 +60,14 @@ namespace BigQuery.Linq.Query
             InternalJoinType joinType,
             string joinTableName,
             IExecutableBigQueryable<TInner> joinTable,
+            IFlattenBigQueryable<TInner> joinFlattenTable,
             Expression<Func<TOuter, TInner, TResult>> aliasSelector,
             Expression<Func<TResult, bool>> joinCondition)
             : base(parent)
         {
             this.joinType = joinType;
             this.joinTableName = joinTableName;
+            this.joinFlattenTable = joinFlattenTable as FlattenBigQueryable<TInner>;
             var sub = joinTable as SubqueryBigQueryable<TInner>;
             if (sub != null)
             {
@@ -115,6 +118,10 @@ namespace BigQuery.Linq.Query
             {
                 sb.AppendLine();
                 sb.Append(joinTable.BuildQueryStringWithoutFrom(depth));
+            }
+            else if (joinFlattenTable != null)
+            {
+                sb.Append(joinFlattenTable.BuildQueryStringWithoutFrom(depth));
             }
             else
             {

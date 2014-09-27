@@ -105,6 +105,7 @@
   <ItemGroup>
     <Compile Include="Builder\ContextTest.cs" />
     <Compile Include="Builder\JoinTest.cs" />
+    <Compile Include="Builder\FlattenTest.cs" />
     <Compile Include="Builder\TableDecoratorTest.cs" />
     <Compile Include="ChainingAssertion.MSTest.cs" />
     <Compile Include="Builder\StandardQueries.cs" />

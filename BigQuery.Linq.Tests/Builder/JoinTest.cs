@@ -96,5 +96,61 @@ FROM
 )
 ".TrimSmart());
         }
+
+        [TestMethod]
+        public void IndentCheckWithFlatten()
+        {
+            var ctx = new BigQueryContext();
+            ctx.From<wikipedia>()
+                .Join(ctx.From<wikipedia>().Flatten(x => x.contributor_id), (A, B) => new { A, B }, x => x.A.title == x.B.title)
+                .Select()
+                .AsSubquery()
+                .Select()
+                .ToString()
+                .Is(@"
+SELECT
+  *
+FROM
+(
+  SELECT
+    *
+  FROM
+    [publicdata:samples.wikipedia] AS [A]
+  INNER JOIN
+    (FLATTEN([publicdata:samples.wikipedia], [contributor_id])) AS [B] ON ([A.title] = [B.title])
+)
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void IndentCheckWithFlatten2()
+        {
+            var ctx = new BigQueryContext();
+            ctx.From<wikipedia>()
+                .Join(ctx.From<wikipedia>().Select(x => new { x.title, v = x.contributor_id }).AsSubquery().Flatten(x => x.v), (A, B) => new { A, B }, x => x.A.title == x.B.title)
+                .Select()
+                .AsSubquery()
+                .Select()
+                .ToString()
+                .Is(@"
+SELECT
+  *
+FROM
+(
+  SELECT
+    *
+  FROM
+    [publicdata:samples.wikipedia] AS [A]
+  INNER JOIN (FLATTEN(
+  (
+    SELECT
+      [title],
+      [contributor_id] AS [v]
+    FROM
+      [publicdata:samples.wikipedia]
+  ), [v])) AS [B] ON ([A.title] = [B.title])
+)
+".TrimSmart());
+        }
     }
 }

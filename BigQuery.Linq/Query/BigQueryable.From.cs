@@ -18,6 +18,11 @@ namespace BigQuery.Linq.Query
         string GetTableName();
     }
 
+    internal interface IWithoutFrom
+    {
+        string BuildQueryStringWithoutFrom(int depth);
+    }
+
     internal class FromBigQueryable<T> : BigQueryable, IFromBigQueryable<T>, IWithAlias, ITableName
     {
         internal readonly string[] tableNames; // for TableDecorator
@@ -165,7 +170,7 @@ namespace BigQuery.Linq.Query
         }
     }
 
-    internal class SubqueryBigQueryable<T> : BigQueryable, ISubqueryBigQueryable<T>, IWithAlias
+    internal class SubqueryBigQueryable<T> : BigQueryable, ISubqueryBigQueryable<T>, IWithAlias, IWithoutFrom
     {
         readonly ExecutableBigQueryableBase<T> typedInner;
 
