@@ -40,9 +40,9 @@ using BigQuery.Linq.BqFunc;
 LINQ to BigQuery is LINQ but is not IQueryable. It's constraint is old good method chain. The rule is
 
 ```
-From(+TableDecorate) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit -> IgnoreCase
-                                       | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) | -> IgnoreCase
-                                                   | -> OrderBy(ThenBy) ->                   |
+From((+TableDecorate)+Flatten) -> Join -> Where -| -> OrderBy(ThenBy) -> Select ->                     | -> Limit -> IgnoreCase
+                                                 | -> Select | -> GroupBy -> Having -> OrderBy(ThenBy) | -> IgnoreCase
+                                                             | -> OrderBy(ThenBy) ->                   |
 ```
 After Select, you can call...
 
@@ -340,7 +340,7 @@ public static class MyExtensions
 
 Limitation
 ---
-Currently not supported Record Type and FLATTEN, WITHIN query.
+Currently not supported Record Type and WITHIN query.
 
 Author Info
 ---
