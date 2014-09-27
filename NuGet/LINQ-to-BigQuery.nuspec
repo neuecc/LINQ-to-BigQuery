@@ -2,18 +2,30 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
+        <releaseNotes>
+            Add : BigQueryable.From(multiSubquery)
+            Add : BigQueryable.Flatten
+            Add : BqFunc.Nth
+            Add : BqFunc.AsConstant
+            Add : BqFunc.In(semijoinExpression) overload
+            Add : MetaTable.InsertAllAsync / CreateTable / CreateTableAsync
+            Fix : TableDecorate in Join can't out indent
+            Update : NuGet package Dependency to id="Google.Apis.Bigquery.v2" version="1.8.1.1680"
+            Breaking Change : QueryContext.Query return QueryResponse
+            Breaking Change : throw TimeoutException when Query is timeout
+        </releaseNotes>
         <language>en-US</language>
         <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
         <projectUrl>https://github.com/neuecc/LINQ-to-BigQuery</projectUrl>
         <tags>LINQ BigQuery</tags>
         <dependencies>
-            <dependency id="Google.Apis.Bigquery.v2" version="1.8.1.1670" />
+            <dependency id="Google.Apis.Bigquery.v2" version="1.8.1.1680" />
         </dependencies>
     </metadata>
     <files>
