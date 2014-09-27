@@ -156,7 +156,7 @@ namespace BigQuery.Linq
         public MetaTable[] GetAllTableInfo(string dataset)
         {
             var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
-            return Query<MetaTable>(query);
+            return Query<MetaTable>(query).Rows;
         }
 
         // Execute
@@ -188,15 +188,6 @@ namespace BigQuery.Linq
             return response;
         }
 
-        public QueryResponse<T> RunDry<T>(string query)
-        {
-            var sw = Stopwatch.StartNew();
-            var queryResponse = BuildRequest(query, isForceDry: true).Execute();
-            sw.Stop();
-            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
-            return response;
-        }
-
         public async Task<QueryResponse<T>> RunAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
         {
             var sw = Stopwatch.StartNew();
@@ -206,15 +197,24 @@ namespace BigQuery.Linq
             return response;
         }
 
-        public T[] Query<T>(string query)
+        public QueryResponse<T> RunDry<T>(string query)
         {
-            return Run<T>(query).Rows;
+            var sw = Stopwatch.StartNew();
+            var queryResponse = BuildRequest(query, isForceDry: true).Execute();
+            sw.Stop();
+            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse);
+            return response;
         }
 
-        public async Task<T[]> QueryAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
+        public QueryResponse<T> Query<T>(string query)
+        {
+            return Run<T>(query);
+        }
+
+        public async Task<QueryResponse<T>> QueryAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
         {
             var response = await RunAsync<T>(query, cancellationToken).ConfigureAwait(false);
-            return response.Rows;
+            return response;
         }
     }
 }

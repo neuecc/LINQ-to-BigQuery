@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq.ConsoleApp
 {
+
+
+
     class Program
     {
 
@@ -23,16 +26,8 @@ namespace BigQuery.Linq.ConsoleApp
         {
 
 
-            // schema?
-
 
         }
     }
 
-    public class Wikipe
-    {
-        public string title { get; set; }
-        public int id { get; set; }
-        public bool? is_redirect { get; set; }
-    }
 }
