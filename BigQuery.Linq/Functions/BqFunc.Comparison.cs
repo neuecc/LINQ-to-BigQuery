@@ -60,6 +60,23 @@ namespace BigQuery.Linq
         public static bool In<T, TExpr>(T expr, IExecutableBigQueryable<TExpr> exprs) { throw Invalid(); }
 
         /// <summary>
+        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
+        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
+        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
+        /// </summary>
+        [FunctionName("NOT IN", SpecifiedFormatterType = typeof(InFormatter))]
+        public static bool NotIn(object expr, params object[] exprs) { throw Invalid(); }
+
+        /// <summary>
+        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
+        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
+        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
+        /// <para>Semijoin expression (i.e. "x IN (SELECT ...)") only supported in WHERE or HAVING clauses</para>
+        /// </summary>
+        [FunctionName("NOT IN", SpecifiedFormatterType = typeof(InSemijoinFormatter))]
+        public static bool NotIn<T, TExpr>(T expr, IExecutableBigQueryable<TExpr> exprs) { throw Invalid(); }
+
+        /// <summary>
         /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
         /// </summary>
         [FunctionName("GREATEST", SpecifiedFormatterType = typeof(GreatestFormatter))]
@@ -138,7 +155,7 @@ namespace BigQuery.Linq
                 var arg = node.Arguments[1] as NewArrayExpression;
                 var expr2 = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
-                return string.Format("{0} IN({1})", expr1, expr2);
+                return string.Format("{0} {1}({2})", expr1, fuctionName, expr2);
             }
         }
 
@@ -155,7 +172,7 @@ namespace BigQuery.Linq
                 var indent = new string(' ', indentSize * (depth));
                 var sb = new StringBuilder();
 
-                sb.AppendLine(expr1 + " IN");
+                sb.AppendLine(expr1 + " " + fuctionName);
                 sb.Append(indent);
                 sb.AppendLine("(");
 

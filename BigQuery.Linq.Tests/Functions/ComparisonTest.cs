@@ -149,6 +149,86 @@ HAVING
         }
 
         [TestMethod]
+        public void NotIn()
+        {
+            var context = new BigQueryContext();
+            context.Select(() => new { value = 100 })
+                .AsSubquery()
+                .Select(x => (BqFunc.NotIn(x.value, 10, 20, 50, 1000)) ? 10000 : -10)
+                .ToString()
+                .Is(@"
+SELECT
+  IF([value] NOT IN(10, 20, 50, 1000), 10000, -10)
+FROM
+(
+  SELECT
+    100 AS [value]
+)
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void NotIn_SubQuery()
+        {
+            var context = new BigQueryContext();
+            context.Select(() => new { value = 100L })
+                .AsSubquery()
+                .Where(x => (BqFunc.NotIn(x.value, context.From<wikipedia>().Select(y => y.id ?? -1).Limit(1000))))
+                .Select(x => x.value)
+                .ToString()
+                .Is(@"
+SELECT
+  [value]
+FROM
+(
+  SELECT
+    100 AS [value]
+)
+WHERE
+  [value] NOT IN
+  (
+    SELECT
+      IFNULL([id], -1)
+    FROM
+      [publicdata:samples.wikipedia]
+    LIMIT 1000
+  )
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void NotIn_SubQuery2()
+        {
+            var context = new BigQueryContext();
+            context.Select(() => new { value = 100L })
+                .AsSubquery()
+                .Select(x => new { x.value })
+                .GroupBy(x => x.value)
+                .Having(x => (BqFunc.NotIn(x.value, context.From<wikipedia>().Select(y => y.id ?? -1).Limit(1000))))
+                .ToString()
+                .Is(@"
+SELECT
+  [value]
+FROM
+(
+  SELECT
+    100 AS [value]
+)
+GROUP BY
+  [value]
+HAVING
+  [value] NOT IN
+  (
+    SELECT
+      IFNULL([id], -1)
+    FROM
+      [publicdata:samples.wikipedia]
+    LIMIT 1000
+  )
+".TrimSmart());
+        }
+
+        [TestMethod]
         public void In_Subquery_real()
         {
             var context = new BigQueryContext();
