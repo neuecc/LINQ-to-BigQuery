@@ -108,8 +108,8 @@ FROM (FLATTEN(
                .Flatten(x => x.digit);
 
             var d = digits
-                .JoinCross(JoinType.Inner, digits, (d1, d2) => new { d1, d2 })
-                .Select(x => new { seq = x.d1.digit + (x.d2.digit * 10)})
+                .JoinCross(digits, (d1, d2) => new { d1, d2 })
+                .Select(x => new { seq = x.d1.digit + (x.d2.digit * 10) })
                 .OrderBy(x => x.seq)
                 .ToString();
 
@@ -127,6 +127,50 @@ FROM (FLATTEN(
   )
 ), [digit])) AS [d1]
 CROSS JOIN (FLATTEN(
+(
+  SELECT
+    INTEGER(SPLIT([seed], '')) AS [digit]
+  FROM
+  (
+    SELECT
+      '0123456789' AS [seed]
+  )
+), [digit])) AS [d2]
+ORDER BY
+  [seq]
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void FlattenDigitMakerJoinEach()
+        {
+            var digits = new BigQueryContext()
+               .Select(() => new { seed = "0123456789" })
+               .AsSubquery()
+               .Select(x => new { digit = BqFunc.Integer(BqFunc.Split(x.seed, "")) })
+               .AsSubquery()
+               .Flatten(x => x.digit);
+
+            var d = digits
+                .JoinCross(digits, (d1, d2) => new { d1, d2 }, each: true)
+                .Select(x => new { seq = x.d1.digit + (x.d2.digit * 10) })
+                .OrderBy(x => x.seq)
+                .ToString();
+
+            d.Is(@"
+SELECT
+  ([d1.digit] + ([d2.digit] * 10)) AS [seq]
+FROM (FLATTEN(
+(
+  SELECT
+    INTEGER(SPLIT([seed], '')) AS [digit]
+  FROM
+  (
+    SELECT
+      '0123456789' AS [seed]
+  )
+), [digit])) AS [d1]
+CROSS JOIN EACH (FLATTEN(
 (
   SELECT
     INTEGER(SPLIT([seed], '')) AS [digit]

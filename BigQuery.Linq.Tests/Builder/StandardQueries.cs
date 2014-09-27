@@ -107,7 +107,7 @@ WHERE
         public void Join()
         {
             var context = new BigQuery.Linq.BigQueryContext();
-
+            
             var query1 = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
                 .Join(context.From<Wikipedia>("[publicdata:samples.wikipedia]").Select(x => new { x.title, x.wp_namespace }).Limit(1000),
                     (kp, tp) => new { kp, tp }, // alias selector

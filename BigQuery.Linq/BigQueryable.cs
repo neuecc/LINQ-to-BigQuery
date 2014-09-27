@@ -430,19 +430,19 @@ namespace BigQuery.Linq
         }
 
         public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
-            JoinType joinType,
             IExecutableBigQueryable<TInner> joinTable,
-            Expression<Func<TOuter, TInner, TResult>> aliasSelector)
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector,
+            bool each = false)
         {
             if (source == null) throw new ArgumentNullException("source");
 
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, joinTable, null, aliasSelector, null);
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (each ? InternalJoinType.CrossEach : InternalJoinType.Cross), null, joinTable, null, aliasSelector, null);
         }
 
         public static IJoinBigQueryable<TResult> JoinCross<TOuter, TInner, TResult>(this IJoinBigQueryable<TOuter> source,
-            JoinType joinType,
             IFlattenBigQueryable<TInner> joinTable,
-            Expression<Func<TOuter, TInner, TResult>> aliasSelector)
+            Expression<Func<TOuter, TInner, TResult>> aliasSelector,
+            bool each = false)
         {
             if (source == null) throw new ArgumentNullException("source");
 
@@ -456,10 +456,10 @@ namespace BigQuery.Linq
                 }
                 else
                 {
-                    return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, null, null, flatten, aliasSelector, null);
+                    return new JoinBigQueryable<TOuter, TInner, TResult>(source, (each ? InternalJoinType.CrossEach : InternalJoinType.Cross), null, null, flatten, aliasSelector, null);
                 }
             }
-            return new JoinBigQueryable<TOuter, TInner, TResult>(source, InternalJoinType.Cross, tb.GetTableName(), null, null, aliasSelector, null);
+            return new JoinBigQueryable<TOuter, TInner, TResult>(source, (each ? InternalJoinType.CrossEach : InternalJoinType.Cross), tb.GetTableName(), null, null, aliasSelector, null);
         }
 
         /// <summary>

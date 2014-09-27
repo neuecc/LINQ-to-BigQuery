@@ -12,7 +12,11 @@ namespace BigQuery.Linq
         Inner = 0,
         InnerEach = 1,
         LeftOuter = 2,
-        LeftOuterEach = 3
+        LeftOuterEach = 3,
+        RightOuter = 4,
+        RightOuterEach = 5,
+        FullOuter = 6,
+        FullOuterEach = 7
     }
 
     internal enum InternalJoinType
@@ -21,7 +25,12 @@ namespace BigQuery.Linq
         InnerEach = 1,
         LeftOuter = 2,
         LeftOuterEach = 3,
-        Cross = 4
+        RightOuter = 4,
+        RightOuterEach = 5,
+        FullOuter = 6,
+        FullOuterEach = 7,
+        Cross = 8,
+        CrossEach = 9,
     }
 
     internal interface IJoinBigQueryable
@@ -100,8 +109,23 @@ namespace BigQuery.Linq.Query
                 case InternalJoinType.LeftOuterEach:
                     sb.Append("LEFT OUTER JOIN EACH");
                     break;
+                case InternalJoinType.RightOuter:
+                    sb.Append("RIGHT OUTER JOIN");
+                    break;
+                case InternalJoinType.RightOuterEach:
+                    sb.Append("RIGHT OUTER JOIN EACH");
+                    break;
+                case InternalJoinType.FullOuter:
+                    sb.Append("FULL OUTER JOIN");
+                    break;
+                case InternalJoinType.FullOuterEach:
+                    sb.Append("FULL OUTER JOIN EACH");
+                    break;
                 case InternalJoinType.Cross:
                     sb.Append("CROSS JOIN");
+                    break;
+                case InternalJoinType.CrossEach:
+                    sb.Append("CROSS JOIN EACH");
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -134,7 +158,7 @@ namespace BigQuery.Linq.Query
             sb.Append(" AS " + aliasName.EscapeBq());
 
             // join condition
-            if (joinType != InternalJoinType.Cross)
+            if (joinType != InternalJoinType.Cross && joinType != InternalJoinType.CrossEach)
             {
                 sb.Append(" ON ");
                 var on = BigQueryTranslateVisitor.BuildQuery(0, 0, joinCondition);
