@@ -35,7 +35,7 @@ namespace BigQuery.Linq
 
     internal interface ISpeficiedFormatter
     {
-        string Format(MethodCallExpression node);
+        string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node);
     }
 
     public static partial class BqFunc

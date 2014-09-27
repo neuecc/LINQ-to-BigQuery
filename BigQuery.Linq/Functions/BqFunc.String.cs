@@ -147,7 +147,7 @@ namespace BigQuery.Linq
 
         class ConcatFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
 
@@ -159,7 +159,7 @@ namespace BigQuery.Linq
 
         class ContainsFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var expr = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);

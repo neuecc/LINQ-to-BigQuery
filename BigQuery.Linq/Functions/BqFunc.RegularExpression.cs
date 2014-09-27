@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace BigQuery.Linq
 
         class RegexpMatchFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innnerTranslator = new BigQueryTranslateVisitor(0, 0);
 
@@ -57,7 +58,7 @@ namespace BigQuery.Linq
 
         class RegexpExtractFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innnerTranslator = new BigQueryTranslateVisitor(0, 0);
 
@@ -72,7 +73,7 @@ namespace BigQuery.Linq
 
         class RegexpReplaceFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innnerTranslator = new BigQueryTranslateVisitor(0, 0);
 

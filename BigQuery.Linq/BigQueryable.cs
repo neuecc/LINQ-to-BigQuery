@@ -100,7 +100,7 @@ namespace BigQuery.Linq
         ISubqueryBigQueryable<T> AsSubquery();
     }
 
-    internal abstract class ExecutableBigQueryableBase<T> : BigQueryable, BigQuery.Linq.IExecutableBigQueryable<T>
+    internal abstract class ExecutableBigQueryableBase: BigQueryable
     {
         public ExecutableBigQueryableBase(IBigQueryable parent)
             : base(parent)
@@ -156,6 +156,15 @@ namespace BigQuery.Linq
             }));
 
             return queryString;
+        }
+    }
+
+    internal abstract class ExecutableBigQueryableBase<T> : ExecutableBigQueryableBase, BigQuery.Linq.IExecutableBigQueryable<T>
+    {
+        public ExecutableBigQueryableBase(IBigQueryable parent)
+            : base(parent)
+        {
+
         }
 
         public T[] ToArray()

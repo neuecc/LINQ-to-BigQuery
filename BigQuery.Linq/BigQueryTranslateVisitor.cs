@@ -328,7 +328,7 @@ namespace BigQuery.Linq
             if (attr.SpecifiedFormatterType != null)
             {
                 var formatter = Activator.CreateInstance(attr.SpecifiedFormatterType, true) as ISpeficiedFormatter;
-                sb.Append(formatter.Format(node));
+                sb.Append(formatter.Format(depth, indentSize, attr.Name, node));
             }
             else
             {
@@ -347,7 +347,7 @@ namespace BigQuery.Linq
 
         protected override Expression VisitConditional(ConditionalExpression node)
         {
-            var innerTranslator = new BigQueryTranslateVisitor();
+            var innerTranslator = new BigQueryTranslateVisitor(depth, indentSize);
 
             // case when ... then ... ... else .. end
             if (node.IfFalse is ConditionalExpression)

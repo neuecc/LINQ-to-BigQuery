@@ -296,7 +296,7 @@ namespace BigQuery.Linq
 
         class CountAllFormatter : ISpeficiedFormatter
         {
-            public string Format(MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 return "COUNT(*)";
             }
@@ -304,7 +304,7 @@ namespace BigQuery.Linq
 
         class CountFieldFormatter : ISpeficiedFormatter
         {
-            public string Format(MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));
@@ -315,7 +315,7 @@ namespace BigQuery.Linq
 
         class CountDistinctFormatter : ISpeficiedFormatter
         {
-            public string Format(MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var args = string.Join(", ", node.Arguments.Select(x => innerTranslator.VisitAndClearBuffer(x)));

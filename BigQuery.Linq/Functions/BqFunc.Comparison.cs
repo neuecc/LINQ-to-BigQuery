@@ -15,25 +15,25 @@ namespace BigQuery.Linq
         /// <summary>
         /// &gt;. Returns true if expr1 is greater than expr2.
         /// </summary>
-        [FunctionName(">", SpecifiedFormatterType = typeof(GreaterThanFormatter))]
+        [FunctionName(">", SpecifiedFormatterType = typeof(RelationalOperatorFormatter))]
         public static bool GreaterThan(string expr1, string epr2) { throw Invalid(); }
 
         /// <summary>
         /// &gt;=. Returns true if expr1 is greater than or equal to expr2.
         /// </summary>
-        [FunctionName(">=", SpecifiedFormatterType = typeof(GreaterThanEqualFormatter))]
+        [FunctionName(">=", SpecifiedFormatterType = typeof(RelationalOperatorFormatter))]
         public static bool GreaterThanEqual(string expr1, string epr2) { throw Invalid(); }
 
         /// <summary>
         /// &lt;. Returns true if expr1 is less than expr2.
         /// </summary>
-        [FunctionName("<", SpecifiedFormatterType = typeof(LessThanFormatter))]
+        [FunctionName("<", SpecifiedFormatterType = typeof(RelationalOperatorFormatter))]
         public static bool LessThan(string expr1, string epr2) { throw Invalid(); }
 
         /// <summary>
         /// &lt;=. Returns true if expr1 is less than or equal to expr2.
         /// </summary>
-        [FunctionName("<=", SpecifiedFormatterType = typeof(LessThanEqualFormatter))]
+        [FunctionName("<=", SpecifiedFormatterType = typeof(RelationalOperatorFormatter))]
         public static bool LessThanEqual(string expr1, string epr2) { throw Invalid(); }
 
         /// <summary>
@@ -49,6 +49,15 @@ namespace BigQuery.Linq
         /// </summary>
         [FunctionName("IN", SpecifiedFormatterType = typeof(InFormatter))]
         public static bool In(object expr, params object[] exprs) { throw Invalid(); }
+
+        /// <summary>
+        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
+        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
+        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
+        /// <para>Semijoin expression (i.e. "x IN (SELECT ...)") only supported in WHERE or HAVING clauses</para>
+        /// </summary>
+        [FunctionName("IN", SpecifiedFormatterType = typeof(InSemijoinFormatter))]
+        public static bool In<T, TExpr>(T expr, IExecutableBigQueryable<TExpr> exprs) { throw Invalid(); }
 
         /// <summary>
         /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
@@ -96,53 +105,20 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        class GreaterThanFormatter : ISpeficiedFormatter
+        class RelationalOperatorFormatter : ISpeficiedFormatter
         {
-            public string Format(MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
                 var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
-                return expr1 + " > " + expr2;
-            }
-        }
-
-        class GreaterThanEqualFormatter : ISpeficiedFormatter
-        {
-            public string Format(MethodCallExpression node)
-            {
-                var innerTranslator = new BigQueryTranslateVisitor();
-                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
-                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
-                return expr1 + " >= " + expr2;
-            }
-        }
-
-        class LessThanFormatter : ISpeficiedFormatter
-        {
-            public string Format(MethodCallExpression node)
-            {
-                var innerTranslator = new BigQueryTranslateVisitor();
-                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
-                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
-                return expr1 + " < " + expr2;
-            }
-        }
-
-        class LessThanEqualFormatter : ISpeficiedFormatter
-        {
-            public string Format(MethodCallExpression node)
-            {
-                var innerTranslator = new BigQueryTranslateVisitor();
-                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
-                var expr2 = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
-                return expr1 + " <= " + expr2;
+                return expr1 + " " + fuctionName + " " + expr2;
             }
         }
 
         class BetweenFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
@@ -155,7 +131,7 @@ namespace BigQuery.Linq
 
         class InFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
@@ -166,9 +142,35 @@ namespace BigQuery.Linq
             }
         }
 
+        class InSemijoinFormatter : ISpeficiedFormatter
+        {
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                var l = Expression.Lambda(node.Arguments[1]);
+                var ctor = l.Compile();
+                var bq = ctor.DynamicInvoke(null) as ExecutableBigQueryableBase;
+
+                var indent = new string(' ', indentSize * (depth));
+                var sb = new StringBuilder();
+
+                sb.AppendLine(expr1 + " IN");
+                sb.Append(indent);
+                sb.AppendLine("(");
+
+                sb.AppendLine(bq.ToQueryString(depth + 1));
+
+                sb.Append(indent);
+                sb.Append(")");
+
+                return sb.ToString();
+            }
+        }
+
         class GreatestFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var arg = node.Arguments[0] as NewArrayExpression;
@@ -180,7 +182,7 @@ namespace BigQuery.Linq
 
         class LeastFormatter : ISpeficiedFormatter
         {
-            public string Format(System.Linq.Expressions.MethodCallExpression node)
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var arg = node.Arguments[0] as NewArrayExpression;
