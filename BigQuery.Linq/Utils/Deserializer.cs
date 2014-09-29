@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Bigquery.v2.Data;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -44,25 +45,8 @@ namespace BigQuery.Linq
         };
 
         protected static readonly Regex ExtractAnonymousFieldNameRegex = new Regex("<(.+)>", RegexOptions.Compiled);
-    }
 
-    internal class Deserializer<T> : Deserializer
-    {
-        readonly TableSchema schema;
-        readonly Dictionary<string, PropertyInfo> typeInfo;
-        readonly Dictionary<string, FieldInfo> fallbackFieldInfo;
-
-        public Deserializer(TableSchema schema)
-        {
-            this.schema = schema;
-            this.typeInfo = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance)
-                .ToDictionary(x => x.Name, StringComparer.InvariantCultureIgnoreCase);
-            this.fallbackFieldInfo = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.SetField | BindingFlags.Instance)
-                .Where(x => x.Name.StartsWith("<"))
-                .ToDictionary(x => ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value, StringComparer.InvariantCultureIgnoreCase);
-        }
-
-        object Parse(string type, string value)
+        static protected object Parse(string type, string value)
         {
             if (value == null) return null;
 
@@ -86,6 +70,46 @@ namespace BigQuery.Linq
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        internal static dynamic DeserializeDynamic(TableSchema schema, TableRow row)
+        {
+            if (row.F.Count == 1 && DataTypeUtility.Parse(schema.Fields[0].Type) != DataType.Record)
+            {
+                var field = schema.Fields[0];
+                var value = row.F[0].V;
+                var parsedValue = Parse(field.Type, (string)value);
+
+                return parsedValue;
+            }
+
+            IDictionary<string, object> container = new ExpandoObject();
+            for (int i = 0; i < row.F.Count; i++)
+            {
+                var field = schema.Fields[i];
+                var value = row.F[i].V;
+                var parsedValue = Parse(field.Type, (string)value);
+
+                container.Add(field.Name, parsedValue);
+            }
+            return container;
+        }
+    }
+
+    internal class Deserializer<T> : Deserializer
+    {
+        readonly TableSchema schema;
+        readonly Dictionary<string, PropertyInfo> typeInfo;
+        readonly Dictionary<string, FieldInfo> fallbackFieldInfo;
+
+        public Deserializer(TableSchema schema)
+        {
+            this.schema = schema;
+            this.typeInfo = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance)
+                .ToDictionary(x => x.Name, StringComparer.InvariantCultureIgnoreCase);
+            this.fallbackFieldInfo = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.SetField | BindingFlags.Instance)
+                .Where(x => x.Name.StartsWith("<"))
+                .ToDictionary(x => ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value, StringComparer.InvariantCultureIgnoreCase);
         }
 
         public T Deserialize(TableRow row)

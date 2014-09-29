@@ -1,6 +1,7 @@
 ﻿using Google.Apis.Bigquery.v2.Data;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,12 +22,24 @@ namespace BigQuery.Linq
         public TimeSpan ExecutionTime { get; private set; }
         public IList<TableFieldSchema> TableFieldSchemas { get; private set; }
 
-        internal QueryResponse(string query, TimeSpan executionTime, QueryResponse queryResponse)
+        internal QueryResponse(string query, TimeSpan executionTime, QueryResponse queryResponse, bool isDynamic)
         {
-            var deserializer = new Deserializer<T>(queryResponse.Schema);
-            var rows = (queryResponse.Rows == null)
-                ? new T[0]
-                : queryResponse.Rows.Select(row => deserializer.Deserialize(row)).ToArray();
+            T[] rows;
+            if (queryResponse.Rows == null)
+            {
+                rows = new T[0];
+            }
+            else if (!isDynamic)
+            {
+                var deserializer = new Deserializer<T>(queryResponse.Schema);
+                rows = queryResponse.Rows.Select(row => deserializer.Deserialize(row)).ToArray();
+            }
+            else
+            {
+                rows = queryResponse.Rows.Select(row => Deserializer.DeserializeDynamic(queryResponse.Schema, row))
+                    .Cast<T>() // T as dynamic...
+                    .ToArray();
+            }
             var schemas = (queryResponse.Schema == null)
                 ? new TableFieldSchema[0]
                 : queryResponse.Schema.Fields;
