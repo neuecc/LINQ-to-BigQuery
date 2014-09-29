@@ -142,6 +142,7 @@
     <Compile Include="SampleTables\shakespeare.cs" />
     <Compile Include="SampleTables\wikipedia.cs" />
     <Compile Include="StringExtensions.cs" />
+    <Compile Include="DataTypeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

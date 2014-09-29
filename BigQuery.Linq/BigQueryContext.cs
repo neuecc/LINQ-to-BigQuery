@@ -163,6 +163,11 @@ namespace BigQuery.Linq
 
         JobsResource.QueryRequest BuildRequest(string query, bool isForceDry)
         {
+            if (BigQueryService == null)
+            {
+                throw new InvalidOperationException("BigQueryService is null. Please set BigQueryService and ProjectId on constructor.");
+            }
+
             var body = new QueryRequest
             {
                 Query = query,

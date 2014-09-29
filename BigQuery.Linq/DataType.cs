@@ -83,6 +83,81 @@ namespace BigQuery.Linq
                     throw new ArgumentException("invalid type:" + type);
             }
         }
+
+        public static DataType ToDataType<T>()
+        {
+            return ToDataType(typeof(T));
+        }
+
+        public static DataType ToDataType(Type type)
+        {
+            var isNulable = type.IsNullable();
+            if (isNulable)
+            {
+                type = type.GetGenericArguments()[0];
+            }
+
+            var tc = Type.GetTypeCode(type);
+            switch (tc)
+            {
+                case TypeCode.Boolean:
+                    return DataType.Boolean;
+                case TypeCode.Char:
+                case TypeCode.String:
+                    return DataType.String;
+                case TypeCode.DateTime:
+                    return DataType.Timestamp;
+                case TypeCode.DBNull:
+                case TypeCode.Empty:
+                    throw new ArgumentException("not supported type");
+                case TypeCode.Decimal:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.Byte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return DataType.Integer;
+                case TypeCode.Object:
+                    if (type == typeof(DateTimeOffset))
+                    {
+                        return DataType.Timestamp;
+                    }
+                    return DataType.Record;
+                default:
+                    return DataType.Record;
+            }
+        }
+
+        public static TableFieldSchema[] ToTableFieldSchema<T>()
+        {
+            return ToTableFieldSchema(typeof(T));
+        }
+
+        public static TableFieldSchema[] ToTableFieldSchema<T>(T dynamicSchema)
+        {
+            return ToTableFieldSchema(typeof(T));
+        }
+
+        public static TableFieldSchema[] ToTableFieldSchema(Type type)
+        {
+            return type.GetProperties().Select(x =>
+            {
+                var isNulable = x.PropertyType.IsNullable();
+                var dataType = ToDataType(x.PropertyType);
+
+                return new TableFieldSchema
+                {
+                    Name = x.Name,
+                    Type = dataType.ToIdentifier(),
+                    Mode = isNulable ? "NULLABLE" : "REQUIRED" // NULLABLE, REQUIRED and REPEATED
+                };
+            }).ToArray();
+        }
     }
 
     internal static class DataTypeFormatter
