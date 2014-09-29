@@ -28,7 +28,8 @@ namespace BigQuery.Linq.Query
             }
             else
             {
-                if (selector.Body.NodeType != ExpressionType.New)
+                if (selector.Body.NodeType != ExpressionType.New
+                 && selector.Body.NodeType != ExpressionType.MemberInit)
                 {
                     command = Indent(depth + 1);
                 }

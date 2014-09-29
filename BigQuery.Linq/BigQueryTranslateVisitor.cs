@@ -86,11 +86,40 @@ namespace BigQuery.Linq
             // specialize for DateTime
             if (FormatIfExprIsDateTime(node)) return node;
 
+            // promising type initializer(goto:VisitMemberInit)
+            if (!node.Type.IsAnonymousType()) return node;
+
             var indent = BuildIndent();
             var innerTranslator = new BigQueryTranslateVisitor(depth, indentSize);
 
             var merge = node.Members.Zip(node.Arguments, (x, y) =>
             {
+                var rightValue = innerTranslator.VisitAndClearBuffer(y);
+
+                if (x.Name == rightValue.Trim('[', ']')) return "[" + x.Name + "]";
+
+                return rightValue + " AS " + "[" + x.Name + "]";
+            });
+
+            var command = string.Join("," + Environment.NewLine,
+                merge.Select(x => indent + x));
+
+            sb.Append(command);
+
+            return node;
+        }
+
+        protected override Expression VisitMemberInit(MemberInitExpression node)
+        {
+            var indent = BuildIndent();
+            var innerTranslator = new BigQueryTranslateVisitor(depth, indentSize);
+
+            var merge = node.Bindings.Select(expr =>
+            {
+                var assignment = expr as MemberAssignment;
+                var x = assignment.Member;
+                var y = assignment.Expression;
+
                 var rightValue = innerTranslator.VisitAndClearBuffer(y);
 
                 if (x.Name == rightValue.Trim('[', ']')) return "[" + x.Name + "]";
