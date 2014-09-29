@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,7 +9,12 @@ namespace BigQuery.Linq
 {
     public enum IntervalUnit
     {
-        YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
+        Year,
+        Month,
+        Day,
+        Hour,
+        Minute,
+        Second
     }
 
     public static partial class BqFunc
@@ -49,7 +55,7 @@ namespace BigQuery.Linq
         }
 
         /// <summary>Adds the specified interval to a TIMESTAMP data type. Possible interval_units values include YEAR, MONTH, DAY, HOUR, MINUTE, and SECOND. If interval is a negative number, the interval is subtracted from the TIMESTAMP data type.</summary>
-        [FunctionName("DATE_ADD")]
+        [FunctionName("DATE_ADD", SpecifiedFormatterType = typeof(DateAddFormatter))]
         public static DateTimeOffset DateAdd(DateTimeOffset timestamp, int interval, IntervalUnit intervalUnit)
         {
             throw Invalid();
@@ -174,7 +180,7 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        
+
         /// <summary>
         /// <para>Returns a human-readable date string in the format date_format_str. date_format_str can include date-related punctuation characters (such as / and -) and special characters accepted by the strftime function in C++ (such as %d for day of month).</para>
         /// <para>Use the UTC_USEC_TO_&lt;function_name&gt; functions if you plan to group query data by time intervals, such as getting all data for a certain month, because the functions are more efficient.</para>
@@ -280,6 +286,20 @@ namespace BigQuery.Linq
         public static long UtcUsecToYear(long unixTimestamp)
         {
             throw Invalid();
+        }
+
+        class DateAddFormatter : ISpeficiedFormatter
+        {
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+
+                var timestamp = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+                var interval = innerTranslator.VisitAndClearBuffer(node.Arguments[1]);
+                var intervalUnit = ((IntervalUnit)(node.Arguments[2] as ConstantExpression).Value).ToString().ToUpper();
+
+                return string.Format("DATE_ADD({0}, {1}, '{2}')", timestamp, interval, intervalUnit);
+            }
         }
     }
 }

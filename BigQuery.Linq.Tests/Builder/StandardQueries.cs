@@ -3,6 +3,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BigQuery.Linq.Tests.Builder
 {
+    enum Nano : ulong
+    {
+        Hoge = 1,
+        Huga = 4,
+        Tako = 100
+    }
+
     class Hoge
     {
         public double MyProperty { get; set; }
@@ -107,7 +114,7 @@ WHERE
         public void Join()
         {
             var context = new BigQuery.Linq.BigQueryContext();
-            
+
             var query1 = context.From<Wikipedia>("[publicdata:samples.wikipedia]")
                 .Join(context.From<Wikipedia>("[publicdata:samples.wikipedia]").Select(x => new { x.title, x.wp_namespace }).Limit(1000),
                     (kp, tp) => new { kp, tp }, // alias selector
@@ -372,6 +379,24 @@ FROM
 WHERE
   (([corpus] = 'othello') AND (LENGTH([word]) > 10))
 LIMIT 5".TrimSmart());
+        }
+
+        [TestMethod]
+        public void EnumAsValue()
+        {
+            new BigQueryContext().Select(() => new
+            {
+                Nano.Hoge,
+                Nano.Huga,
+                Nano.Tako,
+            })
+            .ToString()
+            .Is(@"
+SELECT
+  1 AS [Hoge],
+  4 AS [Huga],
+  100 AS [Tako]
+".TrimSmart());
         }
     }
 }

@@ -44,10 +44,10 @@ SELECT
             {
                 A = BqFunc.Date(BqFunc.Timestamp("2012-10-01 02:03:04")),
                 A2 = BqFunc.Date(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc)),
-                B = BqFunc.DateAdd(BqFunc.Timestamp("2012-10-01 02:03:04"), 5, IntervalUnit.YEAR),
-                B2 = BqFunc.DateAdd(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), 5, IntervalUnit.DAY),
-                C = BqFunc.DateAdd(BqFunc.Timestamp("2012-10-01 02:03:04"), -5, IntervalUnit.YEAR),
-                C2 = BqFunc.DateAdd(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), -5, IntervalUnit.SECOND),
+                B = BqFunc.DateAdd(BqFunc.Timestamp("2012-10-01 02:03:04"), 5, IntervalUnit.Year),
+                B2 = BqFunc.DateAdd(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), 5, IntervalUnit.Day),
+                C = BqFunc.DateAdd(BqFunc.Timestamp("2012-10-01 02:03:04"), -5, IntervalUnit.Year),
+                C2 = BqFunc.DateAdd(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), -5, IntervalUnit.Second),
                 D = BqFunc.DateDiff(BqFunc.Timestamp("2012-10-02 05:23:48"), BqFunc.Timestamp("2011-06-24 12:18:35"))
             }).ToString().Is(@"
 SELECT

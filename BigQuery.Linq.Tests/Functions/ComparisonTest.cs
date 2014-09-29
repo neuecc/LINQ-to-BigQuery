@@ -235,7 +235,7 @@ HAVING
             var inTarget = context
                 .From<github_timeline>("[githubarchive:github.timeline]")
                 .Where(x => x.type=="CreateEvent" 
-                             && BqFunc.ParseUtcUsec(x.repository_created_at) >= BqFunc.ParseUtcUsec(BqFunc.StrftimeUtcUsec(BqFunc.TimestampToUsec(BqFunc.DateAdd(BqFunc.UsecToTimestamp(BqFunc.Now()), -1, IntervalUnit.DAY)), "%Y-%m-%d 20:00:00"))
+                             && BqFunc.ParseUtcUsec(x.repository_created_at) >= BqFunc.ParseUtcUsec(BqFunc.StrftimeUtcUsec(BqFunc.TimestampToUsec(BqFunc.DateAdd(BqFunc.UsecToTimestamp(BqFunc.Now()), -1, IntervalUnit.Day)), "%Y-%m-%d 20:00:00"))
                     && x.repository_fork == "false"
                     && x.payload_ref_type == "repository")
                 .Select(x => new{ x.repository_url })
@@ -244,7 +244,7 @@ HAVING
             context
                 .From<github_timeline>("[githubarchive:github.timeline]")
                 .Where(x => x.type == "WatchEvent"
-                        && BqFunc.ParseUtcUsec(x.repository_created_at) >= BqFunc.ParseUtcUsec(BqFunc.StrftimeUtcUsec(BqFunc.TimestampToUsec(BqFunc.DateAdd(BqFunc.UsecToTimestamp(BqFunc.Now()), -1, IntervalUnit.DAY)), "%Y-%m-%d 20:00:00"))
+                        && BqFunc.ParseUtcUsec(x.repository_created_at) >= BqFunc.ParseUtcUsec(BqFunc.StrftimeUtcUsec(BqFunc.TimestampToUsec(BqFunc.DateAdd(BqFunc.UsecToTimestamp(BqFunc.Now()), -1, IntervalUnit.Day)), "%Y-%m-%d 20:00:00"))
                     && BqFunc.In(x.repository_url, inTarget))
                 .Select(x => new
                 {

@@ -21,28 +21,48 @@ namespace BigQuery.Linq
 
     public static class DataTypeUtility
     {
-        public static DataType ToDataType(string dataType)
+        public static DataType Parse(string dataTypeFormat)
         {
-            switch (dataType)
+            DataType dataType;
+            if (TryParse(dataTypeFormat, out dataType))
             {
-                case "STRING":
-                    return DataType.String;
-                case "INTEGER":
-                    return DataType.Integer;
-                case "FLOAT":
-                    return DataType.Float;
-                case "BOOLEAN":
-                    return DataType.Boolean;
-                case "TIMESTAMP":
-                    return DataType.Timestamp;
-                case "RECORD":
-                    return DataType.Record;
-                default:
-                    throw new ArgumentException("invalid type:" + dataType);
+                return dataType;
+            }
+            else
+            {
+                throw new FormatException("invalid type format:" + dataTypeFormat);
             }
         }
 
-        // //     FLOAT, BOOLEAN, TIMESTAMP or RECORD (where RECORD indicates that the field
+        public static bool TryParse(string dataTypeFormat, out DataType dataType)
+        {
+            switch (dataTypeFormat)
+            {
+                case "STRING":
+                    dataType = DataType.String;
+                    break;
+                case "INTEGER":
+                    dataType = DataType.Integer;
+                    break;
+                case "FLOAT":
+                    dataType = DataType.Float;
+                    break;
+                case "BOOLEAN":
+                    dataType = DataType.Boolean;
+                    break;
+                case "TIMESTAMP":
+                    dataType = DataType.Timestamp;
+                    break;
+                case "RECORD":
+                    dataType = DataType.Record;
+                    break;
+                default:
+                    dataType = (DataType)0;
+                    return false;
+            }
+            return true;
+        }
+
         public static string ToIdentifier(this DataType type)
         {
             switch (type)
@@ -98,7 +118,8 @@ namespace BigQuery.Linq
                 case TypeCode.UInt64:
                     if (value.GetType().IsEnum)
                     {
-                        return "\'" + value + "\'";
+                        var underlyingType = Enum.GetUnderlyingType(value.GetType());
+                        return Convert.ChangeType(value, underlyingType).ToString();
                     }
                     else
                     {
