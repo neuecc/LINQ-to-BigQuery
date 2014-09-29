@@ -56,10 +56,10 @@ namespace BigQuery.Linq
         {
             this.schema = schema;
             this.typeInfo = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance)
-                .ToDictionary(x => x.Name);
+                .ToDictionary(x => x.Name, StringComparer.InvariantCultureIgnoreCase);
             this.fallbackFieldInfo = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.SetField | BindingFlags.Instance)
                 .Where(x => x.Name.StartsWith("<"))
-                .ToDictionary(x => ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value);
+                .ToDictionary(x => ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value, StringComparer.InvariantCultureIgnoreCase);
         }
 
         object Parse(string type, string value)
