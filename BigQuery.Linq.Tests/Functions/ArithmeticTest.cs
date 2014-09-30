@@ -31,11 +31,11 @@ namespace BigQuery.Linq.Tests.Functions
             }).ToString()
                 .Is(@"
 SELECT
-  ([six] + ([five] - [one])) AS [A],
-  ([six] - ([four] + [one])) AS [B],
-  ([six] * ([five] - [one])) AS [C],
-  ([six] / ([two] + [two])) AS [D],
-  ([six] % ([two] + [two])) AS [E]
+  (6 + (5 - 1)) AS [A],
+  (6 - (4 + 1)) AS [B],
+  (6 * (5 - 1)) AS [C],
+  (6 / (2 + 2)) AS [D],
+  (6 % (2 + 2)) AS [E]
 ".TrimSmart());
         }
 

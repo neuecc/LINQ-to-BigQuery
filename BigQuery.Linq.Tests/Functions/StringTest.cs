@@ -41,7 +41,7 @@ LIMIT 100".TrimSmart());
             var s = "Script";
             var t = "2";
             Ctx.Select<string>(() => BqFunc.Concat("Java", "Script", "2")).ToFlatSql().Is(@"SELECT CONCAT('Java', 'Script', '2')");
-            Ctx.Select<string>(() => j + s + t).ToFlatSql().Is(@"SELECT (([j] + [s]) + [t])");
+            Ctx.Select<string>(() => j + s + t).ToFlatSql().Is(@"SELECT (('Java' + 'Script') + '2')");
         }
 
         [TestMethod]

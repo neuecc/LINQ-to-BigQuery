@@ -16,18 +16,18 @@ namespace BigQuery.Linq.Tests.Functions
             var context = new BigQueryContext();
             var x = 1000;
             var y = "hoge";
-            context.Select(() => x == 1000).ToFlatSql().Is("SELECT ([x] = 1000)");
-            context.Select(() => x != 1000).ToFlatSql().Is("SELECT ([x] != 1000)");
-            context.Select(() => x > 1000).ToFlatSql().Is("SELECT ([x] > 1000)");
-            context.Select(() => x < 1000).ToFlatSql().Is("SELECT ([x] < 1000)");
-            context.Select(() => x >= 1000).ToFlatSql().Is("SELECT ([x] >= 1000)");
-            context.Select(() => x <= 1000).ToFlatSql().Is("SELECT ([x] <= 1000)");
-            context.Select(() => y == null).ToFlatSql().Is("SELECT ([y] IS NULL)");
-            context.Select(() => y != null).ToFlatSql().Is("SELECT ([y] IS NOT NULL)");
+            context.Select(() => x == 1000).ToFlatSql().Is("SELECT (1000 = 1000)");
+            context.Select(() => x != 1000).ToFlatSql().Is("SELECT (1000 != 1000)");
+            context.Select(() => x > 1000).ToFlatSql().Is("SELECT (1000 > 1000)");
+            context.Select(() => x < 1000).ToFlatSql().Is("SELECT (1000 < 1000)");
+            context.Select(() => x >= 1000).ToFlatSql().Is("SELECT (1000 >= 1000)");
+            context.Select(() => x <= 1000).ToFlatSql().Is("SELECT (1000 <= 1000)");
+            context.Select(() => y == null).ToFlatSql().Is("SELECT ('hoge' IS NULL)");
+            context.Select(() => y != null).ToFlatSql().Is("SELECT ('hoge' IS NOT NULL)");
 
             long? x2 = 1000;
-            context.Select(() => x2 == 1000).ToFlatSql().Is("SELECT ([x2] = 1000)");
-            context.Select(() => x2.Value == 1000).ToFlatSql().Is("SELECT ([x2] = 1000)");
+            context.Select(() => x2 == 1000).ToFlatSql().Is("SELECT (1000 = 1000)");
+            context.Select(() => x2.Value == 1000).ToFlatSql().Is("SELECT (1000 = 1000)");
         }
 
         [TestMethod]
@@ -37,7 +37,7 @@ namespace BigQuery.Linq.Tests.Functions
             var x = 1000;
 
             context.Select<bool>(() => BqFunc.Between(x, BqFunc.Abs(10), 100)).ToFlatSql()
-                .Is("SELECT ([x] BETWEEN ABS(10) AND 100)");
+                .Is("SELECT (1000 BETWEEN ABS(10) AND 100)");
         }
 
         [TestMethod]
@@ -47,7 +47,7 @@ namespace BigQuery.Linq.Tests.Functions
 
             var x = "hogehoge";
             context.Select<string>(() => x ?? "hugahuga").ToFlatSql()
-                .Is("SELECT IFNULL([x], 'hugahuga')");
+                .Is("SELECT IFNULL('hogehoge', 'hugahuga')");
 
             context.Select(() => BqFunc.Integer("a") ?? -1L).ToFlatSql()
                 .Is("SELECT IFNULL(INTEGER('a'), -1)");

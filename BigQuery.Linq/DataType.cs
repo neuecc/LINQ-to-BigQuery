@@ -174,7 +174,12 @@ namespace BigQuery.Linq
                     return (b == true) ? "true" : "false";
                 case TypeCode.Char:
                 case TypeCode.String:
-                    return "\'" + value + "\'";
+                    // escape
+                    var str = value.ToString()
+                        .Replace("\"", "\\\"") // "
+                        .Replace("\'", "\\\'");// '
+
+                    return "\'" + str + "\'";
                 case TypeCode.DateTime:
                     return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", value) + "\'";
                 case TypeCode.DBNull:

@@ -18,11 +18,11 @@ namespace BigQuery.Linq.Tests.Functions
             var x = int.Parse("1");
             var y = int.Parse("3");
             var z = int.Parse("1");
-            Ctx.Select<int>(() => (x + y) & z).ToFlatSql().Is("SELECT (([x] + [y]) & [z])");
-            Ctx.Select<int>(() => x | y).ToFlatSql().Is("SELECT ([x] | [y])");
-            Ctx.Select<int>(() => x ^ y).ToFlatSql().Is("SELECT ([x] ^ [y])");
-            Ctx.Select<int>(() => x << (y + z)).ToFlatSql().Is("SELECT ([x] << ([y] + [z]))");
-            Ctx.Select<int>(() => (x + y) >> z).ToFlatSql().Is("SELECT (([x] + [y]) >> [z])");
+            Ctx.Select<int>(() => (x + y) & z).ToFlatSql().Is("SELECT ((1 + 3) & 1)");
+            Ctx.Select<int>(() => x | y).ToFlatSql().Is("SELECT (1 | 3)");
+            Ctx.Select<int>(() => x ^ y).ToFlatSql().Is("SELECT (1 ^ 3)");
+            Ctx.Select<int>(() => x << (y + z)).ToFlatSql().Is("SELECT (1 << (3 + 1))");
+            Ctx.Select<int>(() => (x + y) >> z).ToFlatSql().Is("SELECT ((1 + 3) >> 1)");
         }
 
         [TestMethod]
@@ -30,10 +30,10 @@ namespace BigQuery.Linq.Tests.Functions
         {
             var x = int.Parse("1");
             var y = int.Parse("1");
-            Ctx.Select<int>(() => ~x).ToFlatSql().Is("SELECT ~[x]");
+            Ctx.Select<int>(() => ~x).ToFlatSql().Is("SELECT ~1");
 
             // not bitwise but test...
-            Ctx.Select<bool>(() => !(x == y)).ToFlatSql().Is("SELECT NOT ([x] = [y])");
+            Ctx.Select<bool>(() => !(x == y)).ToFlatSql().Is("SELECT NOT (1 = 1)");
         }
     }
 }

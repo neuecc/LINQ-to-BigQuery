@@ -22,7 +22,7 @@ namespace BigQuery.Linq.Tests.Functions
         public void RegexpMatch()
         {
             Ctx.From<Shakespeare>()
-                .Where(x => BqFunc.RegexpMatch(x.word, @"\w\w\'\w\w"))
+                .Where(x => BqFunc.RegexpMatch(x.word, @"\w\w'\w\w"))
                 .Select(x => new { x.word, count = BqFunc.Count(x.word) })
                 .GroupBy(x => x.word)
                 .OrderByDescending(x => x.count)
@@ -48,7 +48,7 @@ LIMIT 3
         public void RegexpExtract()
         {
             Ctx.From<Shakespeare>()
-                .Select(x => new { fragment = BqFunc.RegexpExtract(x.word, @"(\w\w\'\w\w)") })
+                .Select(x => new { fragment = BqFunc.RegexpExtract(x.word, @"(\w\w'\w\w)") })
                 .GroupBy(x => x.fragment)
                 .OrderBy(x => x.fragment)
                 .Limit(3)

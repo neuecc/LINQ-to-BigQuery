@@ -34,7 +34,7 @@ namespace BigQuery.Linq.Tests.Functions
             Ctx.Select<string>(() => BqFunc.HexString(10)).ToFlatSql().Is(@"SELECT HEX_STRING(10)");
             Ctx.Select<string>(() => BqFunc.HexString(10.1)).ToFlatSql().Is(@"SELECT HEX_STRING(10.1)");
             var d = new Nullable<double>();
-            Ctx.Select<string>(() => BqFunc.HexString(d.Value)).ToFlatSql().Is(@"SELECT HEX_STRING([d])");
+            Ctx.Select<string>(() => BqFunc.HexString(d.Value)).ToFlatSql().Is(@"SELECT HEX_STRING(NULL)");
         }
 
         [TestMethod]

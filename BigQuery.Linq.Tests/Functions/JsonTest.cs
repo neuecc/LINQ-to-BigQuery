@@ -17,9 +17,9 @@ namespace BigQuery.Linq.Tests.Functions
         public void Json()
         {
             Ctx.Select(() => new { str = BqFunc.JsonExtract("{\"a\":1, \"b\": [4, 5]}", "$.b") }).ToFlatSql()
-                .Is(@"SELECT JSON_EXTRACT('{""a"":1, ""b"": [4, 5]}', '$.b') AS [str]");
+                .Is(@"SELECT JSON_EXTRACT('{\""a\"":1, \""b\"": [4, 5]}', '$.b') AS [str]");
             Ctx.Select(() => new { str = BqFunc.JsonExtractScalar(@"{""a"": [""x"", {""b"":3}]}", "$.a[1].b") }).ToFlatSql()
-                .Is(@"SELECT JSON_EXTRACT_SCALAR('{""a"": [""x"", {""b"":3}]}', '$.a[1].b') AS [str]");
+                .Is(@"SELECT JSON_EXTRACT_SCALAR('{\""a\"": [\""x\"", {\""b\"":3}]}', '$.a[1].b') AS [str]");
         }
     }
 }

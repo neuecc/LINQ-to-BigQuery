@@ -143,6 +143,7 @@
     <Compile Include="TableNameAttribute.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="Utils\LongExtensions.cs" />
+    <Compile Include="Utils\ReflectionAccessor.cs" />
     <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="Utils\TypeExtensions.cs" />
   </ItemGroup>
@@ -155,7 +156,6 @@
     <Compile Include="Query\BigQueryable.Having.cs" />
     <Compile Include="Functions\BqFunc.Aggregate.cs" />
     <Compile Include="Functions\BqFunc.Other.cs" />
-    <Compile Include="Functions\BqFunc.LinqUtil.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

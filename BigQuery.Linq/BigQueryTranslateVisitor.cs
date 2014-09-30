@@ -299,28 +299,39 @@ namespace BigQuery.Linq
             // specialize for DateTime
             if (FormatIfExprIsDateTime(node)) return node;
 
+            bool isRootIsParameter = false; // as external field or parameter
             var nodes = new List<MemberExpression>();
             var next = node;
             while (next != null)
             {
+                isRootIsParameter = next.Expression.NodeType == ExpressionType.Parameter;
                 nodes.Add(next);
                 next = next.Expression as MemberExpression;
             }
 
-            sb.Append("[");
-            for (int i = nodes.Count - 1; i >= 0; i--)
+            if (isRootIsParameter)
             {
-                sb.Append(nodes[i].Member.Name);
-
-                // If Nullable don't emit .Value
-                if (nodes[i].Type.IsNullable()) break;
-
-                if (nodes.Count != 1 && i != 0)
+                sb.Append("[");
+                for (int i = nodes.Count - 1; i >= 0; i--)
                 {
-                    sb.Append(".");
+                    sb.Append(nodes[i].Member.Name);
+
+                    // If Nullable don't emit .Value
+                    if (nodes[i].Type.IsNullable()) break;
+
+                    if (nodes.Count != 1 && i != 0)
+                    {
+                        sb.Append(".");
+                    }
                 }
+                sb.Append("]");
             }
-            sb.Append("]");
+            else
+            {
+                var v = ExpressionHelper.GetValue(nodes[0]);
+                var str = DataTypeFormatter.Format(v);
+                sb.Append(str);
+            }
 
             return node;
         }

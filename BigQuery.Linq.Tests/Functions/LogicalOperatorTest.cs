@@ -17,9 +17,9 @@ namespace BigQuery.Linq.Tests.Functions
         {
             var v1 = "aaa";
             var v2 = "bbb";
-            Ctx.Select<bool>(() => v1 == v2 && v1 == v2).ToFlatSql().Is("SELECT (([v1] = [v2]) AND ([v1] = [v2]))");
-            Ctx.Select<bool>(() => v1 == v2 || v1 == v2).ToFlatSql().Is("SELECT (([v1] = [v2]) OR ([v1] = [v2]))");
-            Ctx.Select<bool>(() => !(v1 == v2)).ToFlatSql().Is("SELECT NOT ([v1] = [v2])");
+            Ctx.Select<bool>(() => v1 == v2 && v1 == v2).ToFlatSql().Is("SELECT (('aaa' = 'bbb') AND ('aaa' = 'bbb'))");
+            Ctx.Select<bool>(() => v1 == v2 || v1 == v2).ToFlatSql().Is("SELECT (('aaa' = 'bbb') OR ('aaa' = 'bbb'))");
+            Ctx.Select<bool>(() => !(v1 == v2)).ToFlatSql().Is("SELECT NOT ('aaa' = 'bbb')");
         }
     }
 }
