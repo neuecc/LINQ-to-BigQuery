@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.3.1</version>
+        <version>0.3.2.1</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,9 +10,7 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
         <releaseNotes>
             <![CDATA[
-Breaking Change : External field as embeded parameter constant
-Breaking Change : BqFunc.AsConstant
-Breaking Change : String's singleQuote and doubleQuote is escaped
+Add : BigQueryContext.From(IEnumerable[IExecutableBigQueryable]) overload
             ]]>
         </releaseNotes>
         <language>en-US</language>
