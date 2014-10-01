@@ -74,6 +74,11 @@ namespace BigQuery.Linq
             return new FromBigQueryable<T>(tableNames, new RootBigQueryable<T>(this));
         }
 
+        public ISubqueryBigQueryable<T> From<T>(IEnumerable<IExecutableBigQueryable<T>> nestedSources)
+        {
+            return new SubqueryBigQueryable<T>(nestedSources.ToArray());
+        }
+
         public ISubqueryBigQueryable<T> From<T>(IExecutableBigQueryable<T> nestedSource, params IExecutableBigQueryable<T>[] unionSources)
         {
             return new SubqueryBigQueryable<T>(new[] { nestedSource }.Concat(unionSources).ToArray());

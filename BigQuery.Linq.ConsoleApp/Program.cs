@@ -24,8 +24,13 @@ namespace BigQuery.Linq.ConsoleApp
 
         static void Main(string[] args)
         {
+            var context = new BigQueryContext();
 
-    
+            var ss = context.From(Enumerable.Range(0, 10).Select(x => context.Select(() => new { x })))
+                .Select(x => new { x.x })
+                .ToString();
+
+            Console.WriteLine(ss);
             
         }
     }
