@@ -63,7 +63,11 @@ namespace BigQuery.Linq
                 case "TIMESTAMP":
                     var v = double.Parse(value).ToString();
                     var xs = v.Split('.');
-                    var l = long.Parse(string.Format("{0}{1:000000}", long.Parse(xs[0]), long.Parse(xs[1])));
+                    var intergralPart = xs[0];
+                    var decimalPart = (xs.Length == 1)
+                        ? "000000"
+                        : xs[1].Substring(0, Math.Min(xs[1].Length, 6)).PadRight(6, '0'); // Truncate Len:6
+                    var l = long.Parse(intergralPart + decimalPart);
                     return DateTimeExtensions.FromBigQueryTimestamp(l);
                 case "RECORD":
                     throw new NotSupportedException("Currently, Record is not support. Available will be soon.");
