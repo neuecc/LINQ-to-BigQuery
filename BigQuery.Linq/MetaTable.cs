@@ -126,11 +126,16 @@ namespace BigQuery.Linq
         }
 
         /// <param name="retryStrategy">If not null, try retry.</param>
-        public async Task InsertAllAsync<T>(BigqueryService service, IEnumerable<T> data, IBackOff retryStrategy = null)
+        public async Task InsertAllAsync<T>(BigqueryService service, IEnumerable<T> data, IBackOff retryStrategy = null, Func<T, string> insertIdSelector = null)
         {
+            if (insertIdSelector == null)
+            {
+                insertIdSelector = _ => Guid.NewGuid().ToString();
+            }
+
             var rows = data.Select(x => new Google.Apis.Bigquery.v2.Data.TableDataInsertAllRequest.RowsData
             {
-                InsertId = Guid.NewGuid().ToString(),
+                InsertId = insertIdSelector(x),
                 Json = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(x))
             });
 
