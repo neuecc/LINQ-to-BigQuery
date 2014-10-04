@@ -47,13 +47,13 @@ namespace BigQuery.Linq.Query
                 sb.AppendLine("FROM");
 
                 sb.Append(Indent(depth + 1));
-                sb.Append("(FLATTEN(");
+                sb.Append("FLATTEN(");
                 sb.Append(tableName.GetTableName());
 
                 sb.Append(", ");
                 sb.Append(BigQueryTranslateVisitor.BuildQuery(depth, parent.QueryContext.IndentSize, fieldSelector));
 
-                sb.Append("))");
+                sb.Append(")");
 
                 return sb.ToString();
             }
@@ -64,14 +64,14 @@ namespace BigQuery.Linq.Query
                 var sb = new StringBuilder();
 
                 sb.Append(Indent(depth));
-                sb.AppendLine("FROM (FLATTEN(");
+                sb.AppendLine("FROM FLATTEN(");
 
                 sb.Append(subquery.BuildQueryStringWithoutFrom(depth));
 
                 sb.Append(", ");
                 sb.Append(BigQueryTranslateVisitor.BuildQuery(depth, subquery.QueryContext.IndentSize, fieldSelector));
 
-                sb.Append("))");
+                sb.Append(")");
 
                 return sb.ToString();
             }
@@ -100,13 +100,13 @@ namespace BigQuery.Linq.Query
 
                 sb.AppendLine();
                 sb.Append(Indent(depth + 1));
-                sb.Append("(FLATTEN(");
+                sb.Append("FLATTEN(");
                 sb.Append(tableName.GetTableName());
 
                 sb.Append(", ");
                 sb.Append(BigQueryTranslateVisitor.BuildQuery(depth, parent.QueryContext.IndentSize, fieldSelector));
 
-                sb.Append("))");
+                sb.Append(")");
 
                 return sb.ToString();
             }
@@ -116,14 +116,14 @@ namespace BigQuery.Linq.Query
             {
                 var sb = new StringBuilder();
 
-                sb.AppendLine(" (FLATTEN(");
+                sb.AppendLine(" FLATTEN(");
 
                 sb.Append(subquery.BuildQueryStringWithoutFrom(depth));
 
                 sb.Append(", ");
                 sb.Append(BigQueryTranslateVisitor.BuildQuery(depth, subquery.QueryContext.IndentSize, fieldSelector));
 
-                sb.Append("))");
+                sb.Append(")");
 
                 return sb.ToString();
             }

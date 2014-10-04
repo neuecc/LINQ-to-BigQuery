@@ -107,7 +107,7 @@ FROM
 SELECT
   [name]
 FROM
-  (TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27')))
+  TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
 WHERE
   ([age] >= 35)
 ".TrimSmart());
@@ -120,7 +120,7 @@ WHERE
 SELECT
   [name]
 FROM
-  (TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27')))
+  TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
 WHERE
   ([age] >= 35)
 ".TrimSmart());
@@ -133,7 +133,7 @@ WHERE
 SELECT
   [name]
 FROM
-  (TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27')))
+  TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
 WHERE
   ([age] >= 35)
 ".TrimSmart());
@@ -157,7 +157,7 @@ WHERE
 SELECT
   [name]
 FROM
-  (TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27')))
+  TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
 WHERE
   ([age] >= 35)
 ".TrimSmart());
@@ -170,7 +170,7 @@ WHERE
 SELECT
   [name]
 FROM
-  (TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27')))
+  TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
 WHERE
   ([age] >= 35)
 ".TrimSmart());
@@ -183,7 +183,7 @@ WHERE
 SELECT
   [name]
 FROM
-  (TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27')))
+  TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
 WHERE
   ([age] >= 35)
 ".TrimSmart());
@@ -201,7 +201,7 @@ WHERE
 SELECT
   [age]
 FROM
-  (TABLE_QUERY([mydata], ""([table_id] CONTAINS 'oo' AND (LENGTH([table_id]) >= 4))""))".TrimSmart());
+  TABLE_QUERY([mydata], ""([table_id] CONTAINS 'oo' AND (LENGTH([table_id]) >= 4))"")".TrimSmart());
 
             ctx.FromTableQuery("mydata", new { age = 0 }, x => x.table_id.Contains("oo") && BqFunc.Length(x.table_id) >= 4)
                 .Select(x => new { x.age })
@@ -210,7 +210,7 @@ FROM
 SELECT
   [age]
 FROM
-  (TABLE_QUERY([mydata], ""([table_id] CONTAINS 'oo' AND (LENGTH([table_id]) >= 4))""))".TrimSmart());
+  TABLE_QUERY([mydata], ""([table_id] CONTAINS 'oo' AND (LENGTH([table_id]) >= 4))"")".TrimSmart());
 
             // more example
             ctx.FromTableQuery<MetaTable>("mydata", x => BqFunc.RegexpMatch(x.table_id, @"^boo[\d]{3,5}"))
@@ -220,7 +220,7 @@ FROM
 SELECT
   [table_id]
 FROM
-  (TABLE_QUERY([mydata], ""REGEXP_MATCH([table_id], r'^boo[\d]{3,5}')""))".TrimSmart());
+  TABLE_QUERY([mydata], ""REGEXP_MATCH([table_id], r'^boo[\d]{3,5}')"")".TrimSmart());
         }
     }
 }

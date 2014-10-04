@@ -117,7 +117,7 @@ FROM
   FROM
     [publicdata:samples.wikipedia] AS [A]
   INNER JOIN
-    (FLATTEN([publicdata:samples.wikipedia], [contributor_id])) AS [B] ON ([A.title] = [B.title])
+    FLATTEN([publicdata:samples.wikipedia], [contributor_id]) AS [B] ON ([A.title] = [B.title])
 )
 ".TrimSmart());
         }
@@ -141,14 +141,14 @@ FROM
     *
   FROM
     [publicdata:samples.wikipedia] AS [A]
-  INNER JOIN (FLATTEN(
+  INNER JOIN FLATTEN(
   (
     SELECT
       [title],
       [contributor_id] AS [v]
     FROM
       [publicdata:samples.wikipedia]
-  ), [v])) AS [B] ON ([A.title] = [B.title])
+  ), [v]) AS [B] ON ([A.title] = [B.title])
 )
 ".TrimSmart());
         }

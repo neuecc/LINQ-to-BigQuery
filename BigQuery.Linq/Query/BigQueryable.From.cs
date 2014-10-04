@@ -84,7 +84,7 @@ namespace BigQuery.Linq.Query
 
         string RangeFormat()
         {
-            return string.Format("(TABLE_DATE_RANGE({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}')))", prefix, timestampFrom.ToString("yyyy-MM-dd"), timestampTo.ToString("yyyy-MM-dd"));
+            return string.Format("TABLE_DATE_RANGE({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}'))", prefix, timestampFrom.ToString("yyyy-MM-dd"), timestampTo.ToString("yyyy-MM-dd"));
         }
 
         public string GetTableName()
@@ -123,7 +123,7 @@ namespace BigQuery.Linq.Query
 
         string RangeFormat()
         {
-            return string.Format("(TABLE_DATE_RANGE_STRICT({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}')))", prefix, timestampFrom.ToString("yyyy-MM-dd"), timestampTo.ToString("yyyy-MM-dd"));
+            return string.Format("TABLE_DATE_RANGE_STRICT({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}'))", prefix, timestampFrom.ToString("yyyy-MM-dd"), timestampTo.ToString("yyyy-MM-dd"));
         }
 
         public string GetTableName()
@@ -161,7 +161,7 @@ namespace BigQuery.Linq.Query
         string QueryFormat()
         {
             var expr = BigQueryTranslateVisitor.BuildQuery(0, 0, tableMatchCondition);
-            return string.Format("(TABLE_QUERY({0}, \"{1}\"))", dataset, expr);
+            return string.Format("TABLE_QUERY({0}, \"{1}\")", dataset, expr);
         }
 
         public string GetTableName()

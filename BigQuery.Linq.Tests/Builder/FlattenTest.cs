@@ -29,7 +29,7 @@ namespace BigQuery.Linq.Tests.Builder
 SELECT
   *
 FROM
-  (FLATTEN([publicdata:samples.trigrams], [cell.value]))
+  FLATTEN([publicdata:samples.trigrams], [cell.value])
 ".TrimSmart());
         }
 
@@ -44,7 +44,7 @@ FROM
 SELECT
   *
 FROM
-  (FLATTEN([publicdata:samples.trigrams@-3600000-], [cell.value]))
+  FLATTEN([publicdata:samples.trigrams@-3600000-], [cell.value])
 ".TrimSmart());
 
             new BigQueryContext().From<trigrams>().WithSnapshot(TimeSpan.FromHours(1))
@@ -55,7 +55,7 @@ FROM
 SELECT
   *
 FROM
-  (FLATTEN([publicdata:samples.trigrams@-3600000], [cell.value]))
+  FLATTEN([publicdata:samples.trigrams@-3600000], [cell.value])
 ".TrimSmart());
         }
 
@@ -71,7 +71,7 @@ FROM
 SELECT
   *
 FROM
-  (FLATTEN((TABLE_QUERY([publicdata:samples], ""([table_id] = 'trigrams')"")), [cell.value]))
+  FLATTEN(TABLE_QUERY([publicdata:samples], ""([table_id] = 'trigrams')""), [cell.value])
 ".TrimSmart());
         }
 
@@ -87,13 +87,13 @@ FROM
                 .Is(@"
 SELECT
   *
-FROM (FLATTEN(
+FROM FLATTEN(
 (
   SELECT
     [cell.value] AS [v]
   FROM
     [publicdata:samples.trigrams]
-), [v]))
+), [v])
 ".TrimSmart());
         }
 
@@ -116,7 +116,7 @@ FROM (FLATTEN(
             d.Is(@"
 SELECT
   ([d1.digit] + ([d2.digit] * 10)) AS [seq]
-FROM (FLATTEN(
+FROM FLATTEN(
 (
   SELECT
     INTEGER(SPLIT([seed], '')) AS [digit]
@@ -125,8 +125,8 @@ FROM (FLATTEN(
     SELECT
       '0123456789' AS [seed]
   )
-), [digit])) AS [d1]
-CROSS JOIN (FLATTEN(
+), [digit]) AS [d1]
+CROSS JOIN FLATTEN(
 (
   SELECT
     INTEGER(SPLIT([seed], '')) AS [digit]
@@ -135,7 +135,7 @@ CROSS JOIN (FLATTEN(
     SELECT
       '0123456789' AS [seed]
   )
-), [digit])) AS [d2]
+), [digit]) AS [d2]
 ORDER BY
   [seq]
 ".TrimSmart());
@@ -160,7 +160,7 @@ ORDER BY
             d.Is(@"
 SELECT
   ([d1.digit] + ([d2.digit] * 10)) AS [seq]
-FROM (FLATTEN(
+FROM FLATTEN(
 (
   SELECT
     INTEGER(SPLIT([seed], '')) AS [digit]
@@ -169,8 +169,8 @@ FROM (FLATTEN(
     SELECT
       '0123456789' AS [seed]
   )
-), [digit])) AS [d1]
-CROSS JOIN EACH (FLATTEN(
+), [digit]) AS [d1]
+CROSS JOIN EACH FLATTEN(
 (
   SELECT
     INTEGER(SPLIT([seed], '')) AS [digit]
@@ -179,7 +179,7 @@ CROSS JOIN EACH (FLATTEN(
     SELECT
       '0123456789' AS [seed]
   )
-), [digit])) AS [d2]
+), [digit]) AS [d2]
 ORDER BY
   [seq]
 ".TrimSmart());
