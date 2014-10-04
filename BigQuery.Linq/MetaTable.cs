@@ -37,6 +37,15 @@ namespace BigQuery.Linq
 
         }
 
+        public MetaTable(string fullTableId)
+        {
+            var first = fullTableId.UnescapeBq().Split(':');
+            this.project_id = first[0];
+            var second = first[1].Split('.');
+            this.dataset_id = second[0];
+            this.table_id = string.Concat(second.Skip(1));
+        }
+
         public MetaTable(string project_id, string dataset_id, string table_id)
         {
             this.project_id = project_id;
