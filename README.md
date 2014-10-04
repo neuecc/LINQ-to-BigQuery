@@ -298,6 +298,11 @@ public static class Query
 
 public static class MyExtensions
 {
+    public static QueryResponse<T> DumpRun<T>(this IExecutableBigQueryable<T> source)
+    {
+        return source.Run().Dump();
+    }
+
 	public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column, bool isShowXLabel = false)
 	{
 	    var chart = new Chart();

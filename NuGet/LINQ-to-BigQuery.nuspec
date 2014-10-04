@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.3.2.2</version>
+        <version>0.3.2.3</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,7 +10,10 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
         <releaseNotes>
             <![CDATA[
-Fix : TIMESTAMP Deserializer
+Add : MetaTable(fullTableId) constructor
+Add : MetaTable.InsertAllAsync insertIdSelector optional args
+Fix : Remove Flatten/TableDecoratr's unnecessary parentheses
+Breaking Changes : BqFunc.Between/In/NotIn changed object to generics T
             ]]>
         </releaseNotes>
         <language>en-US</language>
