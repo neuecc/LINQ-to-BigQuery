@@ -40,7 +40,7 @@ namespace BigQuery.Linq
         /// Returns true if the value of expr1 is greater than or equal to expr2, and less than or equal to expr3.
         /// </summary>
         [FunctionName("BETWEEN", SpecifiedFormatterType = typeof(BetweenFormatter))]
-        public static bool Between(object expr1, object expr2, object expr3) { throw Invalid(); }
+        public static bool Between<T>(T expr1, T expr2, T expr3) { throw Invalid(); }
 
         /// <summary>
         /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
@@ -48,7 +48,7 @@ namespace BigQuery.Linq
         /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
         /// </summary>
         [FunctionName("IN", SpecifiedFormatterType = typeof(InFormatter))]
-        public static bool In(object expr, params object[] exprs) { throw Invalid(); }
+        public static bool In<T>(T expr, params T[] exprs) { throw Invalid(); }
 
         /// <summary>
         /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
@@ -65,7 +65,7 @@ namespace BigQuery.Linq
         /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
         /// </summary>
         [FunctionName("NOT IN", SpecifiedFormatterType = typeof(InFormatter))]
-        public static bool NotIn(object expr, params object[] exprs) { throw Invalid(); }
+        public static bool NotIn<T>(T expr, params T[] exprs) { throw Invalid(); }
 
         /// <summary>
         /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
