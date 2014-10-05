@@ -80,7 +80,7 @@ FROM
         {
             new BigQueryContext().From<trigrams>()
                 .Select(x => new { v = x.cell.value })
-                .AsSubquery()
+                .Into()
                 .Flatten(x => x.v)
                 .Select()
                 .ToString()
@@ -102,9 +102,9 @@ FROM FLATTEN(
         {
             var digits = new BigQueryContext()
                .Select(() => new { seed = "0123456789" })
-               .AsSubquery()
+               .Into()
                .Select(x => new { digit = BqFunc.Integer(BqFunc.Split(x.seed, "")) })
-               .AsSubquery()
+               .Into()
                .Flatten(x => x.digit);
 
             var d = digits
@@ -146,9 +146,9 @@ ORDER BY
         {
             var digits = new BigQueryContext()
                .Select(() => new { seed = "0123456789" })
-               .AsSubquery()
+               .Into()
                .Select(x => new { digit = BqFunc.Integer(BqFunc.Split(x.seed, "")) })
-               .AsSubquery()
+               .Into()
                .Flatten(x => x.digit);
 
             var d = digits

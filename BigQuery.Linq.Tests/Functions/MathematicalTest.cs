@@ -156,7 +156,7 @@ ORDER BY
                    @long = BqFunc.Average(x.@long / 1000)
                })
                .GroupBy(x => x.distance)
-               .AsSubquery()
+               .Into()
                .Where(x => x.distance < 100)
                .Select(x => new { x.distance, x.lat, x.@long, x.temp })
                .OrderBy(x => x.distance)

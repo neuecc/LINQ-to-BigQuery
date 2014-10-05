@@ -20,7 +20,7 @@ namespace BigQuery.Linq.Tests.Builder
                .Join(ctx.From<Wikipe>().Select().Limit(100), (A, B) => new { A, B }, x => x.A.title == x.B.title)
                .Join(ctx.From<Wikipe>().Select().Limit(100), (X, C) => new { X.A, X.B, C }, x => x.C.title == x.B.title)
                .Select(x => x.A.title)
-               .AsSubquery()
+               .Into()
                .Select()
                .ToString()
                .Is(@"
@@ -79,7 +79,7 @@ INNER JOIN
             ctx.From<wikipedia>()
                 .Join(ctx.From<wikipedia>(), (A, B) => new { A, B }, x => x.A.title == x.B.title)
                 .Select()
-                .AsSubquery()
+                .Into()
                 .Select()
                 .ToString()
                 .Is(@"
@@ -104,7 +104,7 @@ FROM
             ctx.From<wikipedia>()
                 .Join(ctx.From<wikipedia>().Flatten(x => x.contributor_id), (A, B) => new { A, B }, x => x.A.title == x.B.title)
                 .Select()
-                .AsSubquery()
+                .Into()
                 .Select()
                 .ToString()
                 .Is(@"
@@ -127,9 +127,9 @@ FROM
         {
             var ctx = new BigQueryContext();
             ctx.From<wikipedia>()
-                .Join(ctx.From<wikipedia>().Select(x => new { x.title, v = x.contributor_id }).AsSubquery().Flatten(x => x.v), (A, B) => new { A, B }, x => x.A.title == x.B.title)
+                .Join(ctx.From<wikipedia>().Select(x => new { x.title, v = x.contributor_id }).Into().Flatten(x => x.v), (A, B) => new { A, B }, x => x.A.title == x.B.title)
                 .Select()
-                .AsSubquery()
+                .Into()
                 .Select()
                 .ToString()
                 .Is(@"

@@ -58,7 +58,7 @@ namespace BigQuery.Linq.Tests.Functions
         {
             var context = new BigQueryContext();
             context.Select(() => new { value = 100 })
-                .AsSubquery()
+                .Into()
                 .Select(x => (BqFunc.In(x.value, 10, 20, 50, 1000)) ? 10000 : -10)
                 .ToString()
                 .Is(@"
@@ -73,7 +73,7 @@ FROM
 
             // not in
             context.Select(() => new { value = 100 })
-                .AsSubquery()
+                .Into()
                 .Select(x => (!BqFunc.In(x.value, 10, 20, 50, 1000)) ? 10000 : -10)
                 .ToString()
                 .Is(@"
@@ -92,7 +92,7 @@ FROM
         {
             var context = new BigQueryContext();
             context.Select(() => new { value = 100L })
-                .AsSubquery()
+                .Into()
                 .Where(x => (BqFunc.In(x.value, context.From<wikipedia>().Select(y => y.id ?? -1).Limit(1000))))
                 .Select(x => x.value)
                 .ToString()
@@ -121,7 +121,7 @@ WHERE
         {
             var context = new BigQueryContext();
             context.Select(() => new { value = 100L })
-                .AsSubquery()
+                .Into()
                 .Select(x => new{x.value})
                 .GroupBy(x => x.value)
                 .Having(x => (BqFunc.In(x.value, context.From<wikipedia>().Select(y => y.id ?? -1).Limit(1000))))
@@ -153,7 +153,7 @@ HAVING
         {
             var context = new BigQueryContext();
             context.Select(() => new { value = 100 })
-                .AsSubquery()
+                .Into()
                 .Select(x => (BqFunc.NotIn(x.value, 10, 20, 50, 1000)) ? 10000 : -10)
                 .ToString()
                 .Is(@"
@@ -172,7 +172,7 @@ FROM
         {
             var context = new BigQueryContext();
             context.Select(() => new { value = 100L })
-                .AsSubquery()
+                .Into()
                 .Where(x => (BqFunc.NotIn(x.value, context.From<wikipedia>().Select(y => y.id ?? -1).Limit(1000))))
                 .Select(x => x.value)
                 .ToString()
@@ -201,7 +201,7 @@ WHERE
         {
             var context = new BigQueryContext();
             context.Select(() => new { value = 100L })
-                .AsSubquery()
+                .Into()
                 .Select(x => new { x.value })
                 .GroupBy(x => x.value)
                 .Having(x => (BqFunc.NotIn(x.value, context.From<wikipedia>().Select(y => y.id ?? -1).Limit(1000))))

@@ -11,7 +11,7 @@ namespace BigQuery.Linq.Tests.Builder
         {
             var context = new BigQueryContext();
             context.Select(() => new { v = 100 })
-                .AsSubquery()
+                .Into()
                 .Select()
                 .ToString()
                 .Is(@"
@@ -30,7 +30,7 @@ FROM
         {
             var context = new BigQueryContext();
             context.Select(() => new { v = 100 })
-                .AsSubquery()
+                .Into()
                 .Join(context.Select(() => new { v4 = 200 }), (a, b) => new { a, b }, x => x.a.v == x.b.v4)
                 .Select(x => new { vv = x.a.v })
                 .ToString()

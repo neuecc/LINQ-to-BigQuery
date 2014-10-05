@@ -156,7 +156,7 @@ FROM
             context.From<int>("tablewikipedia")
                 .WithRange(new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc))
                 .Select()
-                .AsSubquery()
+                .Into()
                 .Select()
                 .ToString()
                 .Is(@"

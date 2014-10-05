@@ -73,7 +73,7 @@ FROM
 
             bqcx.From<MyClass>()
                 .Select(x => new { x.age, hoge = 10 })
-                .AsSubquery()
+                .Into()
                 .Select(x => new { x.hoge })
                 .ToString()
                 .Is(@"

@@ -84,7 +84,7 @@ namespace BigQuery.Linq.Query
             }
             else if (joinTable != null)
             {
-                this.joinTable = joinTable.AsSubquery() as SubqueryBigQueryable<TInner>;
+                this.joinTable = joinTable.Into() as SubqueryBigQueryable<TInner>;
             }
             this.aliasSelector = aliasSelector;
             this.joinCondition = joinCondition;

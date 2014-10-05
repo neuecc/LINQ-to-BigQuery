@@ -202,7 +202,7 @@ FROM
                     clientIpNum = BqFunc.Integer(BqFunc.ParseIP(x.contributor_ip)),
                     classB = BqFunc.Integer(BqFunc.ParseIP(x.contributor_ip) / (256 * 256))
                 })
-                .AsSubquery()
+                .Into()
                 .Join(JoinType.InnerEach, context.From<geolite_city_bq_b2b>(), (a, b) => new { a, b }, x => x.a.classB == x.b.classB)
                 .Where(x => BqFunc.Between(x.a.clientIpNum, x.b.startIpNum, x.b.endIpNum) && x.b.city != "")
                 .Select(x => new
@@ -272,7 +272,7 @@ FROM
                 B = 10.5,
                 C = BqFunc.Timestamp("2013-12-12 01:01:01")
             })
-            .AsSubquery()
+            .Into()
             .Select(x => new
             {
                 S1 = BqFunc.Sum(x.A),
