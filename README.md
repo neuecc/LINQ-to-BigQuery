@@ -52,6 +52,7 @@ ToArray/ToArrayAsync - Execute query and return rows.
 AsEnumerable - Execute query and return rows, it's deferred(but resultset is not streaming).
 RunDry - Dry run it's receive execution plan.
 ToString - Build query string. It no needs network connection and BigqueryService. 
+Into - Query as Subquery(same as From(query))
 ```
 
 Powerfull Tabledecorator/Table wildcard integration.
@@ -149,7 +150,7 @@ Query.GetContext()
             .OrderBy(y => y.created_at)
             .Value
     })
-    .AsSubquery()
+    .Into()
     .Select(x => new
     {
         x.language,
@@ -158,7 +159,7 @@ Query.GetContext()
     })
     .GroupBy(x => new { x.language, x.yyyymm })
     .Having(x => BqFunc.GreaterThanEqual(x.yyyymm, "2010-01"))
-    .AsSubquery()
+    .Into()
     .Select(x => new
     {
         x.language,
@@ -169,7 +170,7 @@ Query.GetContext()
             .OrderBy(y => y.count)
             .Value
     })
-    .AsSubquery()
+    .Into()
     .Select(x => new
     {
         x.language,

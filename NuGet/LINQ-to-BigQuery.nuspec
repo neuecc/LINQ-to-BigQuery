@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.3.3</version>
+        <version>0.4.0</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,10 +10,18 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
         <releaseNotes>
             <![CDATA[
-Add : MetaTable(fullTableId) constructor
-Add : MetaTable.InsertAllAsync insertIdSelector optional args
-Fix : Remove Flatten/TableDecoratr's unnecessary parentheses
-Breaking Changes : BqFunc.Between/In/NotIn changed object to generics T
+Add : BqFunc.Last
+Add : BqFunc.Nest
+Add : BqFunc.Position
+Add : IExecutableBigQueryable.Into (instead of AsSubquery)
+Add : BqFunc.WithIn
+Improvement : Support RECORD Type
+Improvement : Support REPEATED Field
+Improvement : MetaTableSchema.BuildCSharpClass support record type and repeated field
+Improvement : DataTypeUtility.ToTableFieldSchema support record type and repeated field
+Update : Update NuGet package Dependency to id="Google.Apis.Bigquery.v2" version="1.9.0.1680"
+Update : Remove NuGet package dependency id="Microsoft.Bcl.Async" version="1.0.168"(this dependency including Bigquery.v2)
+Breaking Changes : AsSubquery is Obsolete. use Into instead
             ]]>
         </releaseNotes>
         <language>en-US</language>
