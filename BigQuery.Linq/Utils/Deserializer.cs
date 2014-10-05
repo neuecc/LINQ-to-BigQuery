@@ -70,9 +70,9 @@ namespace BigQuery.Linq
                     var l = long.Parse(intergralPart + decimalPart);
                     return DateTimeExtensions.FromBigQueryTimestamp(l);
                 case "RECORD":
-                    throw new NotSupportedException("Currently, Record is not support. Available will be soon.");
+                    throw new InvalidOperationException("Deserializer can't need support record type. If you encount this error, please write to GitHub issues.");
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("UNKNOWN TYPE:" + type);
             }
         }
 

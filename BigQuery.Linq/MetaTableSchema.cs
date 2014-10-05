@@ -100,38 +100,73 @@ namespace BigQuery.Linq
             this.Fields = fields;
         }
 
-        string ToCSharpType(string type, string mode)
+        static string ToCSharpType(string name, string type, string mode)
         {
             var isNullable = (mode == "NULLABLE");
+            var isArray = (mode == "REPEATED");
             switch (type)
             {
                 case "STRING":
-                    return "string";
+                    return "string" + (isArray ? "[]" : "");
                 case "INTEGER":
-                    return "long" + (isNullable ? "?" : "");
+                    return "long" + (isNullable ? "?" : "") + (isArray ? "[]" : "");
                 case "FLOAT":
-                    return "double" + (isNullable ? "?" : "");
+                    return "double" + (isNullable ? "?" : "") + (isArray ? "[]" : "");
                 case "BOOLEAN":
-                    return "bool" + (isNullable ? "?" : "");
+                    return "bool" + (isNullable ? "?" : "") + (isArray ? "[]" : "");
                 case "TIMESTAMP":
-                    return "DateTimeOffset" + (isNullable ? "?" : "");
+                    return "DateTimeOffset" + (isNullable ? "?" : "") + (isArray ? "[]" : "");
                 case "RECORD":
-                    throw new NotSupportedException("Currently, Record is not support.");
+                    return name + (isNullable ? "?" : "") + (isArray ? "[]" : "");
                 default:
                     throw new InvalidOperationException();
             }
         }
 
-        public string BuildCSharpClass()
+        static string InnerBuildCSharpClass(string className, IList<TableFieldSchema> fields, Dictionary<string, string> innerClasses)
         {
-            var props = Fields.Select(x =>
+            var props = fields.Select(x =>
             {
-                var type = ToCSharpType(x.Type, x.Mode);
                 var name = x.Name;
                 if (ReservedIdentifiers.Contains(name))
                 {
                     name = "@" + name;
                 }
+                var type = ToCSharpType(name, x.Type, x.Mode);
+                if (x.Type == "RECORD" && !innerClasses.ContainsKey(name))
+                {
+                    innerClasses[name] = InnerBuildCSharpClass(name, x.Fields, innerClasses);
+                }
+
+                return string.Format("    public {0} {1} {{ get; set; }}", type, name);
+            });
+
+            var format = @"public class {0}
+{{
+{1}
+}}";
+            var result = string.Format(format, className, string.Join(Environment.NewLine, props));
+
+            return result;
+        }
+
+
+        public string BuildCSharpClass()
+        {
+            var innerClasses = new Dictionary<string, string>();
+            var props = Fields.Select(x =>
+            {
+                var name = x.Name;
+                if (ReservedIdentifiers.Contains(name))
+                {
+                    name = "@" + name;
+                }
+                var type = ToCSharpType(name, x.Type, x.Mode);
+                if (x.Type == "RECORD" && !innerClasses.ContainsKey(name))
+                {
+                    innerClasses[name] = InnerBuildCSharpClass(name, x.Fields, innerClasses);
+                }
+
                 return string.Format("    public {0} {1} {{ get; set; }}", type, name);
             });
 
@@ -142,7 +177,7 @@ public class {1}
 }}";
             var result = string.Format(format, TableInfo.ToFullTableName(), TableInfo.table_id, string.Join(Environment.NewLine, props));
 
-            return result;
+            return string.Join(Environment.NewLine, new[] { result }.Concat(innerClasses.Select(x => Environment.NewLine + x.Value)));
         }
 
         public override string ToString()

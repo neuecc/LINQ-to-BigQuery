@@ -343,10 +343,6 @@ public static class MyExtensions
 }
 ```
 
-Limitation
----
-Currently not supported Record Type and WITHIN query.
-
 Author Info
 ---
 Yoshifumi Kawai(a.k.a. neuecc) is software developer in Japan.  

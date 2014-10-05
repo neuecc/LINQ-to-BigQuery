@@ -96,6 +96,10 @@ namespace BigQuery.Linq
             {
                 type = type.GetGenericArguments()[0];
             }
+            if (type.IsArray)
+            {
+                type = type.GetElementType();
+            }
 
             var tc = Type.GetTypeCode(type);
             switch (tc)
@@ -148,14 +152,24 @@ namespace BigQuery.Linq
             return type.GetProperties().Select(x =>
             {
                 var isNulable = x.PropertyType.IsNullable();
+                var isArray = x.PropertyType.IsArray;
                 var dataType = ToDataType(x.PropertyType);
 
-                return new TableFieldSchema
+                var schema = new TableFieldSchema
                 {
                     Name = x.Name,
                     Type = dataType.ToIdentifier(),
-                    Mode = isNulable ? "NULLABLE" : "REQUIRED" // NULLABLE, REQUIRED and REPEATED
+                    Mode = isArray ? "REPEATED"
+                         : isNulable ? "NULLABLE"
+                         : "REQUIRED"
                 };
+
+                if (dataType == DataType.Record)
+                {
+                    schema.Fields = ToTableFieldSchema(x.PropertyType);
+                }
+
+                return schema;
             }).ToArray();
         }
     }
@@ -210,7 +224,7 @@ namespace BigQuery.Linq
                     {
                         return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", value) + "\'";
                     }
-                    throw new NotImplementedException("Currently not supported object(as record?)");
+                    throw new InvalidOperationException(value.GetType() + " can't format BigQuery SQL string.");
                 default:
                     throw new InvalidOperationException();
             }
