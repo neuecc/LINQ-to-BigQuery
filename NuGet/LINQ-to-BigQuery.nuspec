@@ -21,8 +21,7 @@ Breaking Changes : BqFunc.Between/In/NotIn changed object to generics T
         <projectUrl>https://github.com/neuecc/LINQ-to-BigQuery</projectUrl>
         <tags>LINQ BigQuery</tags>
         <dependencies>
-            <dependency id="Google.Apis.Bigquery.v2" version="1.8.1.1680" />
-            <dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+            <dependency id="Google.Apis.Bigquery.v2" version="1.9.0.1680" />
         </dependencies>
     </metadata>
     <files>
