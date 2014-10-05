@@ -166,7 +166,14 @@ namespace BigQuery.Linq
 
                 if (dataType == DataType.Record)
                 {
-                    schema.Fields = ToTableFieldSchema(x.PropertyType);
+                    if (isArray)
+                    {
+                        schema.Fields = ToTableFieldSchema(x.PropertyType.GetElementType());
+                    }
+                    else
+                    {
+                        schema.Fields = ToTableFieldSchema(x.PropertyType);
+                    }
                 }
 
                 return schema;

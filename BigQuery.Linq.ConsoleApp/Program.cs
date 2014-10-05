@@ -26,12 +26,14 @@ namespace BigQuery.Linq.ConsoleApp
         {
             var context = new BigQueryContext();
 
-            var ss = context.From(Enumerable.Range(0, 10).Select(x => context.Select(() => new { x })))
-                .Select(x => new { x.x })
-                .ToString();
+            var xss = DataTypeUtility.ToTableFieldSchema(new
+     {
+         children = new[]
+   {
+       new { name = "", age = 0L }
+   }
+     });
 
-            Console.WriteLine(ss);
-            
         }
     }
 
