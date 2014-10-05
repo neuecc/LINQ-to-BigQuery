@@ -132,6 +132,7 @@
     <Compile Include="Functions\LogicalOperatorTest.cs" />
     <Compile Include="Functions\DateAndTimeTest.cs" />
     <Compile Include="Functions\AggreagteTest.cs" />
+    <Compile Include="Functions\WithInTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryTest.cs" />
     <Compile Include="SampleTables\geolitecity.cs" />

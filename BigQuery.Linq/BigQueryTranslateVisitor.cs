@@ -257,10 +257,6 @@ namespace BigQuery.Linq
                 }
                 return base.VisitUnary(node);
             }
-            else if (node.NodeType == ExpressionType.Quote)
-            {
-
-            }
 
             throw new InvalidOperationException("Not supported unary expression:" + node);
         }
@@ -306,7 +302,24 @@ namespace BigQuery.Linq
             {
                 isRootIsParameter = next.Expression.NodeType == ExpressionType.Parameter;
                 nodes.Add(next);
-                next = next.Expression as MemberExpression;
+
+                var nextExpr = next.Expression;
+                next = nextExpr as MemberExpression;
+
+                if (next == null)
+                {
+                    // skip indexer access for repeated field
+                    var binaryNext = nextExpr;
+                    while (binaryNext is BinaryExpression)
+                    {
+                        binaryNext = ((BinaryExpression)binaryNext).Left;
+                        if (binaryNext is MemberExpression)
+                        {
+                            next = (MemberExpression)binaryNext;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (isRootIsParameter)

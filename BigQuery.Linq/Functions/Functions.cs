@@ -46,5 +46,53 @@ namespace BigQuery.Linq
         {
             throw new InvalidOperationException(InvalidMessage);
         }
+
+        // WITHIN clause
+
+        /// <summary>
+        /// <para>WITHIN RECORD</para>
+        /// <para>The WITHIN keyword specifically works with aggregate functions to aggregate across children and repeated fields within records and nested fields.</para>
+        /// <para>Aggregates data in the repeated values within the record, where a record represents an entire unique protocol buffer message, including children and repeated values.</para>
+        /// </summary>
+        [FunctionName("WITHIN", SpecifiedFormatterType = typeof(WithInRecordFormatter))]
+        public static T WithIn<T>(T expr)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// <para>WITHIN node_name</para>
+        /// <para>The WITHIN keyword specifically works with aggregate functions to aggregate across children and repeated fields within records and nested fields.</para>
+        /// <para>Aggregates data in the repeated values within the specified node, where a node is a parent node of the field in the aggregation function.</para>
+        /// </summary>
+        [FunctionName("WITHIN", SpecifiedFormatterType = typeof(WithInNodeFormatter))]
+        public static T WithIn<T>(T expr, object node)
+        {
+            throw Invalid();
+        }
+
+        class WithInRecordFormatter : ISpeficiedFormatter
+        {
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
+            {
+                var expr = node.Arguments[0];
+                var str = BigQueryTranslateVisitor.BuildQuery(depth, indentSize, expr);
+
+                return str + " WITHIN RECORD";
+            }
+        }
+
+        class WithInNodeFormatter : ISpeficiedFormatter
+        {
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
+            {
+                var expr = node.Arguments[0];
+                var translater = new BigQueryTranslateVisitor(depth, indentSize);
+                var nodeName = translater.VisitAndClearBuffer(node.Arguments[1]);
+                var str = translater.VisitAndClearBuffer(expr);
+
+                return str + " WITHIN " + nodeName;
+            }
+        }
     }
 }
