@@ -36,11 +36,28 @@ IGNORE CASE
 ".TrimSmart());
         }
 
-        [Ignore]
         [TestMethod]
         public void Position()
         {
-            Assert.Fail("Not implemented yet.");
+            new BigQueryContext()
+                .From("mydata.nest", new
+                {
+                    fullName = "",
+                    children = new[]
+                    {
+                        new { name = "", age = 0L},
+                    }
+                })
+                .Select(x => new { x.fullName, x.children[0].name, position = BqFunc.Position(x.children[0].age)})
+                .ToString()
+                .Is(@"
+SELECT
+  [fullName],
+  [children.name] AS [name],
+  POSITION([children.age]) AS [position]
+FROM
+  [mydata.nest]
+".TrimSmart());
         }
 
         [TestMethod]

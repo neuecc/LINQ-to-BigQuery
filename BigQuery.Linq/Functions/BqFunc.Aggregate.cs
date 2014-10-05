@@ -122,8 +122,8 @@ namespace BigQuery.Linq
         /// <summary>
         /// Returns the last sequential value in the scope of the function. The LAST function works only with the WITHIN keyword.
         /// </summary>
-        [Obsolete("Currently Not Supported, available will be soon.")]
-        public static void Last(object field)
+        [FunctionName("LAST")]
+        public static T Last<T>(T field)
         {
             throw Invalid();
         }
@@ -150,8 +150,8 @@ namespace BigQuery.Linq
         /// <para>Aggregates all values in the current aggregation scope into a repeated field. For example, the query "SELECT x, NEST(y) FROM ... GROUP BY x" returns one output record for each distinct x value, and contains a repeated field for all y values paired with x in the query input. The NEST function requires a GROUP BY clause.</para>
         /// <para>BigQuery automatically flattens query results, so if you use the NEST function on the top level query, the results won't contain repeated fields. Use the NEST function when using a subselect that produces intermediate results for immediate use by the same query.</para>
         /// </summary>
-        [Obsolete("Currently Not Supported, available will be soon.")]
-        public static void Nest()
+        [FunctionName("NEST")]
+        public static T Nest<T>(T field)
         {
             throw Invalid();
         }

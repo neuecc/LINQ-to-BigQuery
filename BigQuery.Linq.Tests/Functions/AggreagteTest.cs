@@ -155,20 +155,51 @@ FROM
 ".TrimSmart());
         }
 
-        [Ignore]
         [TestMethod]
         public void Last()
         {
-            // not implemented yet.
-            Assert.Fail();
+            new BigQueryContext()
+            .From("mydata.nest", new
+            {
+                children = new[]
+                {
+                    new { name = ""},
+                }
+            })
+            .Select(x => BqFunc.WithIn(BqFunc.Last(x.children[0].name)))
+            .ToString()
+            .Is(@"
+SELECT
+  LAST([children.name]) WITHIN RECORD
+FROM
+  [mydata.nest]
+".TrimSmart());
         }
 
-        [Ignore]
         [TestMethod]
         public void Nest()
         {
-            // not implemented yet.
-            Assert.Fail();
+            new BigQueryContext()
+            .From("mydata.nest", new
+            {
+                fullName = "",
+                children = new[]
+                {
+                    new { name = ""},
+                }
+            })
+            .Select(x => new { x.fullName, childrenName = BqFunc.Nest(x.children[0].name) })
+            .GroupBy(x => x.fullName)
+            .ToString()
+            .Is(@"
+SELECT
+  [fullName],
+  NEST([children.name]) AS [childrenName]
+FROM
+  [mydata.nest]
+GROUP BY
+  [fullName]
+".TrimSmart());
         }
 
         [TestMethod]

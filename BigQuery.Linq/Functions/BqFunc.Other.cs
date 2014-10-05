@@ -21,10 +21,10 @@ namespace BigQuery.Linq
         /// <summary>
         /// Returns the one-based, sequential position of field within a set of repeated fields.
         /// </summary>
-        [Obsolete("Currently Not Supported, available will be soon.")]
-        public static void Position()
+        [FunctionName("POSITION")]
+        public static long Position(object field)
         {
-
+            throw Invalid();
         }
     }
 }
