@@ -17,6 +17,11 @@ namespace BigQuery.Linq
         Second
     }
 
+    // note:DateTimeOffset? is so dangerous!
+    // I found following code cause C# compiler crash!
+    // Expression<Func<DateTimeOffset?>> expr = () => new DateTime(2014, 10, 13);
+    // therefore I can't change method signature to nullable.
+
     public static partial class BqFunc
     {
         // https://developers.google.com/bigquery/query-reference#datetimefunctions
@@ -49,7 +54,7 @@ namespace BigQuery.Linq
 
         /// <summary>Returns a human-readable string of a TIMESTAMP data type in the format %Y-%m-%d.</summary>
         [FunctionName("DATE")]
-        public static string Date(DateTimeOffset timestamp)
+        public static string Date(DateTimeOffset timestamp) // DateTimeOffset? cause compiler error.
         {
             throw Invalid();
         }
@@ -63,7 +68,7 @@ namespace BigQuery.Linq
 
         /// <summary>Returns the number of days between two TIMESTAMP data types.</summary>
         [FunctionName("DATEDIFF")]
-        public static long DateDiff(DateTimeOffset timestamp1, DateTimeOffset timestamp2)
+        public static long DateDiff(DateTimeOffset timestamp1, DateTimeOffset? timestamp2)
         {
             throw Invalid();
         }
@@ -93,7 +98,7 @@ namespace BigQuery.Linq
         /// Returns a human-readable string representation of a UNIX timestamp in the format YYYY-MM-DD HH:MM:SS.uuuuuu.
         /// </summary>
         [FunctionName("FORMAT_UTC_USEC")]
-        public static string FormatUtcUsec(long unixTimestamp)
+        public static string FormatUtcUsec(long? unixTimestamp)
         {
             throw Invalid();
         }
@@ -138,7 +143,7 @@ namespace BigQuery.Linq
 
         /// <summary>Converts a UNIX timestamp in milliseconds to a TIMESTAMP data type.</summary>
         [FunctionName("MSEC_TO_TIMESTAMP")]
-        public static DateTimeOffset MsecToTimestamp(long milliseconds)
+        public static DateTimeOffset MsecToTimestamp(long? milliseconds)
         {
             throw Invalid();
         }
@@ -175,7 +180,7 @@ namespace BigQuery.Linq
         /// Converts a UNIX timestamp in seconds to a TIMESTAMP data type.
         /// </summary>
         [FunctionName("SEC_TO_TIMESTAMP")]
-        public static DateTimeOffset SecToTimestamp(long unixTimestampSecond)
+        public static DateTimeOffset SecToTimestamp(long? unixTimestampSecond)
         {
             throw Invalid();
         }
@@ -186,7 +191,7 @@ namespace BigQuery.Linq
         /// <para>Use the UTC_USEC_TO_&lt;function_name&gt; functions if you plan to group query data by time intervals, such as getting all data for a certain month, because the functions are more efficient.</para>
         /// </summary>
         [FunctionName("STRFTIME_UTC_USEC")]
-        public static string StrftimeUtcUsec(long unixTimestamp, string dateFormat)
+        public static string StrftimeUtcUsec(long? unixTimestamp, string dateFormat)
         {
             throw Invalid();
         }
@@ -233,7 +238,7 @@ namespace BigQuery.Linq
         /// <para>Converts a UNIX timestamp in microseconds to a TIMESTAMP data type.</para>
         /// </summary>
         [FunctionName("USEC_TO_TIMESTAMP")]
-        public static DateTimeOffset UsecToTimestamp(long unixTimestamp)
+        public static DateTimeOffset UsecToTimestamp(long? unixTimestamp)
         {
             throw Invalid();
         }
@@ -243,7 +248,7 @@ namespace BigQuery.Linq
         /// <para>For example, if unix_timestamp occurs on May 19th at 08:58, this function returns a UNIX timestamp for May 19th at 00:00 (midnight).</para>
         /// </summary>
         [FunctionName("UTC_USEC_TO_DAY")]
-        public static long UtcUsecToDay(long unixTimestamp)
+        public static long UtcUsecToDay(long? unixTimestamp)
         {
             throw Invalid();
         }
@@ -253,7 +258,7 @@ namespace BigQuery.Linq
         /// <para>For example, if unix_timestamp occurs at 08:58, this function returns a UNIX timestamp for 08:00 on the same day.</para>
         /// </summary>
         [FunctionName("UTC_USEC_TO_HOUR")]
-        public static long UtcUsecToHour(long unixTimestamp)
+        public static long UtcUsecToHour(long? unixTimestamp)
         {
             throw Invalid();
         }
@@ -263,7 +268,7 @@ namespace BigQuery.Linq
         /// <para>For example, if unix_timestamp occurs on March 19th, this function returns a UNIX timestamp for March 1st of the same year.</para>
         /// </summary>
         [FunctionName("UTC_USEC_TO_MONTH")]
-        public static long UtcUsecToMonth(long unixTimestamp)
+        public static long UtcUsecToMonth(long? unixTimestamp)
         {
             throw Invalid();
         }
@@ -273,7 +278,7 @@ namespace BigQuery.Linq
         /// <para>For example, if unix_timestamp occurs on Friday, 2008-04-11, and you set day_of_week to 2 (Tuesday), the function returns a UNIX timestamp for Tuesday, 2008-04-08.</para>
         /// </summary>
         [FunctionName("UTC_USEC_TO_WEEK")]
-        public static long UtcUsecToWeek(long unixTimestamp, long dayOfWeek)
+        public static long UtcUsecToWeek(long? unixTimestamp, long dayOfWeek)
         {
             throw Invalid();
         }
@@ -283,7 +288,7 @@ namespace BigQuery.Linq
         /// <para>For example, if unix_timestamp occurs in 2010, the function returns 1274259481071200, the microsecond representation of 2010-01-01 00:00.</para>
         /// </summary>
         [FunctionName("UTC_USEC_TO_YEAR")]
-        public static long UtcUsecToYear(long unixTimestamp)
+        public static long UtcUsecToYear(long? unixTimestamp)
         {
             throw Invalid();
         }

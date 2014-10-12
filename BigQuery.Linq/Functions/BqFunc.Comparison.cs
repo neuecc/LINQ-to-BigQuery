@@ -80,7 +80,7 @@ namespace BigQuery.Linq
         /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
         /// </summary>
         [FunctionName("GREATEST", SpecifiedFormatterType = typeof(GreatestFormatter))]
-        public static long Greatest(params long[] exprs)
+        public static long Greatest(params long?[] exprs)
         {
             throw Invalid();
         }
@@ -89,18 +89,18 @@ namespace BigQuery.Linq
         /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
         /// </summary>
         [FunctionName("GREATEST", SpecifiedFormatterType = typeof(GreatestFormatter))]
-        public static double Greatest(params double[] exprs)
+        public static double Greatest(params double?[] exprs)
         {
             throw Invalid();
         }
 
         /// <summary>Returns true if numeric_expr is positive or negative infinity.</summary>
         [FunctionName("IS_INF")]
-        public static bool IsInfinity(double numericExpr) { throw Invalid(); }
+        public static bool IsInfinity(double? numericExpr) { throw Invalid(); }
 
         /// <summary>Returns true if numeric_expr is the special NaN numeric value.</summary>
         [FunctionName("IS_NAN")]
-        public static bool IsNAN(double numericExpr) { throw Invalid(); }
+        public static bool IsNAN(double? numericExpr) { throw Invalid(); }
 
         // IS_EXPLICITLY_DEFINED is Deprecated, expr IS NOT NULL instead.
 
@@ -108,7 +108,7 @@ namespace BigQuery.Linq
         /// Returns the smallest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
         /// </summary>
         [FunctionName("LEAST", SpecifiedFormatterType = typeof(LeastFormatter))]
-        public static long Least(params long[] exprs)
+        public static long Least(params long?[] exprs)
         {
             throw Invalid();
         }
@@ -117,7 +117,7 @@ namespace BigQuery.Linq
         /// Returns the smallest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
         /// </summary>
         [FunctionName("LEAST", SpecifiedFormatterType = typeof(LeastFormatter))]
-        public static double Least(params double[] exprs)
+        public static double Least(params double?[] exprs)
         {
             throw Invalid();
         }

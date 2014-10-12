@@ -15,18 +15,18 @@ namespace BigQuery.Linq
         /// Returns the average of the values for a group of rows computed by numeric_expr. Rows with a NULL value are not included in the calculation.
         /// </summary>
         [FunctionName("AVG")]
-        public static double Average(long numericExpression) { throw Invalid(); }
+        public static double Average(long? numericExpression) { throw Invalid(); }
         /// <summary>
         /// Returns the average of the values for a group of rows computed by numeric_expr. Rows with a NULL value are not included in the calculation.
         /// </summary>
         [FunctionName("AVG")]
-        public static double Average(double numericExpression) { throw Invalid(); }
+        public static double Average(double? numericExpression) { throw Invalid(); }
 
         /// <summary>
         /// Returns the Pearson correlation coefficient of a set of number pairs.
         /// </summary>
         [FunctionName("CORR")]
-        public static double Correlation(long numericExpression1, long numericExpression2)
+        public static double Correlation(long? numericExpression1, long? numericExpression2)
         {
             throw Invalid();
         }
@@ -34,7 +34,7 @@ namespace BigQuery.Linq
         /// Returns the Pearson correlation coefficient of a set of number pairs.
         /// </summary>
         [FunctionName("CORR")]
-        public static double Correlation(double numericExpression1, double numericExpression2)
+        public static double Correlation(double? numericExpression1, double? numericExpression2)
         {
             throw Invalid();
         }
@@ -86,17 +86,17 @@ namespace BigQuery.Linq
 
         /// <summary>Computes the population covariance of the values computed by numeric_expr1 and numeric_expr2.</summary>
         [FunctionName("COVAR_POP")]
-        public static double CovariancePopulation(long numericExpression1, long numericExpression2) { throw Invalid(); }
+        public static double CovariancePopulation(long? numericExpression1, long? numericExpression2) { throw Invalid(); }
         /// <summary>Computes the population covariance of the values computed by numeric_expr1 and numeric_expr2.</summary>
         [FunctionName("COVAR_POP")]
-        public static double CovariancePopulation(double numericExpression1, double numericExpression2) { throw Invalid(); }
+        public static double CovariancePopulation(double? numericExpression1, double? numericExpression2) { throw Invalid(); }
 
         /// <summary>Computes the sample covariance of the values computed by numeric_expr1 and numeric_expr2.</summary>
         [FunctionName("COVAR_SAMP")]
-        public static double CovarianceSample(long numericExpression1, long numericExpression2) { throw Invalid(); }
+        public static double CovarianceSample(long? numericExpression1, long? numericExpression2) { throw Invalid(); }
         /// <summary>Computes the sample covariance of the values computed by numeric_expr1 and numeric_expr2.</summary>
         [FunctionName("COVAR_SAMP")]
-        public static double CovarianceSample(double numericExpression1, double numericExpression2) { throw Invalid(); }
+        public static double CovarianceSample(double? numericExpression1, double? numericExpression2) { throw Invalid(); }
 
         /// <summary>Returns the first sequential value in the scope of the function.</summary>
         [FunctionName("FIRST")]
@@ -160,7 +160,7 @@ namespace BigQuery.Linq
         /// Returns the nth sequential value in the scope of the function, where n is a constant. The NTH function starts counting at 1, so there is no zeroth term. If the scope of the function has less than n values, the function returns NULL.
         /// </summary>
         [FunctionName("NTH")]
-        public static T Nth<T>(long n, T field)
+        public static T Nth<T>(long? n, T field)
         {
             throw Invalid();
         }
@@ -178,37 +178,37 @@ namespace BigQuery.Linq
         /// Compares approximate quantiles for the input expression. The number of quantiles computed is controlled with the optional buckets parameter. The default value of buckets is 100. If specified explicitly, buckets must be greater than or equal to 2. The fractional error per quantile is epsilon = 1 / buckets.
         /// </summary>
         [FunctionName("QUANTILES")]
-        public static T Quantiles<T>(T expr, long buckets)
+        public static T Quantiles<T>(T expr, long? buckets)
         {
             throw Invalid();
         }
 
         /// <summary>Returns the standard deviation of the values computed by numeric_expr. Rows with a NULL value are not included in the calculation. The STDDEV function is an alias for STDDEV_SAMP.</summary>
         [FunctionName("STDDEV")]
-        public static double StandardDeviation(long numericExpression) { throw Invalid(); }
+        public static double StandardDeviation(long? numericExpression) { throw Invalid(); }
         /// <summary>Returns the standard deviation of the values computed by numeric_expr. Rows with a NULL value are not included in the calculation. The STDDEV function is an alias for STDDEV_SAMP.</summary>
         [FunctionName("STDDEV")]
-        public static double StandardDeviation(double numericExpression) { throw Invalid(); }
+        public static double StandardDeviation(double? numericExpression) { throw Invalid(); }
 
         /// <summary>Computes the population standard deviation of the value computed by numeric_expr.</summary>
         [FunctionName("STDDEV_POP")]
-        public static double StandardDeviationPopulation(long numericExpression) { throw Invalid(); }
+        public static double StandardDeviationPopulation(long? numericExpression) { throw Invalid(); }
         /// <summary>Computes the population standard deviation of the value computed by numeric_expr.</summary>
         [FunctionName("STDDEV_POP")]
-        public static double StandardDeviationPopulation(double numericExpression) { throw Invalid(); }
+        public static double StandardDeviationPopulation(double? numericExpression) { throw Invalid(); }
 
         /// <summary>Computes the sample standard deviation of the value computed by numeric_expr.</summary>
         [FunctionName("STDDEV_SAMP")]
-        public static double StandardDeviationSample(long numericExpression) { throw Invalid(); }
+        public static double StandardDeviationSample(long? numericExpression) { throw Invalid(); }
         /// <summary>Computes the sample standard deviation of the value computed by numeric_expr.</summary>
         [FunctionName("STDDEV_SAMP")]
-        public static double StandardDeviationSample(double numericExpression) { throw Invalid(); }
+        public static double StandardDeviationSample(double? numericExpression) { throw Invalid(); }
 
         /// <summary>
         /// Returns the sum total of the values in the scope of the function. For use with numerical data types only.
         /// </summary>
         [FunctionName("SUM")]
-        public static long Sum(long field)
+        public static long Sum(long? field)
         {
             throw Invalid();
         }
@@ -217,7 +217,7 @@ namespace BigQuery.Linq
         /// Returns the sum total of the values in the scope of the function. For use with numerical data types only.
         /// </summary>
         [FunctionName("SUM")]
-        public static double Sum(double field)
+        public static double Sum(double? field)
         {
             throw Invalid();
         }
@@ -226,7 +226,7 @@ namespace BigQuery.Linq
         /// Returns the sum total of the values in the scope of the function. For use with numerical data types only.
         /// </summary>
         [FunctionName("SUM")]
-        public static long Sum(DateTimeOffset field)
+        public static long Sum(DateTimeOffset? field)
         {
             throw Invalid();
         }
@@ -253,7 +253,7 @@ namespace BigQuery.Linq
         /// <param name="maxValues">[Optional] The maximum number of results to return. Default is 20.</param>
         /// <returns></returns>
         [FunctionName("TOP")]
-        public static T Top<T>(T field, long maxValues)
+        public static T Top<T>(T field, long? maxValues)
         {
             throw Invalid();
         }
@@ -268,31 +268,31 @@ namespace BigQuery.Linq
         /// <param name="multiplier">A numeric constant, expression, or field that is multiplied with max_values to specify how many results to return.</param>
         /// <returns></returns>
         [FunctionName("TOP")]
-        public static T Top<T>(T field, long maxValues, long multiplier)
+        public static T Top<T>(T field, long? maxValues, long? multiplier)
         {
             throw Invalid();
         }
 
         /// <summary>Computes the variance of the values computed by numeric_expr. Rows with a NULL value are not included in the calculation. The VARIANCE function is an alias for VAR_SAMP.</summary>
         [FunctionName("VARIANCE")]
-        public static double Variance(long numericExpression) { throw Invalid(); }
+        public static double Variance(long? numericExpression) { throw Invalid(); }
         /// <summary>Computes the variance of the values computed by numeric_expr. Rows with a NULL value are not included in the calculation. The VARIANCE function is an alias for VAR_SAMP.</summary>
         [FunctionName("VARIANCE")]
-        public static double Variance(double numericExpression) { throw Invalid(); }
+        public static double Variance(double? numericExpression) { throw Invalid(); }
 
         /// <summary>Computes the population variance of the values computed by numeric_expr.</summary>
         [FunctionName("VAR_POP")]
-        public static double VariancePopulation(long numericExpression) { throw Invalid(); }
+        public static double VariancePopulation(long? numericExpression) { throw Invalid(); }
         /// <summary>Computes the population variance of the values computed by numeric_expr.</summary>
         [FunctionName("VAR_POP")]
-        public static double VariancePopulation(double numericExpression) { throw Invalid(); }
+        public static double VariancePopulation(double? numericExpression) { throw Invalid(); }
 
         /// <summary>Computes the sample variance of the values computed by numeric_expr.</summary>
         [FunctionName("VAR_SAMP")]
-        public static double VarianceSample(long numericExpression) { throw Invalid(); }
+        public static double VarianceSample(long? numericExpression) { throw Invalid(); }
         /// <summary>Computes the sample variance of the values computed by numeric_expr.</summary>
         [FunctionName("VAR_SAMP")]
-        public static double VarianceSample(double numericExpression) { throw Invalid(); }
+        public static double VarianceSample(double? numericExpression) { throw Invalid(); }
 
         class CountAllFormatter : ISpeficiedFormatter
         {

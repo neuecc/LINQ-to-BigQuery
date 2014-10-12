@@ -10,7 +10,7 @@ namespace BigQuery.Linq
     {
         /// <summary>Returns the number of bits that are set in numeric_expr.</summary>
         [FunctionName("BIT_COUNT")]
-        public static int BitCount(long numericExpression)
+        public static int BitCount(long? numericExpression)
         {
             throw Invalid();
         }
