@@ -22,7 +22,7 @@ namespace BigQuery.Linq
         public TimeSpan ExecutionTime { get; private set; }
         public IList<TableFieldSchema> TableFieldSchemas { get; private set; }
 
-        internal QueryResponse(string query, TimeSpan executionTime, QueryResponse queryResponse, bool isDynamic)
+        internal QueryResponse(BigQueryContext context, string query, TimeSpan executionTime, QueryResponse queryResponse, bool isDynamic)
         {
             T[] rows;
             if (queryResponse.Rows == null)
@@ -31,7 +31,13 @@ namespace BigQuery.Linq
             }
             else if (!isDynamic)
             {
-                var deserializer = new Deserializer<T>(queryResponse.Schema);
+                CustomDeserializeFallback fallback;
+                if (!context.fallbacks.TryGetValue(typeof(T), out fallback))
+                {
+                    fallback = null;
+                }
+
+                var deserializer = new Deserializer<T>(queryResponse.Schema, fallback);
                 rows = queryResponse.Rows.Select(row => deserializer.Deserialize(row)).ToArray();
             }
             else

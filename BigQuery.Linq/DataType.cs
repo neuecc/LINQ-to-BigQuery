@@ -1,7 +1,9 @@
 ﻿using Google.Apis.Bigquery.v2.Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -149,10 +151,23 @@ namespace BigQuery.Linq
 
         public static TableFieldSchema[] ToTableFieldSchema(Type type)
         {
+            return ToTableFieldSchema(type, _ => null);
+        }
+
+        /// <param name="customFieldSchemaSelector">Use custom fallback. If return null, use default fieldschema.</param>
+        public static TableFieldSchema[] ToTableFieldSchema(Type type, Func<PropertyInfo, TableFieldSchema> customFieldSchemaSelector)
+        {
             return type.GetProperties().Select(x =>
             {
+                var customSchema = customFieldSchemaSelector(x);
+                if (customSchema != null)
+                {
+                    return customSchema;
+                }
+
                 var isNulable = x.PropertyType.IsNullable();
                 var isArray = x.PropertyType.IsArray;
+
                 var dataType = ToDataType(x.PropertyType);
 
                 var schema = new TableFieldSchema
@@ -178,6 +193,65 @@ namespace BigQuery.Linq
 
                 return schema;
             }).ToArray();
+        }
+
+        public static string ToJsonSchema(this TableFieldSchema schema, Formatting formatting = Formatting.Indented)
+        {
+            using (var sw = new StringWriter())
+            using (var jw = new JsonTextWriter(sw))
+            {
+                jw.Formatting = formatting;
+                WriteJsonSchema(jw, schema);
+                return sw.ToString();
+            }
+        }
+
+        public static string ToJsonSchema(this IEnumerable<TableFieldSchema> schemas, Formatting formatting = Formatting.Indented)
+        {
+            using (var sw = new StringWriter())
+            using (var jw = new JsonTextWriter(sw))
+            {
+                jw.Formatting = formatting;
+                jw.WriteStartArray();
+                foreach (var item in schemas)
+                {
+                    WriteJsonSchema(jw, item);
+                }
+                jw.WriteEndArray();
+                return sw.ToString();
+            }
+        }
+
+        static void WriteJsonSchema(JsonTextWriter jw, TableFieldSchema schema)
+        {
+            jw.WriteStartObject();
+            {
+                jw.WritePropertyName("name");
+                jw.WriteValue(schema.Name);
+                if (schema.Description != null)
+                {
+                    jw.WritePropertyName("description");
+                    jw.WriteValue(schema.Description);
+                }
+                if (schema.Mode != null)
+                {
+                    jw.WritePropertyName("mode");
+                    jw.WriteValue(schema.Mode);
+                }
+                jw.WritePropertyName("type");
+                jw.WriteValue(schema.Type);
+                if (schema.Fields != null)
+                {
+                    jw.WritePropertyName("fields");
+                    jw.WriteStartArray();
+                    foreach (var item in schema.Fields)
+                    {
+                        WriteJsonSchema(jw, item);
+                    }
+                    jw.WriteEndArray();
+                }
+            }
+            jw.WriteEndObject();
         }
     }
 

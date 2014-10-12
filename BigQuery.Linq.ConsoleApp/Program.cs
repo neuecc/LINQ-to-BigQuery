@@ -5,6 +5,7 @@ using Google.Apis.Bigquery.v2.Data;
 using Google.Apis.Services;
 using Google.Apis.Util;
 using Google.Apis.Util.Store;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,24 +19,19 @@ using System.Threading.Tasks;
 namespace BigQuery.Linq.ConsoleApp
 {
 
+
+
     class Program
     {
 
 
         static void Main(string[] args)
         {
-            var context = new BigQueryContext();
-
-            var xss = DataTypeUtility.ToTableFieldSchema(new
-     {
-         children = new[]
-   {
-       new { name = "", age = 0L }
-   }
-     });
-
+       
         }
     }
+
+
 
 
     [TableName("publicdata:samples.trigrams")]

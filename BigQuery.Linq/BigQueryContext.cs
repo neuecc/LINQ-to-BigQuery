@@ -31,6 +31,8 @@ namespace BigQuery.Linq
         public long? TimeoutMs { get; set; }
         public bool? UseQueryCache { get; set; }
 
+        internal readonly Dictionary<Type, CustomDeserializeFallback> fallbacks = new Dictionary<Type, CustomDeserializeFallback>();
+
         public BigQueryContext()
         {
             this.IndentSize = 2;
@@ -164,6 +166,11 @@ namespace BigQuery.Linq
             return Run<MetaTable>(query).Rows;
         }
 
+        public void RegisterCustomDeserializeFallback(Type targetType, CustomDeserializeFallback fallback)
+        {
+            fallbacks[targetType] = fallback;
+        }
+
         // Execute
 
         JobsResource.QueryRequest BuildRequest(string query, bool isForceDry)
@@ -199,7 +206,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse, isDynamic: false);
+            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, isDynamic: false);
             return response;
         }
 
@@ -213,7 +220,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse, isDynamic: false);
+            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, isDynamic: false);
             return response;
         }
 
@@ -227,7 +234,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<T>(query, sw.Elapsed, queryResponse, isDynamic: false);
+            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, isDynamic: false);
             return response;
         }
 
@@ -246,7 +253,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<dynamic>(query, sw.Elapsed, queryResponse, isDynamic: true);
+            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, isDynamic: true);
             return response;
         }
 
@@ -263,7 +270,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<dynamic>(query, sw.Elapsed, queryResponse, isDynamic: true);
+            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, isDynamic: true);
             return response;
         }
 
@@ -280,7 +287,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<dynamic>(query, sw.Elapsed, queryResponse, isDynamic: true);
+            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, isDynamic: true);
             return response;
         }
 

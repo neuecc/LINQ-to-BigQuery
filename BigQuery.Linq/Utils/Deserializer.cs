@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq
 {
+    public delegate bool CustomDeserializeFallback(PropertyInfo targetProperty, object value, out object deserializedValue);
+
     internal abstract class Deserializer
     {
         protected static readonly HashSet<Type> ParsableType = new HashSet<Type>
@@ -105,8 +107,9 @@ namespace BigQuery.Linq
         readonly TableSchema schema;
         readonly Dictionary<string, PropertyInfo> typeInfo;
         readonly Dictionary<string, FieldInfo> fallbackFieldInfo;
+        readonly CustomDeserializeFallback customDeserializeFallback;
 
-        public Deserializer(TableSchema schema)
+        public Deserializer(TableSchema schema, CustomDeserializeFallback customDeserializeFallback)
         {
             this.schema = schema;
             this.typeInfo = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.SetProperty | BindingFlags.Instance)
@@ -114,6 +117,7 @@ namespace BigQuery.Linq
             this.fallbackFieldInfo = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.SetField | BindingFlags.Instance)
                 .Where(x => x.Name.StartsWith("<"))
                 .ToDictionary(x => ExtractAnonymousFieldNameRegex.Match(x.Name).Groups[1].Value, StringComparer.InvariantCultureIgnoreCase);
+            this.customDeserializeFallback = customDeserializeFallback;
         }
 
         public T Deserialize(TableRow row)
@@ -142,10 +146,19 @@ namespace BigQuery.Linq
                 PropertyInfo propertyInfo;
                 if (typeInfo.TryGetValue(field.Name, out propertyInfo))
                 {
-                    object v = (parsedValue == null) ? null
-                        : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
-                        : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0])
-                        : Convert.ChangeType(parsedValue, propertyInfo.PropertyType);
+                    object v;
+                    object customResult;
+                    if (customDeserializeFallback != null && customDeserializeFallback(propertyInfo, parsedValue, out customResult))
+                    {
+                        v = customResult;
+                    }
+                    else
+                    {
+                        v = (parsedValue == null) ? null
+                            : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
+                            : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0])
+                            : Convert.ChangeType(parsedValue, propertyInfo.PropertyType);
+                    }
 
                     if (propertyInfo.GetSetMethod(true) != null)
                     {
