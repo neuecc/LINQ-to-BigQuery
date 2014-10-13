@@ -117,7 +117,7 @@ namespace BigQuery.Linq
                 case "TIMESTAMP":
                     return "DateTimeOffset" + (isNullable ? "?" : "") + (isArray ? "[]" : "");
                 case "RECORD":
-                    return name + (isNullable ? "?" : "") + (isArray ? "[]" : "");
+                    return name + (isArray ? "[]" : "");
                 default:
                     throw new InvalidOperationException();
             }

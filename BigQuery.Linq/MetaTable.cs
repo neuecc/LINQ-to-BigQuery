@@ -165,7 +165,7 @@ namespace BigQuery.Linq
                 }
 
                 if (retryStrategy == null) break;
-                if (response.InsertErrors == null) break;
+                if (response != null && response.InsertErrors == null) break;
 
                 retry++;
                 var nextDelay = retryStrategy.GetNextBackOff(retry);

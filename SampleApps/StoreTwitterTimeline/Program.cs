@@ -155,7 +155,7 @@ namespace StoreTwitterTimeline
             var schema = GetSchemas();
 
             new MetaTable(context.ProjectId, "twitter", "sample")
-                .CreateTable(service, schema, "Twitter Streaming Timeline:Sample");
+              .CreateTable(service, schema, "Twitter Streaming Timeline:Sample");
 
             new MetaTable(context.ProjectId, "twitter", "user")
                 .CreateTable(service, schema, "Twitter Streaming Timeline:User");
@@ -163,6 +163,7 @@ namespace StoreTwitterTimeline
             new MetaTable(context.ProjectId, "twitter", "error")
                 .CreateTable(service, DataTypeUtility.ToTableFieldSchema(new
                 {
+                    Timestamp = default(DateTimeOffset),
                     Type = "",
                     StackTrace = "",
                     Message = "",
@@ -195,12 +196,16 @@ namespace StoreTwitterTimeline
                     return sample.InsertAllAsync(
                             context.BigQueryService,
                             tweets,
-                            new ExponentialBackOff(),
+                            new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3),
                             insertIdSelector: x => x.Id.ToString(),
                             serializerSettings: resolverSettings)
                         .ToObservable();
                 })
-                .Do(_ => { }, ex => errorTable.InsertAllAsync(context.BigQueryService, new[] { ex }).Wait())
+                .Do(_ => { }, ex =>
+                {
+                    Console.WriteLine(ex.ToString());
+                    errorTable.InsertAllAsync(context.BigQueryService, new[] { new { Timestamp = DateTimeOffset.UtcNow, Type = ex.GetType().Name, ex.StackTrace, ex.Message, ex.Source } }).Wait();
+                })
                 .Retry();
 
             var user = new MetaTable(context.ProjectId, "twitter", "user");
@@ -214,12 +219,16 @@ namespace StoreTwitterTimeline
                     return user.InsertAllAsync(
                             context.BigQueryService,
                             tweets,
-                            new ExponentialBackOff(),
+                            new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3),
                             insertIdSelector: x => x.Id.ToString(),
                             serializerSettings: resolverSettings)
                         .ToObservable();
                 })
-                .Do(_ => { }, ex => errorTable.InsertAllAsync(context.BigQueryService, new[] { ex }).Wait())
+                .Do(_ => { }, ex =>
+                {
+                    Console.WriteLine(ex.ToString());
+                    errorTable.InsertAllAsync(context.BigQueryService, new[] { new { Timestamp = DateTimeOffset.UtcNow, Type = ex.GetType().Name, ex.StackTrace, ex.Message, ex.Source } }).Wait();
+                })
                 .Retry();
 
             // start insert
