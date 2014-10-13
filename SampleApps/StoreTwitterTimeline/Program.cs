@@ -9,7 +9,6 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
@@ -18,7 +17,7 @@ namespace StoreTwitterTimeline
 {
     class Program
     {
-        static TableFieldSchema[] GetSchemas()
+        static TableFieldSchema[] CreateTwitterStatusSchemas()
         {
             var schemas = DataTypeUtility.ToTableFieldSchema(typeof(Status), (pi) =>
             {
@@ -148,27 +147,87 @@ namespace StoreTwitterTimeline
             }
         }
 
+        class ErrorTable
+        {
+            public DateTimeOffset Timestamp { get; set; }
+            public string Type { get; set; }
+            public string StackTrace { get; set; }
+            public string Message { get; set; }
+            public string Source { get; set; }
+        }
+
         static void CreateTable()
         {
             var context = Account.GetContext();
             var service = context.BigQueryService;
-            var schema = GetSchemas();
+            var schema = CreateTwitterStatusSchemas();
 
             new MetaTable(context.ProjectId, "twitter", "sample")
-              .CreateTable(service, schema, "Twitter Streaming Timeline:Sample");
+                .CreateTable(service, schema, "Twitter Streaming Timeline:Sample");
 
             new MetaTable(context.ProjectId, "twitter", "user")
                 .CreateTable(service, schema, "Twitter Streaming Timeline:User");
 
             new MetaTable(context.ProjectId, "twitter", "error")
-                .CreateTable(service, DataTypeUtility.ToTableFieldSchema(new
+                .CreateTable(service, DataTypeUtility.ToTableFieldSchema<ErrorTable>());
+        }
+
+        static IObservable<long> InsertStatus(IObservable<StreamingMessage> stream, BigQueryContext context, MetaTable insertTable)
+        {
+            var resolverSettings = new JsonSerializerSettings { ContractResolver = new StatusResolver() };
+            var errorTable = new MetaTable(context.ProjectId, "twitter", "error");
+
+            var count = 0L;
+            return stream
+                .OfType<StatusMessage>()
+                .Select(x => x.Status)
+                .Buffer(TimeSpan.FromSeconds(10), 100)
+                .SelectMany(tweets =>
                 {
-                    Timestamp = default(DateTimeOffset),
-                    Type = "",
-                    StackTrace = "",
-                    Message = "",
-                    Source = "",
-                }));
+                    count += tweets.Count;
+                    return insertTable.InsertAllAsync(
+                            context.BigQueryService,
+                            tweets,
+                            new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3),
+                            insertIdSelector: x => x.Id.ToString(),
+                            serializerSettings: resolverSettings)
+                        .ToObservable();
+                })
+                .Do(_ => { }, ex =>
+                {
+                    string message;
+                    if (ex is InsertAllFailedException)
+                    {
+                        var failed = (ex as InsertAllFailedException);
+                        if (failed.InnerException != null)
+                        {
+                            ex = failed.InnerException;
+                            message = ex.Message;
+                        }
+                        else
+                        {
+                            message = string.Join("\r\n\r\n", failed.InternalErrorInfos.Where(x => x.Reason != "stopped").Select(x => x.ToString()));
+                        }
+                    }
+                    else
+                    {
+                        message = ex.Message;
+                    }
+
+                    Console.WriteLine(message);
+                    try
+                    {
+                        errorTable.InsertAllAsync(context.BigQueryService, new[] { new ErrorTable { Timestamp = DateTimeOffset.UtcNow, Type = ex.GetType().Name, StackTrace = ex.StackTrace, Message = message, Source = ex.Source } }).Wait();
+                    }
+                    catch (Exception ex2)
+                    {
+                        ex = ex2;
+                        Console.WriteLine(ex.ToString());
+                        errorTable.InsertAllAsync(context.BigQueryService, new[] { new ErrorTable { Timestamp = DateTimeOffset.UtcNow, Type = ex.GetType().Name, StackTrace = ex.StackTrace, Message = ex.Message, Source = ex.Source } }).Wait();
+                    }
+                })
+                .Select(_ => count)
+                .Retry();
         }
 
         static void Main(string[] args)
@@ -177,69 +236,29 @@ namespace StoreTwitterTimeline
             // CreateTable();
             // return;
 
+            // Insert Twitter Streaming Data to BigQuery
+
             var context = Account.GetContext();
             var token = Account.GetTokens();
-            var resolverSettings = new JsonSerializerSettings { ContractResolver = new StatusResolver() };
 
-            var sampleCount = 0;
-            var userCount = 0;
-            var errorTable = new MetaTable(context.ProjectId, "twitter", "error");
+            var sampleInsert = InsertStatus(
+                token.Streaming.StartObservableStream(StreamingType.Sample),
+                context,
+                new MetaTable(context.ProjectId, "twitter", "sample"));
 
-            var sample = new MetaTable(context.ProjectId, "twitter", "sample");
-            var sampleInsert = token.Streaming.StartObservableStream(CoreTweet.Streaming.StreamingType.Sample)
-                .OfType<StatusMessage>()
-                .Select(x => x.Status)
-                .Buffer(TimeSpan.FromSeconds(10), 100)
-                .SelectMany(tweets =>
+            var userInsert = InsertStatus(
+                token.Streaming.StartObservableStream(StreamingType.User),
+                context,
+                new MetaTable(context.ProjectId, "twitter", "user"));
+
+            // start insert and synchronous wait
+            sampleInsert.CombineLatest(userInsert, (sampleCount, userCount) => new { sampleCount, userCount })
+                .Sample(TimeSpan.FromSeconds(10))
+                .ForEachAsync(x =>
                 {
-                    sampleCount += tweets.Count;
-                    return sample.InsertAllAsync(
-                            context.BigQueryService,
-                            tweets,
-                            new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3),
-                            insertIdSelector: x => x.Id.ToString(),
-                            serializerSettings: resolverSettings)
-                        .ToObservable();
+                    Console.WriteLine(x.ToString());
                 })
-                .Do(_ => { }, ex =>
-                {
-                    Console.WriteLine(ex.ToString());
-                    errorTable.InsertAllAsync(context.BigQueryService, new[] { new { Timestamp = DateTimeOffset.UtcNow, Type = ex.GetType().Name, ex.StackTrace, ex.Message, ex.Source } }).Wait();
-                })
-                .Retry();
-
-            var user = new MetaTable(context.ProjectId, "twitter", "user");
-            var userInsert = token.Streaming.StartObservableStream(CoreTweet.Streaming.StreamingType.User)
-                .OfType<StatusMessage>()
-                .Select(x => x.Status)
-                .Buffer(TimeSpan.FromSeconds(10), 100)
-                .SelectMany(tweets =>
-                {
-                    userCount += tweets.Count;
-                    return user.InsertAllAsync(
-                            context.BigQueryService,
-                            tweets,
-                            new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3),
-                            insertIdSelector: x => x.Id.ToString(),
-                            serializerSettings: resolverSettings)
-                        .ToObservable();
-                })
-                .Do(_ => { }, ex =>
-                {
-                    Console.WriteLine(ex.ToString());
-                    errorTable.InsertAllAsync(context.BigQueryService, new[] { new { Timestamp = DateTimeOffset.UtcNow, Type = ex.GetType().Name, ex.StackTrace, ex.Message, ex.Source } }).Wait();
-                })
-                .Retry();
-
-            // start insert
-            new[] { sampleInsert, userInsert }.Merge().Subscribe();
-
-            // wait(synchronous timer) and output status
-            Observable.Interval(TimeSpan.FromSeconds(10), Scheduler.CurrentThread)
-                .Subscribe(x =>
-                {
-                    Console.WriteLine("Sample:" + sampleCount + " | " + "User:" + userCount);
-                });
+                .Wait();
         }
     }
 }

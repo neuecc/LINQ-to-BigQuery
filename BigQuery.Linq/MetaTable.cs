@@ -176,24 +176,41 @@ namespace BigQuery.Linq
 
             if (lastError != null)
             {
-                throw new Exception("Can't insert data. RetryCount:" + retry + " " + lastError.ToString());
+                var exception = new InsertAllFailedException("", lastError)
+                {
+                    RetryCount = retry,
+                    InternalErrorInfos = new InsertAllFailedException.ErrorInfo[0],
+                };
+
+                throw exception;
             }
 
             if (response.InsertErrors != null && response.InsertErrors.Any())
             {
                 var errorMessages = response.InsertErrors.Zip(rows, (x, r) =>
                 {
-                    return x.Index + ":" + string.Join(Environment.NewLine, x.Errors.Select(e => string.Format(@"
-DebugInfo:{0}
-ETag:{1}
-Location:{2}
-Message:{3}
-Reason:{4}
-RowJSON:{5}
-", e.DebugInfo, e.ETag, e.Location, e.Message, e.Reason, JsonConvert.SerializeObject(r.Json, Formatting.None))));
-                });
+                    return x.Errors.Select(e =>
+                    {
+                        return new InsertAllFailedException.ErrorInfo
+                        {
+                            Index = x.Index,
+                            DebugInfo = e.DebugInfo,
+                            ETag = e.ETag,
+                            Location = e.Location,
+                            Message = e.Message,
+                            Reason = e.Reason,
+                            PostRawJSON = JsonConvert.SerializeObject(r.Json, Formatting.None)
+                        };
+                    });
+                }).SelectMany(xs => xs);
 
-                throw new Exception("Can't insert data. RetryCount:" + retry + " " + string.Join(Environment.NewLine, errorMessages));
+                var exception = new InsertAllFailedException
+                {
+                    RetryCount = retry,
+                    InternalErrorInfos = errorMessages.ToArray()
+                };
+
+                throw exception;
             }
         }
 
@@ -209,6 +226,51 @@ RowJSON:{5}
             var sizeInfo = string.Format("Size:{0}, RowCount:{1}", size_bytes.ToHumanReadableSize(), row_count);
             var time = string.Format("Created:{0}, LastModified:{1}", creation_time.FromTimestampMilliSeconds(), last_modified_time.FromTimestampMilliSeconds());
             return tableInfo + sizeInfo + ", " + time;
+        }
+    }
+
+    public class InsertAllFailedException : Exception
+    {
+        public int RetryCount { get; internal set; }
+        public ErrorInfo[] InternalErrorInfos { get; internal set; }
+
+        public class ErrorInfo
+        {
+            public long? Index { get; internal set; }
+            public string DebugInfo { get; internal set; }
+            public string ETag { get; internal set; }
+            public string Location { get; internal set; }
+            public string Message { get; internal set; }
+            public string Reason { get; internal set; }
+            public string PostRawJSON { get; internal set; }
+
+            public override string ToString()
+            {
+                return string.Format(@"Index:{0}
+DebugInfo:{1}
+ETag:{2}
+Location:{3}
+Message:{4}
+Reason:{5}
+PostRawJSON:{6}", Index, DebugInfo, ETag, Location, Message, Reason, PostRawJSON);
+            }
+        }
+
+        public InsertAllFailedException()
+        {
+
+        }
+
+        public InsertAllFailedException(string message)
+            : base(message)
+        {
+
+        }
+
+        public InsertAllFailedException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+
         }
     }
 }
