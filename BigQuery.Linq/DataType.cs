@@ -116,9 +116,10 @@ namespace BigQuery.Linq
                 case TypeCode.DBNull:
                 case TypeCode.Empty:
                     throw new ArgumentException("not supported type");
-                case TypeCode.Decimal:
                 case TypeCode.Single:
                 case TypeCode.Double:
+                    return DataType.Float;
+                case TypeCode.Decimal:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
                 case TypeCode.Int64:
@@ -157,42 +158,53 @@ namespace BigQuery.Linq
         /// <param name="customFieldSchemaSelector">Use custom fallback. If return null, use default fieldschema.</param>
         public static TableFieldSchema[] ToTableFieldSchema(Type type, Func<PropertyInfo, TableFieldSchema> customFieldSchemaSelector)
         {
-            return type.GetProperties().Select(x =>
-            {
-                var customSchema = customFieldSchemaSelector(x);
-                if (customSchema != null)
+            return type.GetProperties()
+                .Select(x =>
                 {
-                    return customSchema;
-                }
-
-                var isNulable = x.PropertyType.IsNullable();
-                var isArray = x.PropertyType.IsArray;
-
-                var dataType = ToDataType(x.PropertyType);
-
-                var schema = new TableFieldSchema
-                {
-                    Name = x.Name,
-                    Type = dataType.ToIdentifier(),
-                    Mode = isArray ? "REPEATED"
-                         : isNulable ? "NULLABLE"
-                         : "REQUIRED"
-                };
-
-                if (dataType == DataType.Record)
-                {
-                    if (isArray)
+                    if (x.GetCustomAttribute<JsonIgnoreAttribute>() != null)
                     {
-                        schema.Fields = ToTableFieldSchema(x.PropertyType.GetElementType());
+                        return null;
                     }
-                    else
-                    {
-                        schema.Fields = ToTableFieldSchema(x.PropertyType);
-                    }
-                }
 
-                return schema;
-            }).ToArray();
+                    var customSchema = customFieldSchemaSelector(x);
+                    if (customSchema != null)
+                    {
+                        return customSchema;
+                    }
+
+                    var isNulable = x.PropertyType.IsNullable();
+                    var isArray = x.PropertyType.IsArray;
+
+                    var dataType = ToDataType(x.PropertyType);
+                    var isRecord = dataType == DataType.Record;
+
+                    var jsonName = x.GetCustomAttribute<JsonPropertyAttribute>();
+
+                    var schema = new TableFieldSchema
+                    {
+                        Name = (jsonName != null) ? jsonName.PropertyName : x.Name,
+                        Type = dataType.ToIdentifier(),
+                        Mode = (isArray) ? "REPEATED"
+                             : (isNulable || isRecord || dataType == DataType.String) ? "NULLABLE"
+                             : "REQUIRED"
+                    };
+
+                    if (isRecord)
+                    {
+                        if (isArray)
+                        {
+                            schema.Fields = ToTableFieldSchema(x.PropertyType.GetElementType(), customFieldSchemaSelector);
+                        }
+                        else
+                        {
+                            schema.Fields = ToTableFieldSchema(x.PropertyType, customFieldSchemaSelector);
+                        }
+                    }
+
+                    return schema;
+                })
+                .Where(x => x != null)
+                .ToArray();
         }
 
         public static string ToJsonSchema(this TableFieldSchema schema, Formatting formatting = Formatting.Indented)

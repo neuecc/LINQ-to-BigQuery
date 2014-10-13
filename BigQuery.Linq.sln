@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{44CCD70F
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleApps", "SampleApps", "{EC97FF6D-7FC2-43B8-85A1-40CAF838DC29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreTwitterTimeline", "SampleApps\StoreTwitterTimeline\StoreTwitterTimeline.csproj", "{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,8 +39,15 @@ Global
 		{66C52852-2145-4DDC-B88D-F318B649FAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66C52852-2145-4DDC-B88D-F318B649FAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66C52852-2145-4DDC-B88D-F318B649FAD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D} = {EC97FF6D-7FC2-43B8-85A1-40CAF838DC29}
 	EndGlobalSection
 EndGlobal

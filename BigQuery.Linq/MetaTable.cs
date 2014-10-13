@@ -126,29 +126,43 @@ namespace BigQuery.Linq
         }
 
         /// <param name="retryStrategy">If not null, try retry.</param>
-        public async Task InsertAllAsync<T>(BigqueryService service, IEnumerable<T> data, IBackOff retryStrategy = null, Func<T, string> insertIdSelector = null)
+        public async Task InsertAllAsync<T>(BigqueryService service, IEnumerable<T> data, IBackOff retryStrategy = null, Func<T, string> insertIdSelector = null, JsonSerializerSettings serializerSettings = null)
         {
             if (insertIdSelector == null)
             {
                 insertIdSelector = _ => Guid.NewGuid().ToString();
             }
 
-            var rows = data.Select(x => new Google.Apis.Bigquery.v2.Data.TableDataInsertAllRequest.RowsData
-            {
-                InsertId = insertIdSelector(x),
-                Json = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(x))
-            });
+            var rows = data
+                .Select(x => new Google.Apis.Bigquery.v2.Data.TableDataInsertAllRequest.RowsData
+                {
+                    InsertId = insertIdSelector(x),
+                    Json = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(x, serializerSettings))
+                })
+                .Where(x => x.Json != null)
+                .ToArray();
+
+            if (!rows.Any()) return;
 
             var request = service.Tabledata.InsertAll(new TableDataInsertAllRequest
             {
-                Rows = rows.ToArray()
+                Rows = rows
             }, this.project_id, this.dataset_id, this.table_id);
 
             var retry = 0;
             TableDataInsertAllResponse response = null;
+            Exception lastError;
             do
             {
-                response = await request.ExecuteAsync().ConfigureAwait(false);
+                try
+                {
+                    lastError = null;
+                    response = await request.ExecuteAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                }
 
                 if (retryStrategy == null) break;
                 if (response.InsertErrors == null) break;
@@ -160,17 +174,23 @@ namespace BigQuery.Linq
                 await Task.Delay(nextDelay).ConfigureAwait(false);
             } while (true);
 
+            if (lastError != null)
+            {
+                throw new Exception("Can't insert data. RetryCount:" + retry + " " + lastError.ToString());
+            }
+
             if (response.InsertErrors != null && response.InsertErrors.Any())
             {
-                var errorMessages = response.InsertErrors.Select(x =>
+                var errorMessages = response.InsertErrors.Zip(rows, (x, r) =>
                 {
-                    return x.Index + ":" + x.Errors.Select(e => string.Format(@"
+                    return x.Index + ":" + string.Join(Environment.NewLine, x.Errors.Select(e => string.Format(@"
 DebugInfo:{0}
 ETag:{1}
 Location:{2}
 Message:{3}
 Reason:{4}
-", e.DebugInfo, e.ETag, e.Location, e.Message, e.Reason));
+RowJSON:{5}
+", e.DebugInfo, e.ETag, e.Location, e.Message, e.Reason, JsonConvert.SerializeObject(r.Json, Formatting.None))));
                 });
 
                 throw new Exception("Can't insert data. RetryCount:" + retry + " " + string.Join(Environment.NewLine, errorMessages));
