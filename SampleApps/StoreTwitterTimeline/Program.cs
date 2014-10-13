@@ -123,6 +123,12 @@ namespace StoreTwitterTimeline
                     target.Ignored = true; // ignore double private field
                 }
 
+                foreach (var item in result.Where(x => x.PropertyType == typeof(Dictionary<string, object>)))
+                {
+                    item.PropertyType = typeof(string);
+                    item.ValueProvider = new DictionaryToStringProvider(item.ValueProvider);
+                }
+
                 return result;
             }
         }
@@ -143,7 +149,28 @@ namespace StoreTwitterTimeline
 
             public void SetValue(object target, object value)
             {
+                // not implemented
+            }
+        }
 
+        class DictionaryToStringProvider : IValueProvider
+        {
+            readonly IValueProvider innerProvider;
+
+            public DictionaryToStringProvider(IValueProvider innerProvider)
+            {
+                this.innerProvider = innerProvider;
+            }
+
+            public object GetValue(object target)
+            {
+                var dict = innerProvider.GetValue(target);
+                return JsonConvert.SerializeObject(dict);
+            }
+
+            public void SetValue(object target, object value)
+            {
+                // not implemented
             }
         }
 
