@@ -1,4 +1,4 @@
-LINQ-to-BigQuery
+LINQ to BigQuery
 ================
 LINQ to BigQuery is C# LINQ Provider for [Google BigQuery](https://cloud.google.com/bigquery/). It also enables Desktop query editor and dump to chart with [LINQPad](http://www.linqpad.net).
 
