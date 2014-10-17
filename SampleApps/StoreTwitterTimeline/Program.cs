@@ -14,6 +14,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace StoreTwitterTimeline
 {
@@ -323,28 +324,51 @@ namespace StoreTwitterTimeline
             // return;
 
             // Insert Twitter Streaming Data to BigQuery
+            
+            // logging:)
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Console.WriteLine("Unhandled!");
+                Console.WriteLine(e.ExceptionObject);
+                Console.ReadLine();
+            };
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                Console.WriteLine("TaskUnobserved!");
+                Console.WriteLine(e.Exception);
+                Console.ReadLine();
+            };
 
-            var context = Account.GetContext();
-            var token = Account.GetTokens();
+            try
+            {
+                var context = Account.GetContext();
+                var token = Account.GetTokens();
 
-            var sampleInsert = InsertStatus(
-                token.Streaming.StartObservableStream(StreamingType.Sample),
-                context,
-                new MetaTable(context.ProjectId, "twitter", "sample"));
+                var sampleInsert = InsertStatus(
+                    token.Streaming.StartObservableStream(StreamingType.Sample),
+                    context,
+                    new MetaTable(context.ProjectId, "twitter", "sample"));
 
-            var userInsert = InsertStatus(
-                token.Streaming.StartObservableStream(StreamingType.User),
-                context,
-                new MetaTable(context.ProjectId, "twitter", "user"));
+                var userInsert = InsertStatus(
+                    token.Streaming.StartObservableStream(StreamingType.User),
+                    context,
+                    new MetaTable(context.ProjectId, "twitter", "user"));
 
-            // start insert and synchronous wait
-            sampleInsert.CombineLatest(userInsert, (sampleCount, userCount) => new { sampleCount, userCount })
-                .Sample(TimeSpan.FromSeconds(10))
-                .ForEachAsync(x =>
-                {
-                    Console.WriteLine(x.ToString());
-                })
-                .Wait();
+                // start insert and synchronous wait
+                sampleInsert.CombineLatest(userInsert, (sampleCount, userCount) => new { sampleCount, userCount })
+                    .Sample(TimeSpan.FromSeconds(10))
+                    .ForEachAsync(x =>
+                    {
+                        Console.WriteLine(x.ToString());
+                    })
+                    .Wait();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Fatal Error!-------------------");
+                Console.WriteLine(ex);
+                Console.ReadLine(); // not a service:)
+            }
         }
     }
 }
