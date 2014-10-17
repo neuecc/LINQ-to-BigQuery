@@ -91,8 +91,14 @@ namespace BigQuery.Linq
                 }
             }, this.project_id, this.dataset_id).Execute();
 
-            this.creation_time = r.CreationTime.Value;
-            this.last_modified_time = r.LastModifiedTime.Value;
+            if (r.CreationTime != null)
+            {
+                this.creation_time = r.CreationTime.Value;
+            }
+            if(r.LastModifiedTime != null)
+            {
+                this.last_modified_time = r.LastModifiedTime.Value;
+            }
         }
 
         /// <param name="description">[Optional] A user-friendly description of this table.</param>

@@ -8,10 +8,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
+using System.Threading;
 
 namespace StoreTwitterTimeline
 {
@@ -183,6 +185,14 @@ namespace StoreTwitterTimeline
             public string Source { get; set; }
         }
 
+        class ResponseTable
+        {
+            public DateTimeOffset Timestamp { get; set; }
+            public int RetryCount { get; set; }
+            public int RowCount { get; set; }
+            public double Duration { get; set; }
+        }
+
         static void CreateTable()
         {
             var context = Account.GetContext();
@@ -197,28 +207,59 @@ namespace StoreTwitterTimeline
 
             new MetaTable(context.ProjectId, "twitter", "error")
                 .CreateTable(service, DataTypeUtility.ToTableFieldSchema<ErrorTable>());
+
+            new MetaTable(context.ProjectId, "twitter", "response")
+                .CreateTable(service, DataTypeUtility.ToTableFieldSchema<ResponseTable>());
         }
 
         static IObservable<long> InsertStatus(IObservable<StreamingMessage> stream, BigQueryContext context, MetaTable insertTable)
         {
             var resolverSettings = new JsonSerializerSettings { ContractResolver = new StatusResolver() };
             var errorTable = new MetaTable(context.ProjectId, "twitter", "error");
+            var responseTable = new MetaTable(context.ProjectId, "twitter", "response");
 
             var count = 0L;
+            var concurrentCount = 0;
             return stream
                 .OfType<StatusMessage>()
                 .Select(x => x.Status)
-                .Buffer(TimeSpan.FromSeconds(10), 100)
+                .Buffer(TimeSpan.FromSeconds(10), 200)
                 .SelectMany(tweets =>
                 {
+                    if (tweets.Count == 0) return Observable.Empty<System.Reactive.Unit>();
+
                     count += tweets.Count;
+                    var c1 = Interlocked.Increment(ref concurrentCount);
+                    Console.WriteLine("Start:" + c1);
+                    var backoff = new RetryCountExponentialBackoff();
+                    var sw = Stopwatch.StartNew();
                     return insertTable.InsertAllAsync(
                             context.BigQueryService,
                             tweets,
-                            new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3),
+                            backoff,
                             insertIdSelector: x => x.Id.ToString(),
                             serializerSettings: resolverSettings)
-                        .ToObservable();
+                        .ToObservable()
+                        .SelectMany(_ =>
+                        {
+                            sw.Stop();
+                            Console.WriteLine(tweets.Count + "|" + sw.Elapsed);
+                            return responseTable.InsertAllAsync(
+                                context.BigQueryService,
+                                new[] { new ResponseTable 
+                                {
+                                    Timestamp = DateTimeOffset.UtcNow,
+                                    RetryCount = backoff.RetryCount,
+                                    RowCount = tweets.Count,
+                                    Duration = sw.Elapsed.TotalMilliseconds 
+                                }})
+                                .ToObservable();
+                        })
+                        .Finally(() =>
+                        {
+                            var c2 = Interlocked.Decrement(ref concurrentCount);
+                            Console.WriteLine("Decrement:" + c2);
+                        });
                 })
                 .Do(_ => { }, ex =>
                 {
@@ -255,6 +296,24 @@ namespace StoreTwitterTimeline
                 })
                 .Select(_ => count)
                 .Retry();
+        }
+
+        class RetryCountExponentialBackoff : IBackOff
+        {
+            public int RetryCount { get; private set; }
+
+            ExponentialBackOff backoff = new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3);
+
+            public TimeSpan GetNextBackOff(int currentRetry)
+            {
+                RetryCount = currentRetry;
+                return backoff.GetNextBackOff(currentRetry);
+            }
+
+            public int MaxNumOfRetries
+            {
+                get { return backoff.MaxNumOfRetries; }
+            }
         }
 
         static void Main(string[] args)
