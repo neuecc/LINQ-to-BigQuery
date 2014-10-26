@@ -57,19 +57,19 @@ namespace BigQuery.Linq
                 case "STRING":
                     return value;
                 case "INTEGER":
-                    return long.Parse(value);
+                    return long.Parse(value, CultureInfo.InvariantCulture);
                 case "FLOAT":
-                    return double.Parse(value);
+                    return double.Parse(value, CultureInfo.InvariantCulture);
                 case "BOOLEAN":
                     return bool.Parse(value);
                 case "TIMESTAMP":
-                    var v = double.Parse(value).ToString();
+                    var v = double.Parse(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture);
                     var xs = v.Split('.');
                     var intergralPart = xs[0];
                     var decimalPart = (xs.Length == 1)
                         ? "000000"
                         : xs[1].Substring(0, Math.Min(xs[1].Length, 6)).PadRight(6, '0'); // Truncate Len:6
-                    var l = long.Parse(intergralPart + decimalPart);
+                    var l = long.Parse(intergralPart + decimalPart, CultureInfo.InvariantCulture);
                     return DateTimeExtensions.FromBigQueryTimestamp(l);
                 case "RECORD":
                     throw new InvalidOperationException("Deserializer can't need support record type. If you encount this error, please write to GitHub issues.");
@@ -130,8 +130,8 @@ namespace BigQuery.Linq
 
                 object v = (parsedValue == null) ? null
                     : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
-                    : typeof(T).IsNullable() ? Convert.ChangeType(parsedValue, typeof(T).GetGenericArguments()[0])
-                    : Convert.ChangeType(parsedValue, typeof(T));
+                    : typeof(T).IsNullable() ? Convert.ChangeType(parsedValue, typeof(T).GetGenericArguments()[0], CultureInfo.InvariantCulture)
+                    : Convert.ChangeType(parsedValue, typeof(T), CultureInfo.InvariantCulture);
                 return (T)v;
             }
 
@@ -156,8 +156,8 @@ namespace BigQuery.Linq
                     {
                         v = (parsedValue == null) ? null
                             : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
-                            : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0])
-                            : Convert.ChangeType(parsedValue, propertyInfo.PropertyType);
+                            : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0], CultureInfo.InvariantCulture)
+                            : Convert.ChangeType(parsedValue, propertyInfo.PropertyType,CultureInfo.InvariantCulture);
                     }
 
                     if (propertyInfo.GetSetMethod(true) != null)

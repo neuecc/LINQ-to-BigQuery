@@ -306,11 +306,20 @@ namespace BigQuery.Linq
                     if (value.GetType().IsEnum)
                     {
                         var underlyingType = Enum.GetUnderlyingType(value.GetType());
-                        return Convert.ChangeType(value, underlyingType).ToString();
+                        return Convert.ChangeType(value, underlyingType, CultureInfo.InvariantCulture).ToString();
                     }
                     else
                     {
-                        return value.ToString();
+                        if (tc == TypeCode.Double)
+                        {
+                            return ((double) value).ToString(CultureInfo.InvariantCulture);
+                        }
+                        else
+                        {
+                            return value.ToString();                            
+                        }
+
+
                     }
                 case TypeCode.Object:
                     if (value.GetType() == typeof(DateTimeOffset))

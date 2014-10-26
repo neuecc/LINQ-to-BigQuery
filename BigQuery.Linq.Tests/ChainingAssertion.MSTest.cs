@@ -186,6 +186,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -222,13 +223,13 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
                 var dumper = new ExpressionDumper<T>(value, predicate.Parameters.Single());
                 dumper.Visit(predicate);
                 var dump = string.Join(", ", dumper.Members.Select(kvp => kvp.Key + " = " + kvp.Value));
-                msg = string.Format("\r\n{0} = {1}\r\n{2}\r\n{3}{4}",
+                msg = string.Format(CultureInfo.InvariantCulture, "\r\n{0} = {1}\r\n{2}\r\n{3}{4}",
                     paramName, value, dump, predicate,
                     string.IsNullOrEmpty(message) ? "" : ", " + message);
             }
             catch
             {
-                msg = string.Format("{0} = {1}, {2}{3}",
+                msg = string.Format(CultureInfo.InvariantCulture, "{0} = {1}, {2}{3}",
                     paramName, value, predicate,
                     string.IsNullOrEmpty(message) ? "" : ", " + message);
             }
@@ -359,7 +360,7 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
             }
             else if (!typeof(T).IsInstanceOfType(exception))
             {
-                var formatted = string.Format("{0} Catched:{1}{2}", headerMsg, exception.GetType().Name, additionalMsg);
+                var formatted = string.Format(CultureInfo.InvariantCulture, "{0} Catched:{1}{2}", headerMsg, exception.GetType().Name, additionalMsg);
                 throw new AssertFailedException(formatted);
             }
 
@@ -375,7 +376,7 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
             {
                 var headerMsg = "Failed Throws<" + typeof(T).Name + ">.";
                 var additionalMsg = string.IsNullOrEmpty(message) ? "" : ", " + message;
-                var formatted = string.Format("{0} Catched:{1}{2}", headerMsg, exception.GetType().Name, additionalMsg);
+                var formatted = string.Format(CultureInfo.InvariantCulture, "{0} Catched:{1}{2}", headerMsg, exception.GetType().Name, additionalMsg);
                 throw new AssertFailedException(formatted);
             }
 

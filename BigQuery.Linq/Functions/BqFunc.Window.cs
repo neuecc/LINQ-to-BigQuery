@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -142,7 +143,7 @@ namespace BigQuery.Linq
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> Ntile<T>(T fieldSource, int numBuckets)
         {
-            return new FirstWindowFunction<T, long>("NTILE", numBuckets.ToString());
+            return new FirstWindowFunction<T, long>("NTILE", numBuckets.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -163,7 +164,7 @@ namespace BigQuery.Linq
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> PercentileCont<T>(T fieldSource, double percentile)
         {
-            return new FirstWindowFunction<T, long>("PERCENTILE_CONT", percentile.ToString());
+            return new FirstWindowFunction<T, long>("PERCENTILE_CONT", percentile.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -174,7 +175,7 @@ namespace BigQuery.Linq
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> PercentileDisc<T>(T fieldSource, double percentile)
         {
-            return new FirstWindowFunction<T, long>("PERCENTILE_DISC", percentile.ToString());
+            return new FirstWindowFunction<T, long>("PERCENTILE_DISC", percentile.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>
