@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BigQuery.Linq
 {
@@ -170,12 +171,18 @@ namespace BigQuery.Linq
                 return string.Format("    public {0} {1} {{ get; set; }}", type, name);
             });
 
+            var className = TableInfo.table_id;
+            if (Regex.IsMatch(className, "^[012345679]"))
+            {
+                className = "_" + className;
+            }
+
             var format = @"[TableName(""{0}"")]
 public class {1}
 {{
 {2}
 }}";
-            var result = string.Format(format, TableInfo.ToFullTableName(), TableInfo.table_id, string.Join(Environment.NewLine, props));
+            var result = string.Format(format, TableInfo.ToFullTableName(), className, string.Join(Environment.NewLine, props));
 
             return string.Join(Environment.NewLine, new[] { result }.Concat(innerClasses.Select(x => Environment.NewLine + x.Value)));
         }
