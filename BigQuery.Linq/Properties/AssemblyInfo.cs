@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("4034d170-5d75-4c8c-92b5-8aede1bff4e2")]
 
-[assembly: AssemblyVersion("0.4.2.0")]
-[assembly: AssemblyFileVersion("0.4.2.0")]
+[assembly: AssemblyVersion("0.5.0.0")]
+[assembly: AssemblyFileVersion("0.5.0.0")]
 
 [assembly: InternalsVisibleTo("BigQuery.Linq.Tests")]

@@ -1,1 +1,1 @@
-nuget push LINQ-to-BigQuery.0.4.2.nupkg
+nuget push LINQ-to-BigQuery.0.5.0.nupkg
