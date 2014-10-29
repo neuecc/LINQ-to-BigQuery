@@ -83,7 +83,7 @@ namespace BigQuery.Linq.Query
                     }
                     else
                     {
-                        sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
+                        sb.Append(absoluteTime1.Value.ToUnixTimestamp());
                     }
                 }
                 else
@@ -94,7 +94,7 @@ namespace BigQuery.Linq.Query
                     }
                     else if (absoluteTime1.HasValue)
                     {
-                        sb.Append(absoluteTime1.Value.ToBigQueryTimestamp());
+                        sb.Append(absoluteTime1.Value.ToUnixTimestamp());
                     }
                     sb.Append("-");
                     if (relativeTime2 != null)
@@ -103,7 +103,7 @@ namespace BigQuery.Linq.Query
                     }
                     else if (absoluteTime2.HasValue)
                     {
-                        sb.Append(absoluteTime2.Value.ToBigQueryTimestamp());
+                        sb.Append(absoluteTime2.Value.ToUnixTimestamp());
                     }
                 }
 

@@ -65,7 +65,7 @@ FROM
 SELECT
   *
 FROM
-  [tablewikipedia@1407504014000000]".TrimSmart());
+  [tablewikipedia@1407504014000]".TrimSmart());
         }
 
         [TestMethod]
@@ -80,7 +80,7 @@ FROM
 SELECT
   *
 FROM
-  [tablewikipedia@1407504014000000-]".TrimSmart());
+  [tablewikipedia@1407504014000-]".TrimSmart());
 
             context.From<int>("tablewikipedia")
                 .WithRange(TimeSpan.FromHours(1))
@@ -100,17 +100,7 @@ FROM
 SELECT
   *
 FROM
-  [tablewikipedia@1349056984000000-1407504014000000]".TrimSmart());
-
-            context.From<int>("tablewikipedia")
-                .WithRange(new DateTime(2012, 10, 1, 2, 3, 4, DateTimeKind.Utc), TimeSpan.FromHours(1))
-                .Select()
-                .ToString()
-                .Is(@"
-SELECT
-  *
-FROM
-  [tablewikipedia@1349056984000000--3600000]".TrimSmart());
+  [tablewikipedia@1349056984000-1407504014000]".TrimSmart());
 
             context.From<int>("tablewikipedia")
                 .WithRange(TimeSpan.FromHours(1), TimeSpan.FromHours(2))
@@ -122,15 +112,7 @@ SELECT
 FROM
   [tablewikipedia@-3600000--7200000]".TrimSmart());
 
-            context.From<int>("tablewikipedia")
-                .WithRange(TimeSpan.FromHours(1), new DateTime(2014, 8, 8, 13, 20, 14, DateTimeKind.Utc))
-                .Select()
-                .ToString()
-                .Is(@"
-SELECT
-  *
-FROM
-  [tablewikipedia@-3600000-1407504014000000]".TrimSmart());
+            
         }
 
         [TestMethod]
@@ -145,7 +127,7 @@ FROM
 SELECT
   *
 FROM
-  [tablewikipedia@1407504014000000-]
+  [tablewikipedia@1407504014000-]
 ".TrimSmart());
         }
 
@@ -167,8 +149,25 @@ FROM
   SELECT
     *
   FROM
-    [tablewikipedia@1407504014000000-]
+    [tablewikipedia@1407504014000-]
 )".TrimSmart());
+        }
+
+        [TestMethod]
+        public void RealEx()
+        {
+            var date = new DateTime(2014,10,30, 3,59,0);
+            var context = new BigQuery.Linq.BigQueryContext();
+            context.From<int>("tablewikipedia")
+                .WithRange(date.AddSeconds(-10), date)
+                .Select()
+                .ToString()
+                .Is(@"
+SELECT
+  *
+FROM
+  [tablewikipedia@1414609130000-1414609140000]
+".TrimSmart());
         }
     }
 }

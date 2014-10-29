@@ -336,20 +336,6 @@ namespace BigQuery.Linq
             return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom, absoluteTime2: absoluteTimeTo);
         }
 
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, DateTimeOffset absoluteTimeFrom, TimeSpan relativeTimeTo)
-        {
-            if (source == null) throw new ArgumentNullException("source");
-
-            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, absoluteTime1: absoluteTimeFrom, relativeTime2: relativeTimeTo);
-        }
-
-        public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom, DateTimeOffset absoluteTimeTo)
-        {
-            if (source == null) throw new ArgumentNullException("source");
-
-            return new TableDecoratorBigQueryable<T>(source, DecorateType.Range, relativeTime1: relativeTimeFrom, absoluteTime2: absoluteTimeTo);
-        }
-
         public static ITableDecoratorBigQueryable<T> WithRange<T>(this IFromBigQueryable<T> source, TimeSpan relativeTimeFrom, TimeSpan relativeTimeTo)
         {
             if (source == null) throw new ArgumentNullException("source");
