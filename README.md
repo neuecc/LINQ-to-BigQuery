@@ -233,9 +233,9 @@ ORDER BY
 Realtime Streaming Sample with Rx
 
 ```csharp
-// [githubarchive:github.timeline@1411511274158000-1411511574167000]
-// [githubarchive:github.timeline@1411511574167000-1411511874174000]
-// [githubarchive:github.timeline@1411511874174000-1411512174175000]
+// [githubarchive:github.timeline@1411511274158-1411511574167]
+// [githubarchive:github.timeline@1411511574167-1411511874174]
+// [githubarchive:github.timeline@1411511874174-1411512174175]
 // ...
 Observable.Timer(TimeSpan.Zero, TimeSpan.FromMinutes(5))
     .Timestamp()
@@ -252,6 +252,8 @@ Observable.Timer(TimeSpan.Zero, TimeSpan.FromMinutes(5))
 ```
 
 More query samples, see:[BigQuery.Linq.Tests](https://github.com/neuecc/LINQ-to-BigQuery/tree/master/BigQuery.Linq.Tests). You can see How to Join? How to Window? etc...
+
+Create table, insert data samples, see:[SampleApps/StoreTwitterTimeline](https://github.com/neuecc/LINQ-to-BigQuery/blob/master/SampleApps/StoreTwitterTimeline/).
 
 LINQPad Integration
 ---
