@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Globalization;
 
 namespace BigQuery.Linq.Tests.Builder
 {
@@ -397,6 +398,29 @@ SELECT
   4 AS [Huga],
   100 AS [Tako]
 ".TrimSmart());
+        }
+
+        [TestMethod]
+        public void DateTime()
+        {
+            var jpCalendar = CultureInfo.GetCultureInfo("ja-jp").Calendar; // +9
+            new BigQueryContext().Select(() => new { dt = new DateTime(2014, 10, 17, 6, 0, 0, jpCalendar) })
+                .ToString()
+                .Is(@"
+SELECT
+  '2014-10-16 21:00:00.000000' AS [dt]".TrimSmart());
+
+            new BigQueryContext().Select(() => new { dt = new DateTime(2014, 10, 16, 21, 0, 0, DateTimeKind.Utc) })
+                .ToString()
+                .Is(@"
+SELECT
+  '2014-10-16 21:00:00.000000' AS [dt]".TrimSmart());
+
+            new BigQueryContext().Select(() => new { dt = new DateTimeOffset(2014, 10, 16, 21, 0, 0, TimeSpan.Zero) })
+                .ToString()
+                .Is(@"
+SELECT
+  '2014-10-16 21:00:00.000000' AS [dt]".TrimSmart());
         }
     }
 }

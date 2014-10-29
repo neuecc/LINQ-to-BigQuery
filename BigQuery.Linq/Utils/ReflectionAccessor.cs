@@ -85,10 +85,15 @@ namespace BigQuery.Linq
 
                 var memberExpression = (MemberExpression)expression;
                 memberExpressions.Add(memberExpression);
-                expression = memberExpression.Expression;
+                var nextExpression = memberExpression.Expression;
+                if (nextExpression == null) break;
+                expression = nextExpression;
             }
 
-            var value = ((ConstantExpression)expression).Value;
+            var rootExpression = expression as ConstantExpression;
+            var value = (rootExpression != null)
+                    ? rootExpression.Value
+                    : null;
 
             for (int i = memberExpressions.Count - 1; i >= 0; i--)
             {

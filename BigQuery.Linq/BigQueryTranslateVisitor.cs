@@ -63,7 +63,8 @@ namespace BigQuery.Linq
                 var node = expr as NewExpression;
                 if (node.Constructor.DeclaringType == typeof(DateTime) || node.Constructor.DeclaringType == typeof(DateTimeOffset))
                 {
-                    var parameters = node.Arguments.Select(x => (x as ConstantExpression).Value).ToArray();
+                    
+                    var parameters = node.Arguments.Select(x => ExpressionHelper.GetValue(x)).ToArray();
                     var datetime = node.Constructor.Invoke(parameters);
                     var v = DataTypeFormatter.Format(datetime);
                     sb.Append(v);

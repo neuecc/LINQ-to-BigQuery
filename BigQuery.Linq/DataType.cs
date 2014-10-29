@@ -288,7 +288,7 @@ namespace BigQuery.Linq
 
                     return "\'" + str + "\'";
                 case TypeCode.DateTime:
-                    return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", value) + "\'";
+                    return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", ((DateTime)value).ToUniversalTime()) + "\'";
                 case TypeCode.DBNull:
                 case TypeCode.Empty:
                     return "NULL";
@@ -315,9 +315,9 @@ namespace BigQuery.Linq
                         return value.ToString();
                     }
                 case TypeCode.Object:
-                    if (value.GetType() == typeof(DateTimeOffset))
+                    if (value is DateTimeOffset)
                     {
-                        return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", value) + "\'";
+                        return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", ((DateTimeOffset)value).ToUniversalTime()) + "\'";
                     }
                     throw new InvalidOperationException(value.GetType() + " can't format BigQuery SQL string.");
                 default:
