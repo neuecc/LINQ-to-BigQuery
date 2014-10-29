@@ -292,9 +292,11 @@ namespace BigQuery.Linq
                 case TypeCode.DBNull:
                 case TypeCode.Empty:
                     return "NULL";
-                case TypeCode.Decimal:
                 case TypeCode.Single:
+                    return ((float)value).ToString(CultureInfo.InvariantCulture);
                 case TypeCode.Double:
+                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Decimal:
                 case TypeCode.Int16:
                 case TypeCode.Int32:
                 case TypeCode.Int64:
@@ -310,16 +312,7 @@ namespace BigQuery.Linq
                     }
                     else
                     {
-                        if (tc == TypeCode.Double)
-                        {
-                            return ((double) value).ToString(CultureInfo.InvariantCulture);
-                        }
-                        else
-                        {
-                            return value.ToString();                            
-                        }
-
-
+                        return value.ToString();
                     }
                 case TypeCode.Object:
                     if (value.GetType() == typeof(DateTimeOffset))

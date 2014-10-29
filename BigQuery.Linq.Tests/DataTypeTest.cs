@@ -63,20 +63,20 @@ namespace BigQuery.Linq.Tests
         {
             DataTypeUtility.ToTableFieldSchema<wikipedia>().IsStructuralEqual(new[] 
             {
-                new TableFieldSchema(){ Name = "title", Type = "STRING", Mode = "REQUIRED"},
+                new TableFieldSchema(){ Name = "title", Type = "STRING", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "id", Type = "INTEGER", Mode = "NULLABLE"},
-                new TableFieldSchema(){ Name = "language", Type = "STRING", Mode = "REQUIRED"},
+                new TableFieldSchema(){ Name = "language", Type = "STRING", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "wp_namespace", Type = "INTEGER", Mode = "REQUIRED"},
                 new TableFieldSchema(){ Name = "is_redirect", Type = "BOOLEAN", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "revision_id", Type = "INTEGER", Mode = "NULLABLE"},
-                new TableFieldSchema(){ Name = "contributor_ip", Type = "STRING", Mode = "REQUIRED"},
+                new TableFieldSchema(){ Name = "contributor_ip", Type = "STRING", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "contributor_id", Type = "INTEGER", Mode = "NULLABLE"},
-                new TableFieldSchema(){ Name = "contributor_username", Type = "STRING", Mode = "REQUIRED"},
+                new TableFieldSchema(){ Name = "contributor_username", Type = "STRING", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "timestamp", Type = "INTEGER", Mode = "REQUIRED"},
                 new TableFieldSchema(){ Name = "is_minor", Type = "BOOLEAN", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "is_bot", Type = "BOOLEAN", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "reversion_id", Type = "INTEGER", Mode = "NULLABLE"},
-                new TableFieldSchema(){ Name = "comment", Type = "STRING", Mode = "REQUIRED"},
+                new TableFieldSchema(){ Name = "comment", Type = "STRING", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "num_characters", Type = "INTEGER", Mode = "REQUIRED"},
             });
 
@@ -94,7 +94,7 @@ namespace BigQuery.Linq.Tests
                 new TableFieldSchema(){ Name = "Hoge", Type = "TIMESTAMP", Mode = "REQUIRED"},
                 new TableFieldSchema(){ Name = "Huga", Type = "TIMESTAMP", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "Tako", Type = "BOOLEAN", Mode = "REQUIRED"},
-                new TableFieldSchema(){ Name = "Nano", Type = "INTEGER", Mode = "REQUIRED"},
+                new TableFieldSchema(){ Name = "Nano", Type = "FLOAT", Mode = "REQUIRED"},
                 new TableFieldSchema(){ Name = "K", Type = "INTEGER", Mode = "NULLABLE"},
                 new TableFieldSchema(){ Name = "C", Type = "INTEGER", Mode = "REQUIRED"},
             });
@@ -173,18 +173,18 @@ namespace BigQuery.Linq.Tests
   },
   {
     ""name"": ""Next"",
-    ""mode"": ""REQUIRED"",
+    ""mode"": ""NULLABLE"",
     ""type"": ""RECORD"",
     ""fields"": [
       {
         ""name"": ""BBB"",
-        ""mode"": ""REQUIRED"",
+        ""mode"": ""NULLABLE"",
         ""type"": ""STRING""
       },
       {
         ""name"": ""ZZZ"",
         ""mode"": ""NULLABLE"",
-        ""type"": ""INTEGER""
+        ""type"": ""FLOAT""
       }
     ]
   },
