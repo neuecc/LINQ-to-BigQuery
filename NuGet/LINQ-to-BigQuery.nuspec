@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.5.0</version>
+        <version>0.5.1</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,11 +10,8 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
         <releaseNotes>
             <![CDATA[
-Fix : Generate invalid timestamp at TableDecorators
-Fix : Generate invalid floating point decimal mark in use commma mark culture, thanks @greigs
-Breaking Changes : DateTime/DateTimeOffset is auto converted local time to UTC in query string
-Improvement : Support framewrok .NET 4.5 rather than 4.5.1, thanks @greigs
-Improvement : MetaTableSchema.BuildCSharpClass supports case of tableId startwith number
+Fix : decimal DataType is being converted to integer instead of FLOAT, thanks @elad-bar
+Add : MetaTableSchema.ToJsonSchema
             ]]>
         </releaseNotes>
         <language>en-US</language>
