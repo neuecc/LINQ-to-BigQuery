@@ -122,7 +122,7 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        class RelationalOperatorFormatter : ISpeficiedFormatter
+        class RelationalOperatorFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -133,7 +133,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class BetweenFormatter : ISpeficiedFormatter
+        class BetweenFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -146,7 +146,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class InFormatter : ISpeficiedFormatter
+        class InFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -159,7 +159,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class InSemijoinFormatter : ISpeficiedFormatter
+        class InSemijoinFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -185,7 +185,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class GreatestFormatter : ISpeficiedFormatter
+        class GreatestFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -197,7 +197,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class LeastFormatter : ISpeficiedFormatter
+        class LeastFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {

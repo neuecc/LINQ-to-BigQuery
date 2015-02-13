@@ -293,7 +293,7 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        class DateAddFormatter : ISpeficiedFormatter
+        class DateAddFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {

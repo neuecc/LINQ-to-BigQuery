@@ -382,7 +382,7 @@ namespace BigQuery.Linq
 
             if (attr.SpecifiedFormatterType != null)
             {
-                var formatter = Activator.CreateInstance(attr.SpecifiedFormatterType, true) as ISpeficiedFormatter;
+                var formatter = Activator.CreateInstance(attr.SpecifiedFormatterType, true) as ISpecifiedFormatter;
                 sb.Append(formatter.Format(depth, indentSize, attr.Name, node));
             }
             else

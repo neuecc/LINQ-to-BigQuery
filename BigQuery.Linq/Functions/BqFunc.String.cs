@@ -145,7 +145,7 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        class ConcatFormatter : ISpeficiedFormatter
+        class ConcatFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -157,7 +157,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class ContainsFormatter : ISpeficiedFormatter
+        class ContainsFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {

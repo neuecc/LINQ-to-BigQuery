@@ -33,7 +33,7 @@ namespace BigQuery.Linq
     {
     }
 
-    internal interface ISpeficiedFormatter
+    internal interface ISpecifiedFormatter
     {
         string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node);
     }
@@ -71,7 +71,7 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        class WithInRecordFormatter : ISpeficiedFormatter
+        class WithInRecordFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -82,7 +82,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class WithInNodeFormatter : ISpeficiedFormatter
+        class WithInNodeFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {

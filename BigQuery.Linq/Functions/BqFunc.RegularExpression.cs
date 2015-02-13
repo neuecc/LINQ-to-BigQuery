@@ -41,7 +41,7 @@ namespace BigQuery.Linq
             throw Invalid();
         }
 
-        class RegexpMatchFormatter : ISpeficiedFormatter
+        class RegexpMatchFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -56,7 +56,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class RegexpExtractFormatter : ISpeficiedFormatter
+        class RegexpExtractFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -71,7 +71,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class RegexpReplaceFormatter : ISpeficiedFormatter
+        class RegexpReplaceFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {

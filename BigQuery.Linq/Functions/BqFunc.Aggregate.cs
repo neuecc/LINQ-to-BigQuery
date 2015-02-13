@@ -294,7 +294,7 @@ namespace BigQuery.Linq
         [FunctionName("VAR_SAMP")]
         public static double VarianceSample(double? numericExpression) { throw Invalid(); }
 
-        class CountAllFormatter : ISpeficiedFormatter
+        class CountAllFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -302,7 +302,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class CountFieldFormatter : ISpeficiedFormatter
+        class CountFieldFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
@@ -313,7 +313,7 @@ namespace BigQuery.Linq
             }
         }
 
-        class CountDistinctFormatter : ISpeficiedFormatter
+        class CountDistinctFormatter : ISpecifiedFormatter
         {
             public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
             {
