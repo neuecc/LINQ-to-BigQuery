@@ -173,7 +173,7 @@ namespace BigQuery.Linq
             });
 
             var className = TableInfo.table_id;
-            if (Regex.IsMatch(className, "^[012345679]"))
+            if (Regex.IsMatch(className, "^[0123456789]"))
             {
                 className = "_" + className;
             }
