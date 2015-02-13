@@ -234,7 +234,7 @@ namespace BigQuery.Linq
             }
         }
 
-        static void WriteJsonSchema(JsonTextWriter jw, TableFieldSchema schema)
+        internal static void WriteJsonSchema(JsonTextWriter jw, TableFieldSchema schema)
         {
             jw.WriteStartObject();
             {

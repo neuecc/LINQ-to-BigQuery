@@ -1,6 +1,8 @@
 ﻿using Google.Apis.Bigquery.v2.Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -90,7 +92,6 @@ namespace BigQuery.Linq
             "volatile",
             "while",
         };
-
 
         public MetaTable TableInfo { get; private set; }
         public IList<TableFieldSchema> Fields { get; private set; }
@@ -187,6 +188,52 @@ public class {1}
             return string.Join(Environment.NewLine, new[] { result }.Concat(innerClasses.Select(x => Environment.NewLine + x.Value)));
         }
 
+        /// <summary>
+        /// Showing the table schema same as bq --format=prettyjson show
+        /// </summary>
+        public string ToJsonSchema(Formatting formatting = Formatting.Indented)
+        {
+            using (var sw = new StringWriter())
+            using (var jw = new JsonTextWriter(sw))
+            {
+                jw.Formatting = formatting;
+
+                jw.WriteStartObject();
+
+                jw.WritePropertyName("id"); jw.WriteValue(TableInfo.project_id + ":" + TableInfo.dataset_id + "." + TableInfo.table_id);
+                jw.WritePropertyName("creationTime"); jw.WriteValue(TableInfo.creation_time);
+                jw.WritePropertyName("lastModifiedTime"); jw.WriteValue(TableInfo.last_modified_time);
+                jw.WritePropertyName("numBytes"); jw.WriteValue(TableInfo.size_bytes);
+                jw.WritePropertyName("numRows"); jw.WriteValue(TableInfo.row_count);
+                jw.WritePropertyName("type"); jw.WriteValue((TableInfo.type == 2) ? "VIEW" : "TABLE");
+                jw.WritePropertyName("tableReference");
+                {
+                    jw.WriteStartObject();
+                    jw.WritePropertyName("projectId"); jw.WriteValue(TableInfo.project_id);
+                    jw.WritePropertyName("datasetId"); jw.WriteValue(TableInfo.dataset_id);
+                    jw.WritePropertyName("tableId"); jw.WriteValue(TableInfo.table_id);
+                    jw.WriteEndObject();
+                }
+                jw.WritePropertyName("schema");
+                {
+                    jw.WriteStartObject();
+                    jw.WritePropertyName("fields");
+                    {
+                        jw.WriteStartArray();
+                        foreach (var field in Fields)
+                        {
+                            DataTypeUtility.WriteJsonSchema(jw, field);
+                        }
+                        jw.WriteEndArray();
+                    }
+                    jw.WriteEndObject();
+                }
+
+                jw.WriteEndObject();
+
+                return sw.ToString();
+            }
+        }
         public override string ToString()
         {
             return TableInfo.ToFullTableName();
