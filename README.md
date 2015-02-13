@@ -10,6 +10,8 @@ binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuer
 PM> Install-Package LINQ-to-BigQuery
 ```
 
+LastUpdate, ver 0.5.1(2015-02-13). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
+
 LINQ with LINQPad
 ---
 [LINQPad](http://www.linqpad.net) is editor for BigQuery!
@@ -77,6 +79,16 @@ Powerfull Tabledecorator/Table wildcard integration.
 // FROM (TABLE_QUERY([mydata], "REGEXP_MATCH([table_id], r'^boo[\d]{3,5}')"))
 .FromTableQuery<mydata>("mydata", x => BqFunc.RegexpMatch(x.table_id, "^boo[\\d]{3,5}"))
 ```
+
+My thought of LINQ
+---
+LINQ to BigQuery is LINQ but is not IQueryable. It's my answer of LINQ.
+
+IQueryable isn't necessary for LINQ to translate SQL. I need all BigQuery's sql can write LINQ to BigQuery, all specialized sql can execute, all function can execute(include window function). [BigQuery's SQL](https://developers.google.com/bigquery/query-reference) different with standard Sql. I must support Multiple FROM, WITHIN, JOIN EACH, GROUP EACH BY, FLATTEN, IGNORECASE, etc) and LINQ to BigQuery is done.
+ 
+Therefore control order, protect runtime error, satisfy all syntax. "IQueryable is all database's abastraction" is fantasy, LINQ needs specialized each Database. But LINQ to Xxx needs LINQ's atmosphere, filter as Where, projection as Select, order as OrderBy/ThenBy, like convention over configuration.
+ 
+I think "IQueryable is dead, Long live Expression". Of course Expression Tree has performance issue, but execute BigQuery is very expensive so LINQ to BigQuery can ignore cost of Experssion relatively.
 
 Basics
 ---
