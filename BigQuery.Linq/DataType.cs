@@ -118,8 +118,8 @@ namespace BigQuery.Linq
                     throw new ArgumentException("not supported type");
                 case TypeCode.Single:
                 case TypeCode.Double:
-                    return DataType.Float;
                 case TypeCode.Decimal:
+                    return DataType.Float;
                 case TypeCode.Int16:
                 case TypeCode.Int32:
                 case TypeCode.Int64:
@@ -283,9 +283,8 @@ namespace BigQuery.Linq
                 case TypeCode.String:
                     // escape
                     var str = value.ToString()
-                        .Replace("\"", "\\\"") // "
-                        .Replace("\'", "\\\'");// '
-
+                        .Replace("\"", "\\\"")  // "
+                        .Replace("\'", "\\\'"); // '
                     return "\'" + str + "\'";
                 case TypeCode.DateTime:
                     return "\'" + string.Format("{0:yyyy-MM-dd HH:mm:ss.ffffff}", ((DateTime)value).ToUniversalTime()) + "\'";

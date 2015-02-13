@@ -47,6 +47,10 @@ namespace BigQuery.Linq.Tests
         {
             DataTypeUtility.ToDataType(typeof(int)).Is(DataType.Integer);
             DataTypeUtility.ToDataType(typeof(int?)).Is(DataType.Integer);
+            DataTypeUtility.ToDataType(typeof(double)).Is(DataType.Float);
+            DataTypeUtility.ToDataType(typeof(double?)).Is(DataType.Float);
+            DataTypeUtility.ToDataType(typeof(decimal)).Is(DataType.Float);
+            DataTypeUtility.ToDataType(typeof(decimal?)).Is(DataType.Float);
             DataTypeUtility.ToDataType<bool>().Is(DataType.Boolean);
             DataTypeUtility.ToDataType<bool?>().Is(DataType.Boolean);
             DataTypeUtility.ToDataType<DateTime>().Is(DataType.Timestamp);
