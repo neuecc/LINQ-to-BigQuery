@@ -453,5 +453,70 @@ WHERE
 LIMIT 5
 ".TrimSmart());
         }
+
+        [TestMethod]
+        public void DescendingOrderingOnMultipleColumnsWhenPartitioning()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello" && BqFunc.Length(x.word) > 10)
+                .Select(x => new
+                {
+                    x.word,
+                    x.word_count,
+                    row_num = BqFunc.RowNumber(x)
+                        .PartitionBy(y => y.corpus)
+                        .OrderByDescending(y => new {y.word, y.word_count})
+                        .Value
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  [word_count],
+  ROW_NUMBER() OVER (PARTITION BY [corpus] ORDER BY [word] DESC,
+[word_count] DESC) AS [row_num]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  (([corpus] = 'othello') AND (LENGTH([word]) > 10))
+LIMIT 5
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void DescendingOrderingOnMultipleColumns()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<Shakespeare>()
+                .Where(x => x.corpus == "othello" && BqFunc.Length(x.word) > 10)
+                .Select(x => new
+                {
+                    x.word,
+                    x.word_count,
+                    row_num = BqFunc.RowNumber(x)
+                        .OrderByDescending(y => new { y.word, y.word_count })
+                        .Value
+                })
+                .Limit(5)
+                .ToString();
+
+            query1.Is(@"
+SELECT
+  [word],
+  [word_count],
+  ROW_NUMBER() OVER (ORDER BY [word] DESC,
+[word_count] DESC) AS [row_num]
+FROM
+  [publicdata:samples.shakespeare]
+WHERE
+  (([corpus] = 'othello') AND (LENGTH([word]) > 10))
+LIMIT 5
+".TrimSmart());
+        }
     }
 }
