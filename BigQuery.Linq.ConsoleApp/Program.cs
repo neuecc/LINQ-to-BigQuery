@@ -15,6 +15,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace BigQuery.Linq.ConsoleApp
 {
@@ -54,15 +55,13 @@ namespace BigQuery.Linq.ConsoleApp
 
         static void Main(string[] args)
         {
-            
 
+
+          
+            
 
         }
     }
-
-    
-
-
 
     [TableName("publicdata:samples.trigrams")]
     public class trigrams

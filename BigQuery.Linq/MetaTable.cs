@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace BigQuery.Linq
 {
@@ -95,7 +96,7 @@ namespace BigQuery.Linq
             {
                 this.creation_time = r.CreationTime.Value;
             }
-            if(r.LastModifiedTime != null)
+            if (r.LastModifiedTime != null)
             {
                 this.last_modified_time = r.LastModifiedTime.Value;
             }

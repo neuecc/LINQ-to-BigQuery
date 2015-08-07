@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace BigQuery.Linq
 {
@@ -89,6 +90,28 @@ namespace BigQuery.Linq
         }
 
         // Table wildcard functions
+
+        /// <summary>
+        /// Queries todays table
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>()
+        {
+            var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
+
+            return FromDateRange<T>(attr.TablePrefix, DateTimeOffset.Now, DateTimeOffset.Now);
+        }
+
+        /// <summary>
+        /// Queries timestamp date table
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(DateTimeOffset timestamp)
+        {
+            var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
+
+            return FromDateRange<T>(attr.TablePrefix, timestamp, timestamp);
+        }
 
         /// <summary>
         /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
@@ -220,6 +243,19 @@ namespace BigQuery.Linq
         {
             var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
             return Run<MetaTable>(query).Rows;
+        }
+
+        public string[] BuildCSharpClass(string dataset)
+        {
+            var tables = GetAllTableInfo(dataset)
+                .Select(info => new { info, prefix = Regex.Replace(info.ToFullTableName(), @"\d{8}]$", "]") })
+                .ToLookup(x => x.prefix, x => x.info)
+                .Select(x => x.First()); // alt distinct
+
+            return Task.WhenAll(tables.Select(x => x.GetTableSchemaAsync(BigQueryService)))
+                .Result
+                .Select(x => x.BuildCSharpClass(outTablePrefixClassIfMatched: true))
+                .ToArray();
         }
 
         public void RegisterCustomDeserializeFallback(Type targetType, CustomDeserializeFallback fallback)

@@ -153,7 +153,7 @@ namespace BigQuery.Linq
         }
 
 
-        public string BuildCSharpClass()
+        public string BuildCSharpClass(bool outTablePrefixClassIfMatched = false)
         {
             var innerClasses = new Dictionary<string, string>();
             var props = Fields.Select(x =>
@@ -178,12 +178,34 @@ namespace BigQuery.Linq
                 className = "_" + className;
             }
 
-            var format = @"[TableName(""{0}"")]
+            var regex = new Regex(@"\d{8}]$");
+            var fullname = TableInfo.ToFullTableName();
+            string attr;
+            if (outTablePrefixClassIfMatched && regex.IsMatch(fullname))
+            {
+                attr = $"[TablePrefix(\"{regex.Replace(fullname, "]")}\")]";
+                className = regex.Replace(className + "]", "").TrimEnd('_', ']');
+            }
+            else
+            {
+                attr = $"[TableName(\"{fullname}\")]";
+            }
+
+            var tostring = $@"
+    public override string ToString()
+    {{
+        return """"
+{string.Join(Environment.NewLine, Fields.Select(x => $"             + \"{x.Name} : \" + {x.Name} + \"|\""))}
+             ;
+    }}";
+
+        var format = @"{0}
 public class {1}
 {{
 {2}
+{3}
 }}";
-            var result = string.Format(format, TableInfo.ToFullTableName(), className, string.Join(Environment.NewLine, props));
+            var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props), tostring);
 
             return string.Join(Environment.NewLine, new[] { result }.Concat(innerClasses.Select(x => Environment.NewLine + x.Value)));
         }
