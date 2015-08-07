@@ -441,12 +441,14 @@ namespace BigQuery.Linq
             {
                 var expr1 = translator.VisitAndClearBuffer(partitionKeySelector);
                 var expr2 = translator.VisitAndClearBuffer(orderKeySelector);
+                expr2 = isDescending ? expr2.Replace(",", " DESC,") : expr2;
                 var s = string.Format("{0}({1}) OVER (PARTITION BY {2} ORDER BY {3}{4})", methodName, argument, expr1, expr2, (isDescending) ? " DESC" : "");
                 return s;
             }
             else
             {
                 var expr2 = translator.VisitAndClearBuffer(orderKeySelector);
+                expr2 = isDescending ? expr2.Replace(",", " DESC,") : expr2;
                 var s = string.Format("{0}({1}) OVER (ORDER BY {2}{3})", methodName, argument, expr2, (isDescending) ? " DESC" : "");
                 return s;
             }
