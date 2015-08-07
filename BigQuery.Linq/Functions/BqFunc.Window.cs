@@ -356,15 +356,15 @@ namespace BigQuery.Linq
         }
 
         [WindowFunctionAlert]
-        public FullWindowFunction<TSource, TResult, TSource, TOrderKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        public FullWindowFunction<TSource, TResult, TSource> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TResult, TSource, TOrderKey>(methodName, argument, null, keySelector, false);
+            return new FullWindowFunction<TSource, TResult, TSource>(methodName, argument, null, keySelector, false);
         }
 
         [WindowFunctionAlert]
-        public FullWindowFunction<TSource, TResult, TSource, TOrderKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        public FullWindowFunction<TSource, TResult, TSource> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TResult, TSource, TOrderKey>(methodName, argument, null, keySelector, true);
+            return new FullWindowFunction<TSource, TResult, TSource>(methodName, argument, null, keySelector, true);
         }
 
         public override string ToString()
@@ -393,15 +393,15 @@ namespace BigQuery.Linq
         public TResult Value { get { throw new InvalidOperationException("Property is marker for Query Analyze. Can't call directly."); } }
 
         [WindowFunctionAlert]
-        public FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        public FullWindowFunction<TSource, TResult, TPartitionKey> OrderBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey>(methodName, argument, partitionKeySelector, keySelector, false);
+            return new FullWindowFunction<TSource, TResult, TPartitionKey>(methodName, argument, partitionKeySelector, keySelector, false);
         }
 
         [WindowFunctionAlert]
-        public FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        public FullWindowFunction<TSource, TResult, TPartitionKey> OrderByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
-            return new FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey>(methodName, argument, partitionKeySelector, keySelector, true);
+            return new FullWindowFunction<TSource, TResult, TPartitionKey>(methodName, argument, partitionKeySelector, keySelector, true);
         }
 
         public override string ToString()
@@ -414,19 +414,28 @@ namespace BigQuery.Linq
         }
     }
 
-    public sealed class FullWindowFunction<TSource, TResult, TPartitionKey, TOrderKey>
+    public sealed class FullWindowFunction<TSource, TResult, TPartitionKey>
     {
         readonly string methodName;
         readonly string argument;
         readonly Expression<Func<TSource, TPartitionKey>> partitionKeySelector;
-        readonly Expression<Func<TSource, TOrderKey>> orderKeySelector;
+        readonly Expression orderKeySelector;
         readonly bool isDescending;
+        readonly FullWindowFunction<TSource, TResult, TPartitionKey> parent;
 
-        internal FullWindowFunction(string methodName, string argument, Expression<Func<TSource, TPartitionKey>> partitionKeySelector, Expression<Func<TSource, TOrderKey>> orderKeySelector, bool isDescending)
+        internal FullWindowFunction(string methodName, string argument, Expression<Func<TSource, TPartitionKey>> partitionKeySelector, /* Expression<Func<TSource, TOrderKey>> */ Expression orderKeySelector, bool isDescending)
         {
             this.methodName = methodName;
             this.argument = argument;
             this.partitionKeySelector = partitionKeySelector;
+            this.orderKeySelector = orderKeySelector;
+            this.isDescending = isDescending;
+            this.parent = null;
+        }
+
+        internal FullWindowFunction(FullWindowFunction<TSource, TResult, TPartitionKey> parent, Expression orderKeySelector, bool isDescending)
+        {
+            this.parent = parent;
             this.orderKeySelector = orderKeySelector;
             this.isDescending = isDescending;
         }
@@ -434,22 +443,43 @@ namespace BigQuery.Linq
         [WindowFunction]
         public TResult Value { get { throw new InvalidOperationException("Property is marker for Query Analyze. Can't call directly."); } }
 
+        [WindowFunctionAlert]
+        public FullWindowFunction<TSource, TResult, TPartitionKey> ThenBy<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        {
+            return new FullWindowFunction<TSource, TResult, TPartitionKey>(this, keySelector, false);
+        }
+
+        [WindowFunctionAlert]
+        public FullWindowFunction<TSource, TResult, TPartitionKey> ThenByByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        {
+            return new FullWindowFunction<TSource, TResult, TPartitionKey>(this, keySelector, true);
+        }
+
         public override string ToString()
         {
             var translator = new BigQueryTranslateVisitor();
-            if (partitionKeySelector != null)
+
+            var orderByBuilder = new List<string>();
+            FullWindowFunction<TSource, TResult, TPartitionKey> self = this;
+            while (self.parent != null)
             {
-                var expr1 = translator.VisitAndClearBuffer(partitionKeySelector);
-                var expr2 = translator.VisitAndClearBuffer(orderKeySelector);
-                expr2 = isDescending ? expr2.Replace(",", " DESC,") : expr2;
-                var s = string.Format("{0}({1}) OVER (PARTITION BY {2} ORDER BY {3}{4})", methodName, argument, expr1, expr2, (isDescending) ? " DESC" : "");
+                orderByBuilder.Add(translator.VisitAndClearBuffer(self.orderKeySelector) + (self.isDescending ? " DESC" : ""));
+                self = self.parent;
+            }
+            orderByBuilder.Add(translator.VisitAndClearBuffer(self.orderKeySelector) + (self.isDescending ? " DESC" : ""));
+            orderByBuilder.Reverse();
+
+            if (self.partitionKeySelector != null)
+            {
+                var expr1 = translator.VisitAndClearBuffer(self.partitionKeySelector);
+                var expr2 = string.Join(", ", orderByBuilder);
+                var s = string.Format("{0}({1}) OVER (PARTITION BY {2} ORDER BY {3})", self.methodName, self.argument, expr1, expr2);
                 return s;
             }
             else
             {
-                var expr2 = translator.VisitAndClearBuffer(orderKeySelector);
-                expr2 = isDescending ? expr2.Replace(",", " DESC,") : expr2;
-                var s = string.Format("{0}({1}) OVER (ORDER BY {2}{3})", methodName, argument, expr2, (isDescending) ? " DESC" : "");
+                var expr2 = string.Join(", ", orderByBuilder);
+                var s = string.Format("{0}({1}) OVER (ORDER BY {2})", self.methodName, self.argument, expr2);
                 return s;
             }
         }

@@ -271,19 +271,17 @@ namespace BigQuery.Linq
             {
                 var methodNode = node.Expression as MethodCallExpression;
 
-                MethodCallExpression root;
-                var paritionBy = (MethodCallExpression)methodNode.Object;
-                if (paritionBy == null)
+                var root = (MethodCallExpression)methodNode.Object;
+                while (true)
                 {
-                    root = methodNode;
-                }
-                else
-                {
-                    root = (MethodCallExpression)paritionBy.Object;
                     if (root == null)
                     {
-                        root = paritionBy;
+                        root = (MethodCallExpression)methodNode;
+                        break;
                     }
+                    var parent = root.Object as MethodCallExpression;
+                    if (parent == null) break;
+                    root = parent;
                 }
 
                 var para = root.Arguments[0] as ParameterExpression;

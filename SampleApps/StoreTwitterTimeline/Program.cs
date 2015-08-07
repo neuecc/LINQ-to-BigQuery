@@ -3,7 +3,7 @@ using CoreTweet;
 using CoreTweet.Streaming;
 using CoreTweet.Streaming.Reactive;
 using Google.Apis.Bigquery.v2.Data;
-using Google.Apis.Util;
+// using Google.Apis.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -299,11 +299,11 @@ namespace StoreTwitterTimeline
                 .Retry();
         }
 
-        class RetryCountExponentialBackoff : IBackOff
+        class RetryCountExponentialBackoff : Google.Apis.Util.IBackOff
         {
             public int RetryCount { get; private set; }
 
-            ExponentialBackOff backoff = new ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3);
+            Google.Apis.Util.ExponentialBackOff backoff = new Google.Apis.Util.ExponentialBackOff(TimeSpan.FromMilliseconds(250), 3);
 
             public TimeSpan GetNextBackOff(int currentRetry)
             {

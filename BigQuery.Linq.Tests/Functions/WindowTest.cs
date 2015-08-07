@@ -467,7 +467,8 @@ LIMIT 5
                     x.word_count,
                     row_num = BqFunc.RowNumber(x)
                         .PartitionBy(y => y.corpus)
-                        .OrderByDescending(y => new {y.word, y.word_count})
+                        .OrderBy(y => y.word)
+                        .ThenByByDescending(y => y.word_count)
                         .Value
                 })
                 .Limit(5)
@@ -477,8 +478,7 @@ LIMIT 5
 SELECT
   [word],
   [word_count],
-  ROW_NUMBER() OVER (PARTITION BY [corpus] ORDER BY [word] DESC,
-[word_count] DESC) AS [row_num]
+  ROW_NUMBER() OVER (PARTITION BY [corpus] ORDER BY [word], [word_count] DESC) AS [row_num]
 FROM
   [publicdata:samples.shakespeare]
 WHERE
@@ -499,7 +499,9 @@ LIMIT 5
                     x.word,
                     x.word_count,
                     row_num = BqFunc.RowNumber(x)
-                        .OrderByDescending(y => new { y.word, y.word_count })
+                        .OrderByDescending(y => y.word)
+                        .ThenBy(y => y.word_count)
+                        .ThenByByDescending(y => y.corpus)
                         .Value
                 })
                 .Limit(5)
@@ -509,8 +511,7 @@ LIMIT 5
 SELECT
   [word],
   [word_count],
-  ROW_NUMBER() OVER (ORDER BY [word] DESC,
-[word_count] DESC) AS [row_num]
+  ROW_NUMBER() OVER (ORDER BY [word] DESC, [word_count], [corpus] DESC) AS [row_num]
 FROM
   [publicdata:samples.shakespeare]
 WHERE
