@@ -52,5 +52,27 @@ namespace BigQuery.Linq
             var date = unixEpochOffset.AddMilliseconds(timestampMillisecond);
             return date;
         }
+
+        /// <summary>
+        /// From long with 6 millisecond digits(YYYY-MM-DD HH:MM:SS[.uuuuuu].)
+        /// </summary>
+        public static DateTimeOffset FromBigQueryTimestamp(this ulong timestamp)
+        {
+            var seconds = Math.Round(((double)timestamp / 1000));
+            var date = unixEpochOffset.AddMilliseconds(seconds);
+            return date;
+        }
+
+        public static DateTimeOffset FromTimestampSeconds(this ulong timestampSecond)
+        {
+            var date = unixEpochOffset.AddSeconds(timestampSecond);
+            return date;
+        }
+
+        public static DateTimeOffset FromTimestampMilliSeconds(this ulong timestampMillisecond)
+        {
+            var date = unixEpochOffset.AddMilliseconds(timestampMillisecond);
+            return date;
+        }
     }
 }
