@@ -59,6 +59,9 @@ namespace BigQuery.Linq.Query
         readonly string prefix;
         readonly DateTimeOffset timestampFrom;
         readonly DateTimeOffset timestampTo;
+        readonly Expression<Func<DateTimeOffset>> timestampFromExpr;
+        readonly Expression<Func<DateTimeOffset>> timestampToExpr;
+
         internal override int Order
         {
             get { return 1; }
@@ -72,6 +75,14 @@ namespace BigQuery.Linq.Query
             this.timestampTo = timestampTo;
         }
 
+        internal FromDateRangeBigQueryable(string prefix, Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo, IBigQueryable parent)
+            : base(parent)
+        {
+            this.prefix = prefix.EscapeBq();
+            this.timestampFromExpr = timestampFrom;
+            this.timestampToExpr = timestampTo;
+        }
+
         public override string BuildQueryString(int depth)
         {
             return Indent(depth) + "FROM" + Environment.NewLine + Indent(depth + 1) + RangeFormat();
@@ -84,7 +95,17 @@ namespace BigQuery.Linq.Query
 
         string RangeFormat()
         {
-            return string.Format("TABLE_DATE_RANGE({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}'))", prefix, timestampFrom.ToUniversalTime().ToString("yyyy-MM-dd"), timestampTo.ToUniversalTime().ToString("yyyy-MM-dd"));
+            if (timestampFromExpr == null)
+            {
+                return string.Format("TABLE_DATE_RANGE({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}'))", prefix, timestampFrom.ToUniversalTime().ToString("yyyy-MM-dd"), timestampTo.ToUniversalTime().ToString("yyyy-MM-dd"));
+            }
+            else
+            {
+                var translator = new BigQueryTranslateVisitor();
+                var from = translator.VisitAndClearBuffer(timestampFromExpr);
+                var to = translator.VisitAndClearBuffer(timestampToExpr);
+                return string.Format("TABLE_DATE_RANGE({0}, {1}, {2})", prefix, from, to);
+            }
         }
 
         public string GetTableName()
@@ -98,6 +119,9 @@ namespace BigQuery.Linq.Query
         readonly string prefix;
         readonly DateTimeOffset timestampFrom;
         readonly DateTimeOffset timestampTo;
+        readonly Expression<Func<DateTimeOffset>> timestampFromExpr;
+        readonly Expression<Func<DateTimeOffset>> timestampToExpr;
+
         internal override int Order
         {
             get { return 1; }
@@ -109,6 +133,14 @@ namespace BigQuery.Linq.Query
             this.prefix = prefix.EscapeBq();
             this.timestampFrom = timestampFrom;
             this.timestampTo = timestampTo;
+        }
+
+        internal FromDateRangeStrictBigQueryable(string prefix, Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo, IBigQueryable parent)
+            : base(parent)
+        {
+            this.prefix = prefix.EscapeBq();
+            this.timestampFromExpr = timestampFrom;
+            this.timestampToExpr = timestampTo;
         }
 
         public override string BuildQueryString(int depth)
@@ -123,7 +155,17 @@ namespace BigQuery.Linq.Query
 
         string RangeFormat()
         {
-            return string.Format("TABLE_DATE_RANGE_STRICT({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}'))", prefix, timestampFrom.ToUniversalTime().ToString("yyyy-MM-dd"), timestampTo.ToUniversalTime().ToString("yyyy-MM-dd"));
+            if (timestampFromExpr == null)
+            {
+                return string.Format("TABLE_DATE_RANGE_STRICT({0}, TIMESTAMP('{1}'), TIMESTAMP('{2}'))", prefix, timestampFrom.ToUniversalTime().ToString("yyyy-MM-dd"), timestampTo.ToUniversalTime().ToString("yyyy-MM-dd"));
+            }
+            else
+            {
+                var translator = new BigQueryTranslateVisitor();
+                var from = translator.VisitAndClearBuffer(timestampFromExpr);
+                var to = translator.VisitAndClearBuffer(timestampToExpr);
+                return string.Format("TABLE_DATE_RANGE_STRICT({0}, {1}, {2})", prefix, from, to);
+            }
         }
 
         public string GetTableName()

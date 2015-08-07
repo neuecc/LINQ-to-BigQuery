@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace BigQuery.Linq.Tests.Builder
 {
@@ -94,12 +95,27 @@ FROM
         {
             var from = new DateTime(2014, 3, 25, 0, 0, 0, DateTimeKind.Utc);
             var to = from.AddDays(2);
+            Expression<Func<DateTimeOffset>> fromExpr = () => BqFunc.Timestamp("2014-03-25");
+            Expression<Func<DateTimeOffset>> toExpr = () => BqFunc.Timestamp("2014-03-27");
 
             var ctx = new BigQueryContext();
 
             AssertEx.Throws<ArgumentException>(() => ctx.FromDateRange<MyClass>(from, to));
 
             ctx.FromDateRange<People>(from, to)
+                .Where(x => x.age >= 35)
+                .Select(x => new { x.name })
+                .ToString()
+                .Is(@"
+SELECT
+  [name]
+FROM
+  TABLE_DATE_RANGE([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
+WHERE
+  ([age] >= 35)
+".TrimSmart());
+
+            ctx.FromDateRange<People>(fromExpr, toExpr)
                 .Where(x => x.age >= 35)
                 .Select(x => new { x.name })
                 .ToString()
@@ -144,12 +160,27 @@ WHERE
         {
             var from = new DateTime(2014, 3, 25, 0, 0, 0, DateTimeKind.Utc);
             var to = from.AddDays(2);
+            Expression<Func<DateTimeOffset>> fromExpr = () => BqFunc.Timestamp("2014-03-25");
+            Expression<Func<DateTimeOffset>> toExpr = () => BqFunc.Timestamp("2014-03-27");
 
             var ctx = new BigQueryContext();
 
             AssertEx.Throws<ArgumentException>(() => ctx.FromDateRangeStrict<MyClass>(from, to));
 
             ctx.FromDateRangeStrict<People>(from, to)
+                .Where(x => x.age >= 35)
+                .Select(x => new { x.name })
+                .ToString()
+                .Is(@"
+SELECT
+  [name]
+FROM
+  TABLE_DATE_RANGE_STRICT([mydata.people], TIMESTAMP('2014-03-25'), TIMESTAMP('2014-03-27'))
+WHERE
+  ([age] >= 35)
+".TrimSmart());
+
+            ctx.FromDateRangeStrict<People>(fromExpr, toExpr)
                 .Where(x => x.age >= 35)
                 .Select(x => new { x.name })
                 .ToString()

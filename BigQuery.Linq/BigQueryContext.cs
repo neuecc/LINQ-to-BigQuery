@@ -102,6 +102,17 @@ namespace BigQuery.Linq
         /// <summary>
         /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
         /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo)
+        {
+            var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
+
+            return FromDateRange<T>(attr.TablePrefix, timestampFrom, timestampTo);
+        }
+
+        /// <summary>
+        /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
+        /// </summary>
         public IFromTableWildcardBigQueryable<T> FromDateRange<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             return new FromDateRangeBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
@@ -110,7 +121,23 @@ namespace BigQuery.Linq
         /// <summary>
         /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
         /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(string prefix, Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo)
+        {
+            return new FromDateRangeBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
+        }
+
+        /// <summary>
+        /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
+        /// </summary>
         public IFromTableWildcardBigQueryable<T> FromDateRange<T>(string prefix, T dynamicSchema, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        {
+            return new FromDateRangeBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
+        }
+
+        /// <summary>
+        /// Queries daily tables that overlap with the time range between timestamp1 and timestamp2.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRange<T>(string prefix, T dynamicSchema, Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo)
         {
             return new FromDateRangeBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
         }
@@ -129,6 +156,17 @@ namespace BigQuery.Linq
         /// <summary>
         /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
         /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo)
+        {
+            var attr = typeof(T).GetCustomAttribute<TablePrefixAttribute>();
+            if (attr == null) throw new ArgumentException("T should use TablePrefixAttribute");
+
+            return FromDateRangeStrict<T>(attr.TablePrefix, timestampFrom, timestampTo);
+        }
+
+        /// <summary>
+        /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
+        /// </summary>
         public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(string prefix, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
         {
             return new FromDateRangeStrictBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
@@ -137,7 +175,23 @@ namespace BigQuery.Linq
         /// <summary>
         /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
         /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(string prefix, Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo)
+        {
+            return new FromDateRangeStrictBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
+        }
+
+        /// <summary>
+        /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
+        /// </summary>
         public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(string prefix, T dynamicSchema, DateTimeOffset timestampFrom, DateTimeOffset timestampTo)
+        {
+            return new FromDateRangeStrictBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
+        }
+
+        /// <summary>
+        /// This function is equivalent to TABLE_DATE_RANGE. The only difference is that if any daily table is missing in the sequence, TABLE_DATE_RANGE_STRICT fails and returns a Not Found: Table [table_name] error.
+        /// </summary>
+        public IFromTableWildcardBigQueryable<T> FromDateRangeStrict<T>(string prefix, T dynamicSchema, Expression<Func<DateTimeOffset>> timestampFrom, Expression<Func<DateTimeOffset>> timestampTo)
         {
             return new FromDateRangeStrictBigQueryable<T>(prefix, timestampFrom, timestampTo, new RootBigQueryable<T>(this));
         }
