@@ -450,7 +450,7 @@ namespace BigQuery.Linq
         }
 
         [WindowFunctionAlert]
-        public FullWindowFunction<TSource, TResult, TPartitionKey> ThenByByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
+        public FullWindowFunction<TSource, TResult, TPartitionKey> ThenByDescending<TOrderKey>(Expression<Func<TSource, TOrderKey>> keySelector)
         {
             return new FullWindowFunction<TSource, TResult, TPartitionKey>(this, keySelector, true);
         }

@@ -468,7 +468,7 @@ LIMIT 5
                     row_num = BqFunc.RowNumber(x)
                         .PartitionBy(y => y.corpus)
                         .OrderBy(y => y.word)
-                        .ThenByByDescending(y => y.word_count)
+                        .ThenByDescending(y => y.word_count)
                         .Value
                 })
                 .Limit(5)
@@ -501,7 +501,7 @@ LIMIT 5
                     row_num = BqFunc.RowNumber(x)
                         .OrderByDescending(y => y.word)
                         .ThenBy(y => y.word_count)
-                        .ThenByByDescending(y => y.corpus)
+                        .ThenByDescending(y => y.corpus)
                         .Value
                 })
                 .Limit(5)
