@@ -155,9 +155,9 @@ namespace BigQuery.Linq
                     else
                     {
                         v = (parsedValue == null) ? null
-                            : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
-                            : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0], CultureInfo.InvariantCulture)
-                            : Convert.ChangeType(parsedValue, propertyInfo.PropertyType,CultureInfo.InvariantCulture);
+                          : ((propertyInfo.PropertyType == typeof(DateTime)) || (propertyInfo.PropertyType == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
+                          : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0], CultureInfo.InvariantCulture)
+                          : Convert.ChangeType(parsedValue, propertyInfo.PropertyType,CultureInfo.InvariantCulture);
                     }
 
                     if (propertyInfo.GetSetMethod(true) != null)
