@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BigQuery.Linq
 {
@@ -32,11 +33,42 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
+        /// Returns the one-based index of the first occurrence of str2 in str1, or returns 0 if str2 does not occur in str1.
+        /// </summary>
+        [FunctionName("INSTR")]
+        public static long InStr(string str1, string str2)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
         /// Returns the leftmost numeric_expr characters of str. If the number is longer than str, the full string will be returned.
         /// <para>Example: LEFT('seattle', 3) returns sea.</para>
         /// </summary>
         [FunctionName("LEFT")]
         public static string Left(string str, long length)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// <para>ReturnsRemoves characters from the left side of str1.</para>
+        /// <para>If str2 is omitted, LTRIM removes spaces from the left side of str1.</para>
+        /// <para>Otherwise, LTRIM removes any characters in str2 from the left side of str1 (case-sensitive).</para>
+        /// </summary>
+        [FunctionName("LTRIM")]
+        public static string TrimLeft(string str1)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// <para>ReturnsRemoves characters from the left side of str1.</para>
+        /// <para>If str2 is omitted, LTRIM removes spaces from the left side of str1.</para>
+        /// <para>Otherwise, LTRIM removes any characters in str2 from the left side of str1 (case-sensitive).</para>
+        /// </summary>
+        [FunctionName("LTRIM")]
+        public static string TrimLeft(string str1, string str2)
         {
             throw Invalid();
         }
@@ -86,6 +118,28 @@ namespace BigQuery.Linq
         /// </summary>
         [FunctionName("RPAD")]
         public static string PadRight(string str, int totalWidth, string paddingString)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// <para>Removes trailing characters from the right side of str1.</para>
+        /// <para>If str2 is omitted, RTRIM removes trailing spaces from str1.</para>
+        /// <para>Otherwise, RTRIM removes any characters in str2 from the right side of str1 (case-sensitive).</para>
+        /// </summary>
+        [FunctionName("RTRIM")]
+        public static string TrimRight(string str1)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// <para>Removes trailing characters from the right side of str1.</para>
+        /// <para>If str2 is omitted, RTRIM removes trailing spaces from str1.</para>
+        /// <para>Otherwise, RTRIM removes any characters in str2 from the right side of str1 (case-sensitive).</para>
+        /// </summary>
+        [FunctionName("RTRIM")]
+        public static string TrimRight(string str1, string str2)
         {
             throw Invalid();
         }

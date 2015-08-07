@@ -44,6 +44,25 @@ FROM
         }
 
         [TestMethod]
+        public void BitOperator()
+        {
+            shakespear.Select(x =>new
+            {
+                A = BqFunc.BitAnd(x.word_count),
+                O = BqFunc.BitOr(x.word_count),
+                X = BqFunc.BitXor(x.word_count),
+            }).ToString()
+                .Is(@"
+SELECT
+  BIT_AND([word_count]) AS [A],
+  BIT_OR([word_count]) AS [O],
+  BIT_XOR([word_count]) AS [X]
+FROM
+  [publicdata:samples.shakespeare]
+".TrimSmart());
+        }
+
+        [TestMethod]
         public void Corr()
         {
             shakespear.Select(x => BqFunc.Correlation(x.word_count, x.corpus_date)).ToString()
@@ -63,13 +82,15 @@ FROM
                 A = BqFunc.Count(),
                 B = BqFunc.Count(x.corpus_date),
                 C = BqFunc.CountDistinct(x.word_count),
-                D = BqFunc.CountDistinct(x.word_count, 10000)
+                D = BqFunc.CountDistinct(x.word_count, 10000),
+                E = BqFunc.ExactCountDistinct(x.word_count)
             }).ToString().Is(@"
 SELECT
   COUNT(*) AS [A],
   COUNT([corpus_date]) AS [B],
   COUNT(DISTINCT [word_count]) AS [C],
-  COUNT(DISTINCT [word_count], 10000) AS [D]
+  COUNT(DISTINCT [word_count], 10000) AS [D],
+  EXACT_COUNT_DISTINCT([word_count]) AS [E]
 FROM
   [publicdata:samples.shakespeare]
 ".TrimSmart());
@@ -139,9 +160,8 @@ FROM
         }
 
         [TestMethod]
-        public void GroupCount()
+        public void GroupConcat()
         {
-
             shakespear.Select(x => new
             {
                 A = BqFunc.GroupConcat(x.word),
@@ -150,6 +170,22 @@ FROM
 SELECT
   GROUP_CONCAT([word]) AS [A],
   GROUP_CONCAT([word], 'hoge') AS [B]
+FROM
+  [publicdata:samples.shakespeare]
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void GroupConcatUnquoted()
+        {
+            shakespear.Select(x => new
+            {
+                A = BqFunc.GroupConcatUnquoted(x.word),
+                B = BqFunc.GroupConcatUnquoted(x.word, "hoge"),
+            }).ToString().Is(@"
+SELECT
+  GROUP_CONCAT_UNQUOTED([word]) AS [A],
+  GROUP_CONCAT_UNQUOTED([word], 'hoge') AS [B]
 FROM
   [publicdata:samples.shakespeare]
 ".TrimSmart());
@@ -335,6 +371,20 @@ FROM
 SELECT
   TOP([word]) AS [A],
   COUNT(*) AS [B]
+FROM
+  [publicdata:samples.shakespeare]
+".TrimSmart());
+        }
+
+        [TestMethod]
+        public void Unique()
+        {
+            shakespear.Select(x => new
+            {
+                A = BqFunc.Unique(x.word),
+            }).ToString().Is(@"
+SELECT
+  UNIQUE([word]) AS [A]
 FROM
   [publicdata:samples.shakespeare]
 ".TrimSmart());

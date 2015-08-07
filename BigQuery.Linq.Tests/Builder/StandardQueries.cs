@@ -133,7 +133,7 @@ FROM
 ORDER BY
   [title] DESC, [wp_namespace], [language] DESC, [revision_id]");
         }
-        
+
 
         [TestMethod]
         public void Join()
@@ -231,6 +231,84 @@ WHERE
 GROUP BY
   [word],
   [corpus]".TrimSmart());
+        }
+
+        [TestMethod]
+        public void GroupByRollup()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<natality>()
+                .Where(x => x.year >= 2000 && x.year <= 2002)
+                .Select(x => new
+                {
+                    x.year,
+                    x.is_male,
+                    count = BqFunc.Count(1)
+                })
+                .GroupBy(x => new { x.year, x.is_male }, rollup: true)
+                .OrderBy(x => x.year)
+                .ThenBy(x => x.is_male)
+                .ToString()
+                .TrimSmart();
+
+            query1.Is(@"
+SELECT
+  [year],
+  [is_male],
+  COUNT(1) AS [count]
+FROM
+  [publicdata:samples.natality]
+WHERE
+  (([year] >= 2000) AND ([year] <= 2002))
+GROUP BY ROLLUP
+(
+  [year],
+  [is_male]
+)
+ORDER BY
+  [year], [is_male]".TrimSmart());
+        }
+
+        [TestMethod]
+        public void GroupByGrouping()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var query1 = context.From<natality>()
+                .Where(x => x.year >= 2000 && x.year <= 2002)
+                .Select(x => new
+                {
+                    x.year,
+                    rollup_year = BqFunc.Grouping(x.year),
+                    x.is_male,
+                    rollup_gender = BqFunc.Grouping(x.is_male),
+                    count = BqFunc.Count(1)
+                })
+                .GroupBy(x => new { x.year, x.is_male }, rollup: true)
+                .OrderBy(x => x.year)
+                .ThenBy(x => x.is_male)
+                .ToString()
+                .TrimSmart();
+
+            query1.Is(@"
+SELECT
+  [year],
+  GROUPING([year]) AS [rollup_year],
+  [is_male],
+  GROUPING([is_male]) AS [rollup_gender],
+  COUNT(1) AS [count]
+FROM
+  [publicdata:samples.natality]
+WHERE
+  (([year] >= 2000) AND ([year] <= 2002))
+GROUP BY ROLLUP
+(
+  [year],
+  [is_male]
+)
+ORDER BY
+  [year], [is_male]".TrimSmart());
         }
 
 
@@ -359,7 +437,7 @@ LIMIT 5".TrimSmart());
                 {
                     x.word,
                     lag = BqFunc.RowNumber(x)
-                        //.PartitionBy(y => y.corpus)
+                    //.PartitionBy(y => y.corpus)
                     .OrderByDescending(y => y.word_count)
                     .Value
                 })

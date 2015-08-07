@@ -32,6 +32,13 @@ namespace BigQuery.Linq.Tests.Functions
         }
 
         [TestMethod]
+        public void Exp()
+        {
+            Ctx.Select(() => BqFunc.Exp(100L)).ToFlatSql().Is("SELECT EXP(100)");
+            Ctx.Select(() => BqFunc.Exp(100.5)).ToFlatSql().Is("SELECT EXP(100.5)");
+        }
+
+        [TestMethod]
         public void Trigonometric()
         {
             Ctx.Select(() => BqFunc.Acos(0.5)).ToFlatSql().Is("SELECT ACOS(0.5)");

@@ -77,6 +77,15 @@ namespace BigQuery.Linq
         public static bool NotIn<T, TExpr>(T expr, IExecutableBigQueryable<TExpr> exprs) { throw Invalid(); }
 
         /// <summary>
+        /// Returns the first argument that isn't NULL.
+        /// </summary>
+        [FunctionName("COALESCE", SpecifiedFormatterType = typeof(CoalesceFormatter))]
+        public static T Coalesce<T>(params T[] exprs)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
         /// Returns the largest numeric_expr parameter. All parameters must be numeric, and all parameters must be the same type. If any parameter is NULL, this function returns NULL.
         /// </summary>
         [FunctionName("GREATEST", SpecifiedFormatterType = typeof(GreatestFormatter))]
@@ -118,6 +127,15 @@ namespace BigQuery.Linq
         /// </summary>
         [FunctionName("LEAST", SpecifiedFormatterType = typeof(LeastFormatter))]
         public static double Least(params double?[] exprs)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// If expr is not null, returns expr, otherwise returns null_default. The NVL function is an alias for IFNULL.
+        /// </summary>
+        [FunctionName("NVL")]
+        public static T Nvl<T>(T expr, T null_default)
         {
             throw Invalid();
         }
@@ -206,6 +224,18 @@ namespace BigQuery.Linq
                 var expr = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
 
                 return string.Format("LEAST({0})", expr);
+            }
+        }
+
+        class CoalesceFormatter : ISpecifiedFormatter
+        {
+            public string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node)
+            {
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var arg = node.Arguments[0] as NewArrayExpression;
+                var expr = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
+
+                return string.Format("COALESCE({0})", expr);
             }
         }
     }

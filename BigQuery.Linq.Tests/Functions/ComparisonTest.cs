@@ -316,5 +316,27 @@ LIMIT 25".TrimSmart());
             context.Select(() => BqFunc.IsNAN(10.5)).ToFlatSql().Is("SELECT IS_NAN(10.5)");
 
         }
+
+        [TestMethod]
+        public void Coslaesce()
+        {
+            var context = new BigQueryContext();
+            context.From<wikipedia>().Select(x => new { a = BqFunc.Coalesce(x.title, "aaa", "bbb") }).ToString()
+                .Is(@"SELECT
+  COALESCE([title], 'aaa', 'bbb') AS [a]
+FROM
+  [publicdata:samples.wikipedia]");
+        }
+
+        [TestMethod]
+        public void Nvl()
+        {
+            var context = new BigQueryContext();
+            context.From<wikipedia>().Select(x => new { a = BqFunc.Nvl(x.title, "aaa") }).ToString()
+                .Is(@"SELECT
+  NVL([title], 'aaa') AS [a]
+FROM
+  [publicdata:samples.wikipedia]");
+        }
     }
 }

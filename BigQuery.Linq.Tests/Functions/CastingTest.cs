@@ -53,5 +53,16 @@ namespace BigQuery.Linq.Tests.Functions
             Ctx.Select<string>(() => BqFunc.String(10)).ToFlatSql().Is(@"SELECT STRING(10)");
             Ctx.Select<string>(() => BqFunc.String(45.49)).ToFlatSql().Is(@"SELECT STRING(45.49)");
         }
+
+        [TestMethod]
+        public void Cast()
+        {
+            Ctx.Select<int>(() => BqFunc.Cast<int>(10)).ToFlatSql().Is(@"SELECT CAST(10 AS INTEGER)");
+            Ctx.Select<string>(() => BqFunc.Cast<string>(10)).ToFlatSql().Is(@"SELECT CAST(10 AS STRING)");
+            Ctx.Select<double>(() => BqFunc.Cast<double>(10)).ToFlatSql().Is(@"SELECT CAST(10 AS FLOAT)");
+            Ctx.Select<bool>(() => BqFunc.Cast<bool>(10)).ToFlatSql().Is(@"SELECT CAST(10 AS BOOLEAN)");
+            Ctx.Select<DateTimeOffset>(() => BqFunc.Cast<DateTimeOffset>(10)).ToFlatSql().Is(@"SELECT CAST(10 AS TIMESTAMP)");
+            Ctx.Select<DateTime>(() => BqFunc.Cast<DateTime>(10)).ToFlatSql().Is(@"SELECT CAST(10 AS TIMESTAMP)");
+        }
     }
 }

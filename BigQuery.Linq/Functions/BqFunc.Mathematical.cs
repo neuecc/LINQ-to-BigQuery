@@ -63,6 +63,14 @@ namespace BigQuery.Linq
         [FunctionName("FLOOR")]
         public static double Floor(double? value) { throw Invalid(); }
 
+        /// <summary>Returns the result of raising the constant "e" - the base of the natural logarithm - to the power of numeric_expr.</summary>
+        [FunctionName("EXP")]
+        public static double Exp(long? value) { throw Invalid(); }
+
+        /// <summary>Returns the result of raising the constant "e" - the base of the natural logarithm - to the power of numeric_expr.</summary>
+        [FunctionName("EXP")]
+        public static double Exp(double? value) { throw Invalid(); }
+
         /// <summary>Returns the natural logarithm of the argument.</summary>
         [FunctionName("LOG")]
         public static double Log(double? value) { throw Invalid(); }

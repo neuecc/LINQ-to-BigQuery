@@ -539,9 +539,9 @@ namespace BigQuery.Linq
             return new SelectBigQueryable<TSource, TResult>(source, selector);
         }
 
-        public static IGroupByBigQueryable<TSource> GroupBy<TSource, TKey>(this ISelectBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, bool each = false)
+        public static IGroupByBigQueryable<TSource> GroupBy<TSource, TKey>(this ISelectBigQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, bool each = false, bool rollup = false)
         {
-            return new GroupByBigQueryable<TSource, TKey>(source, keySelector, each);
+            return new GroupByBigQueryable<TSource, TKey>(source, keySelector, each, rollup);
         }
 
         public static IHavingBigQueryable<TSource> Having<TSource>(this IGroupByBigQueryable<TSource> source, Expression<Func<TSource, bool>> condition)

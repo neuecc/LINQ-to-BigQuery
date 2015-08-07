@@ -123,5 +123,27 @@ LIMIT 1000".TrimSmart());
             Ctx.Select<string>(() => BqFunc.Substring("awesome", 3)).ToFlatSql().Is("SELECT SUBSTR('awesome', 3)");
             Ctx.Select<string>(() => BqFunc.Substring("awesome", -4, 4)).ToFlatSql().Is("SELECT SUBSTR('awesome', -4, 4)");
         }
+
+        [TestMethod]
+        public void InStr()
+        {
+            Ctx.Select<long>(() => BqFunc.InStr("awesome", "eso")).ToFlatSql().Is("SELECT INSTR('awesome', 'eso')");
+        }
+
+        [TestMethod]
+        public void Trim()
+        {
+            Ctx.Select<string>(() => BqFunc.TrimLeft("  Say hello  ")).ToString().Is(@"SELECT
+  LTRIM('  Say hello  ')");
+            Ctx.Select<string>(() => BqFunc.TrimLeft("Say hello", "yaS")).ToFlatSql().Is("SELECT LTRIM('Say hello', 'yaS')");
+            Ctx.Select<string>(() => BqFunc.TrimLeft("Say hello", " ySa")).ToString().Is(@"SELECT
+  LTRIM('Say hello', ' ySa')");
+
+            Ctx.Select<string>(() => BqFunc.TrimRight("  Say hello  ")).ToString().Is(@"SELECT
+  RTRIM('  Say hello  ')");
+            Ctx.Select<string>(() => BqFunc.TrimRight("Say hello", "leo")).ToFlatSql().Is("SELECT RTRIM('Say hello', 'leo')");
+            Ctx.Select<string>(() => BqFunc.TrimRight("Say hello", " hloe")).ToString().Is(@"SELECT
+  RTRIM('Say hello', ' hloe')");
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace BigQuery.Linq
 
     internal interface ISpecifiedFormatter
     {
-        string Format(int depth, int indentSize, string fuctionName, MethodCallExpression node);
+        string Format(int depth, int indentSize, string functionName, MethodCallExpression node);
     }
 
     public static partial class BqFunc
@@ -67,6 +67,15 @@ namespace BigQuery.Linq
         /// </summary>
         [FunctionName("WITHIN", SpecifiedFormatterType = typeof(WithInNodeFormatter))]
         public static T WithIn<T>(T expr, object node)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// The GROUPING modifier allows you to distinguish between rows that BigQuery added because of the ROLLUP modifier, versus rows that have a NULL value.
+        /// </summary>
+        [FunctionName("GROUPING")]
+        public static T Grouping<T>(T expr)
         {
             throw Invalid();
         }

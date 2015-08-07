@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,6 +27,12 @@ namespace BigQuery.Linq
         /// </summary>
         [FunctionName("BOOLEAN")]
         public static bool? Boolean(double? numericExpr) { throw Invalid(); }
+
+        /// <summary>
+        /// Converts expr into a variable of type type.
+        /// </summary>
+        [FunctionName("CAST", SpecifiedFormatterType = typeof(CastFormatter))]
+        public static T Cast<T>(object expr) { throw Invalid(); }
 
         /// <summary>
         /// Returns expr as a double. The expr can be a string like '45.78', but the function returns NULL for non-numeric values.
@@ -62,5 +69,20 @@ namespace BigQuery.Linq
         /// </summary>
         [FunctionName("STRING")]
         public static string String(double? numericExpr) { throw Invalid(); }
+
+        class CastFormatter : ISpecifiedFormatter
+        {
+            public string Format(int depth, int indentSize, string functionName, MethodCallExpression node)
+            {
+                var type = node.Method.GetGenericArguments()[0];
+                var dataType = DataTypeUtility.ToDataType(type);
+                var identifier = dataType.ToIdentifier();
+
+                var innerTranslator = new BigQueryTranslateVisitor();
+                var expr = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
+
+                return $"{functionName}({expr} AS {identifier})";
+            }
+        }
     }
 }

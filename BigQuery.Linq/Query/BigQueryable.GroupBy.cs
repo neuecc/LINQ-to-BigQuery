@@ -12,16 +12,19 @@ namespace BigQuery.Linq.Query
     {
         readonly Expression<Func<TSource, TKey>> keySelector;
         readonly bool each;
+        readonly bool rollup;
+
         internal override int Order
         {
             get { return 4; }
         }
 
-        internal GroupByBigQueryable(IBigQueryable parent, Expression<Func<TSource, TKey>> keySelector, bool each)
+        internal GroupByBigQueryable(IBigQueryable parent, Expression<Func<TSource, TKey>> keySelector, bool each, bool rollup)
             : base(parent)
         {
             this.keySelector = keySelector;
             this.each = each;
+            this.rollup = rollup;
         }
 
         public override string BuildQueryString(int depth)
@@ -42,8 +45,24 @@ namespace BigQuery.Linq.Query
 
             var sb = new StringBuilder();
             sb.Append(Indent(depth));
-            sb.AppendLine("GROUP " + ((each) ? "EACH BY" : "BY"));
+            sb.Append("GROUP " + ((each) ? "EACH BY" : "BY"));
+            if (rollup)
+            {
+                sb.AppendLine(" ROLLUP");
+                sb.Append(Indent(depth));
+                sb.AppendLine("(");
+            }
+            else
+            {
+                sb.AppendLine();
+            }
             sb.Append(command);
+            if (rollup)
+            {
+                sb.AppendLine();
+                sb.Append(Indent(depth));
+                sb.Append(")");
+            }
 
             return sb.ToString();
         }

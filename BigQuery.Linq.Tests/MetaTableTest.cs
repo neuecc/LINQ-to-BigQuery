@@ -38,6 +38,13 @@ namespace BigQuery.Linq.Tests
 public class _201001
 {
     public long a { get; set; }
+
+    public override string ToString()
+    {
+        return """"
+             + ""a : "" + a + ""|""
+             ;
+    }
 }");
             
         }

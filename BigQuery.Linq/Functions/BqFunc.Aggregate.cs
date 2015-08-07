@@ -23,6 +23,24 @@ namespace BigQuery.Linq
         public static double Average(double? numericExpression) { throw Invalid(); }
 
         /// <summary>
+        /// Returns the result of a bitwise AND operation between each instance of numeric_expr across all rows. NULL values are ignored. This function returns NULL if all instances of numeric_expr evaluate to NULL.
+        /// </summary>
+        [FunctionName("BIT_AND")]
+        public static double BitAnd(long? numericExpression) { throw Invalid(); }
+
+        /// <summary>
+        /// Returns the result of a bitwise OR operation between each instance of numeric_expr across all rows. NULL values are ignored. This function returns NULL if all instances of numeric_expr evaluate to NULL.
+        /// </summary>
+        [FunctionName("BIT_OR")]
+        public static double BitOr(long? numericExpression) { throw Invalid(); }
+
+        /// <summary>
+        /// Returns the result of a bitwise XOR operation between each instance of numeric_expr across all rows. NULL values are ignored. This function returns NULL if all instances of numeric_expr evaluate to NULL.
+        /// </summary>
+        [FunctionName("BIT_XOR")]
+        public static double BitXor(long? numericExpression) { throw Invalid(); }
+
+        /// <summary>
         /// Returns the Pearson correlation coefficient of a set of number pairs.
         /// </summary>
         [FunctionName("CORR")]
@@ -98,6 +116,15 @@ namespace BigQuery.Linq
         [FunctionName("COVAR_SAMP")]
         public static double CovarianceSample(double? numericExpression1, double? numericExpression2) { throw Invalid(); }
 
+        /// <summary>
+        /// <para>Returns the exact number of non-NULL, distinct values for the specified field. For better scalability and performance, use COUNT(DISTINCT field).</para>
+        /// </summary>
+        [FunctionName("EXACT_COUNT_DISTINCT")]
+        public static long ExactCountDistinct(object field)
+        {
+            throw Invalid();
+        }
+
         /// <summary>Returns the first sequential value in the scope of the function.</summary>
         [FunctionName("FIRST")]
         public static T First<T>(T expr)
@@ -115,6 +142,20 @@ namespace BigQuery.Linq
         /// <summary>Concatenates multiple strings into a single string, where each value is separated by the optional separator parameter. If separator is omitted, BigQuery returns a comma-separated string.</summary>
         [FunctionName("GROUP_CONCAT")]
         public static string GroupConcat(string str, string separator)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>Concatenates multiple strings into a single string, where each value is separated by the optional separator parameter. If separator is omitted, BigQuery returns a comma-separated string. Unlike GROUP_CONCAT, this function will not add double quotes to returned values that include a double quote character.</summary>
+        [FunctionName("GROUP_CONCAT_UNQUOTED")]
+        public static string GroupConcatUnquoted(string str)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>Concatenates multiple strings into a single string, where each value is separated by the optional separator parameter. If separator is omitted, BigQuery returns a comma-separated string. Unlike GROUP_CONCAT, this function will not add double quotes to returned values that include a double quote character.</summary>
+        [FunctionName("GROUP_CONCAT_UNQUOTED")]
+        public static string GroupConcatUnquoted(string str, string separator)
         {
             throw Invalid();
         }
@@ -269,6 +310,17 @@ namespace BigQuery.Linq
         /// <returns></returns>
         [FunctionName("TOP")]
         public static T Top<T>(T field, long? maxValues, long? multiplier)
+        {
+            throw Invalid();
+        }
+
+        /// <summary>
+        /// <para>Returns the set of unique, non-NULL values in the scope of the function in an undefined order.</para>
+        /// <para>Similar to a large GROUP BY clause without the EACH keyword, the query will fail with a "Resources Exceeded" error if there are too many distinct values.</para>
+        /// <para>Unlike GROUP BY, however, the UNIQUE function can be applied with scoped aggregation, allowing efficient operation on nested fields with a limited number of values.</para>
+        /// </summary>
+        [FunctionName("UNIQUE")]
+        public static T Unique<T>(T expr)
         {
             throw Invalid();
         }
