@@ -112,6 +112,30 @@ WHERE
         }
 
         [TestMethod]
+        public void OrderBy()
+        {
+            var context = new BigQuery.Linq.BigQueryContext();
+
+            var s = context.From<BigQuery.Linq.Tests.wikipedia>("tablewikipedia")
+                .OrderByDescending(x => x.title)
+                .ThenBy(x => x.wp_namespace)
+                .ThenByDescending(x => x.language)
+                .ThenBy(x => x.revision_id)
+                .Select(x => new { x.title, x.wp_namespace })
+                .ToString().TrimEnd();
+
+
+            s.Is(@"SELECT
+  [title],
+  [wp_namespace]
+FROM
+  [tablewikipedia]
+ORDER BY
+  [title] DESC, [wp_namespace], [language] DESC, [revision_id]");
+        }
+        
+
+        [TestMethod]
         public void Join()
         {
             var context = new BigQuery.Linq.BigQueryContext();
