@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.5.1</version>
+        <version>0.6.0</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,8 +10,16 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop query editor and dump to chart with LINQPad.</description>
         <releaseNotes>
             <![CDATA[
-Fix : decimal DataType is being converted to integer instead of FLOAT, thanks @elad-bar
-Add : MetaTableSchema.ToJsonSchema
+Update : Update BigQuery's dll - 1.9.2.2240
+Fix : Support paging for large results, thanks @greigs
+Add : Window function supports ThenBy/ThenByDescending, thanks @kbremner
+Add : FromDateRange(Expression<Func<DateTimeOffset>>) overload
+Add : BigQueryContext.IsConvertResultUtcToLocalTime (its default is true, this is breaking changes)
+Add : MetaTableSchema.BuildCSharpClass(bool outTablePrefixClassIfMatched)
+Add : BigQueryContext.BuildCSharpClass
+Add : GroupBy supports ROLLUP
+Add : New Query Operators(BqFunc) - Coaslesce, GroupConcatUnquoted, Grouping, BitAnd, BitOr, BitXor, ExactCountDistinct, Unique, Cast, Nvl, Exp, InStr, TrimLeft, TrimRight
+Improvement : BuildCSharpClass code generates ToString code
             ]]>
         </releaseNotes>
         <language>en-US</language>
@@ -19,7 +27,7 @@ Add : MetaTableSchema.ToJsonSchema
         <projectUrl>https://github.com/neuecc/LINQ-to-BigQuery</projectUrl>
         <tags>LINQ BigQuery</tags>
         <dependencies>
-            <dependency id="Google.Apis.Bigquery.v2" version="1.9.0.1680" />
+            <dependency id="Google.Apis.Bigquery.v2" version="1.9.2.2240" />
         </dependencies>
     </metadata>
     <files>

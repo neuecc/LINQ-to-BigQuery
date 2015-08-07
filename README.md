@@ -10,7 +10,7 @@ binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuer
 PM> Install-Package LINQ-to-BigQuery
 ```
 
-LastUpdate, ver 0.5.1(2015-02-13). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
+LastUpdate, ver 0.6.0(2015-08-07). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
 
 LINQ with LINQPad
 ---
@@ -32,11 +32,11 @@ Strongly Typed with IntelliSense(and function documents).
 
 ![bq_intellisense_func](https://cloud.githubusercontent.com/assets/46207/4381902/acc2f72e-437d-11e4-8e3b-a79147b6f044.jpg)
 
-All BigQuery functions is under BqFunc(except string.Contains). If you use C# 6.0(next version!), enable static using.
+All BigQuery functions is under BqFunc(except string.Contains). If you use C# 6.0 you can enable static using.
 
 ```csharp
 // C# 6.0 Using Static
-using BigQuery.Linq.BqFunc;
+using static BigQuery.Linq.BqFunc;
 ```
 
 LINQ to BigQuery is LINQ but is not IQueryable. It's constraint is old good method chain. The rule is
@@ -78,6 +78,15 @@ Powerfull Tabledecorator/Table wildcard integration.
 
 // FROM (TABLE_QUERY([mydata], "REGEXP_MATCH([table_id], r'^boo[\d]{3,5}')"))
 .FromTableQuery<mydata>("mydata", x => BqFunc.RegexpMatch(x.table_id, "^boo[\\d]{3,5}"))
+```
+
+Timezone convention
+---
+LINQ to BigQuery converts local time to UTC automatically for BigQuery's query string. Result set of BigQuery converts UTC to local time automatically, too. If you want to use UTC, configure `BigQueryContext.IsConvertResultUtcToLocalTime`. 
+
+```csharp
+var context = new BigQueryContext();
+context.IsConvertResultUtcToLocalTime = false; // default is true
 ```
 
 My thought of LINQ
@@ -139,6 +148,32 @@ var schema = tableInfos[0].GetTableSchema(context.BigQueryService);
 
 // Build C# class definition
 schema.BuildCSharpClass().Dump();
+```
+
+If table separated in YYYYMMDD suffix(for FromDateRange), you can use TablePrefixAttribute's table and `BigQueryContext.BuildCSharpClass` supports generate class.
+
+```csharp
+[TablePrefix("[mytable.LoginInfo]")]
+public class Login
+{
+    public DateTimeOffset timestamp { get; set; }
+    public string url { get; set; }
+    public string userAgent { get; set; }
+}
+
+// Generate all tableinfo and if table's suffix is YYYYMMDD, generates [TablePrefix] table.
+var codes = context.BuildCSharpClass("mydataset");
+```
+
+TablePrefix's class is used by `FromDateRange`, `FromDateRangeStrict`.
+
+```csharp 
+// TABLE_DATE_RANGE([mytable.LoginInfo], TIMESTAMP('2015-03-03'), TIMESTAMP('2015-03-09'))
+context.FromDateRange<LoginInfo>(new DateTime(2015, 3, 4), new DateTime(2015, 3, 10));
+
+// You can write Today and One Date
+context.FromDateRange<LoginInfo>();
+context.FromDateRange<LoginInfo>(new DateTime(2015, 3, 4));
 ```
 
 Advanced Sample

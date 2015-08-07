@@ -17,6 +17,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
+using static BigQuery.Linq.BqFunc;
+
 namespace BigQuery.Linq.ConsoleApp
 {
     public static class Query
@@ -55,12 +57,20 @@ namespace BigQuery.Linq.ConsoleApp
 
         static void Main(string[] args)
         {
+            //var str = Query.GetWhiteContext().BuildCSharpClass("access");
 
 
-          
             
 
         }
+    }
+
+    [TablePrefix("[mytable.LoginInfo]")]
+    public class Login
+    {
+        public DateTimeOffset timestamp { get; set; }
+        public string url { get; set; }
+        public string userAgent { get; set; }
     }
 
     [TableName("publicdata:samples.trigrams")]
