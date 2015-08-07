@@ -120,7 +120,7 @@ namespace BigQuery.Linq
             this.customDeserializeFallback = customDeserializeFallback;
         }
 
-        public T Deserialize(TableRow row)
+        public T Deserialize(TableRow row, bool isConvertUtcToLocal)
         {
             if (row.F.Count == 1 && ParsableType.Contains(typeof(T)))
             {
@@ -132,6 +132,9 @@ namespace BigQuery.Linq
                     : ((typeof(T) == typeof(DateTime)) || (typeof(T) == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
                     : typeof(T).IsNullable() ? Convert.ChangeType(parsedValue, typeof(T).GetGenericArguments()[0], CultureInfo.InvariantCulture)
                     : Convert.ChangeType(parsedValue, typeof(T), CultureInfo.InvariantCulture);
+                if (isConvertUtcToLocal && v != null && v.GetType() == typeof(DateTime)) v = ((DateTime)v).ToLocalTime();
+                if (isConvertUtcToLocal && v != null && v.GetType() == typeof(DateTimeOffset)) v = ((DateTimeOffset)v).ToLocalTime();
+
                 return (T)v;
             }
 
@@ -158,6 +161,9 @@ namespace BigQuery.Linq
                           : ((propertyInfo.PropertyType == typeof(DateTime)) || (propertyInfo.PropertyType == typeof(DateTime?))) ? ((DateTimeOffset)parsedValue).UtcDateTime
                           : propertyInfo.PropertyType.IsNullable() ? Convert.ChangeType(parsedValue, propertyInfo.PropertyType.GetGenericArguments()[0], CultureInfo.InvariantCulture)
                           : Convert.ChangeType(parsedValue, propertyInfo.PropertyType,CultureInfo.InvariantCulture);
+
+                        if (isConvertUtcToLocal && v != null && v.GetType() == typeof(DateTime)) v = ((DateTime)v).ToLocalTime();
+                        if (isConvertUtcToLocal && v != null && v.GetType() == typeof(DateTimeOffset)) v = ((DateTimeOffset)v).ToLocalTime();
                     }
 
                     if (propertyInfo.GetSetMethod(true) != null)

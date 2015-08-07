@@ -19,6 +19,7 @@ namespace BigQuery.Linq
     public class BigQueryContext
     {
         public int IndentSize { get; set; }
+        public bool IsConvertResultUtcToLocalTime { get; set; }
         public BigqueryService BigQueryService { get; set; }
         public string ProjectId { get; set; }
 
@@ -36,6 +37,7 @@ namespace BigQuery.Linq
         public BigQueryContext()
         {
             this.IndentSize = 2;
+            this.IsConvertResultUtcToLocalTime = true;
         }
 
         public BigQueryContext(BigqueryService service, string projectId)

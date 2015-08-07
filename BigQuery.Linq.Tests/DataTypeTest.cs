@@ -142,7 +142,7 @@ namespace BigQuery.Linq.Tests
                     new TableCell { V = null } ,
                     new TableCell { V = "{\"a\": 1}"},
                 }
-            });
+            }, true);
 
             value.Hoge.Is(100);
             value.MyProperty["a"].Is(1L);

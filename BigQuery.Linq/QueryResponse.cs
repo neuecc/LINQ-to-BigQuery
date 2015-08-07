@@ -38,7 +38,7 @@ namespace BigQuery.Linq
                 }
 
                 var deserializer = new Deserializer<T>(queryResponse.Schema, fallback);
-                rows = queryResponse.Rows.Select(row => deserializer.Deserialize(row)).ToArray();
+                rows = queryResponse.Rows.Select(row => deserializer.Deserialize(row, context.IsConvertResultUtcToLocalTime)).ToArray();
             }
             else
             {
