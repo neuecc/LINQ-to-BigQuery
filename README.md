@@ -10,7 +10,7 @@ binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuer
 PM> Install-Package LINQ-to-BigQuery
 ```
 
-LastUpdate, ver 0.6.0(2015-08-07). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
+LastUpdate, ver 0.6.2(2015-08-10). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
 
 LINQ with LINQPad
 ---
