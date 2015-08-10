@@ -302,7 +302,7 @@ namespace BigQuery.Linq
             var projectId = queryResponse.JobReference.ProjectId;
             var pageToken = queryResponse.PageToken;
 
-            if ((ulong)queryResponse.Rows.Count < queryResponse.TotalRows)
+            if (queryResponse.Rows != null && pageToken != null && (ulong)queryResponse.Rows.Count < queryResponse.TotalRows)
             {
                 do
                 {
