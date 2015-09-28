@@ -54,8 +54,8 @@
       <HintPath>..\..\packages\Google.Apis.Auth.1.9.2\lib\net40\Google.Apis.Auth.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Google.Apis.Bigquery.v2, Version=1.9.2.227, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Google.Apis.Bigquery.v2.1.9.2.2270\lib\portable-net40+sl50+win+wpa81+wp80\Google.Apis.Bigquery.v2.dll</HintPath>
+    <Reference Include="Google.Apis.Bigquery.v2, Version=1.9.2.234, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Google.Apis.Bigquery.v2.1.9.2.2340\lib\portable-net40+sl50+win+wpa81+wp80\Google.Apis.Bigquery.v2.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Google.Apis.Core, Version=1.9.2.27816, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">

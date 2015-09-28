@@ -191,21 +191,12 @@ namespace BigQuery.Linq
                 attr = $"[TableName(\"{fullname}\")]";
             }
 
-            var tostring = $@"
-    public override string ToString()
-    {{
-        return """"
-{string.Join(Environment.NewLine, Fields.Select(x => $"             + \"{x.Name} : \" + {x.Name} + \"|\""))}
-             ;
-    }}";
-
         var format = @"{0}
 public class {1}
 {{
 {2}
-{3}
 }}";
-            var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props), tostring);
+            var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props));
 
             return string.Join(Environment.NewLine, new[] { result }.Concat(innerClasses.Select(x => Environment.NewLine + x.Value)));
         }

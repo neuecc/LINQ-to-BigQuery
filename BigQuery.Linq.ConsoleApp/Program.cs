@@ -48,7 +48,6 @@ namespace BigQuery.Linq.ConsoleApp
             context.TimeoutMs = (long)TimeSpan.FromMinutes(1).TotalMilliseconds;
             return context;
         }
-
     }
 
 
@@ -58,8 +57,6 @@ namespace BigQuery.Linq.ConsoleApp
 
         static void Main(string[] args)
         {
-            
-
 
 
         }
