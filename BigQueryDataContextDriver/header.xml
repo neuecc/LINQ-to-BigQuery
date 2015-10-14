@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DataContextDriver>
+   <MainAssembly>BigQueryDataContextDriver.dll</MainAssembly>
+   <SupportUri>https://github.com/neuecc/LINQ-to-BigQuery/</SupportUri>
+</DataContextDriver>

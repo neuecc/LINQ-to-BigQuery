@@ -1,45 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5DFCDDDB-5A06-4752-96C3-2B8C2B7F1C51}</ProjectGuid>
+    <ProjectGuid>{1693BE95-B9A2-4D3D-A2D8-A07B55CBD908}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BigQuery.Linq</RootNamespace>
-    <AssemblyName>BigQuery.Linq</AssemblyName>
+    <RootNamespace>BigQueryDataContextDriver</RootNamespace>
+    <AssemblyName>BigQueryDataContextDriver</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\QuaySide\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\BigQuery.Linq.xml</DocumentationFile>
-    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\BigQuery.Linq.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -60,8 +51,8 @@
       <HintPath>..\packages\Google.Apis.Auth.1.9.2\lib\net40\Google.Apis.Auth.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Google.Apis.Bigquery.v2, Version=1.9.2.234, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.Bigquery.v2.1.9.2.2340\lib\portable-net40+sl50+win+wpa81+wp80\Google.Apis.Bigquery.v2.dll</HintPath>
+    <Reference Include="Google.Apis.Bigquery.v2, Version=1.9.2.238, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Bigquery.v2.1.9.2.2380\lib\portable-net40+sl50+win+wpa81+wp80\Google.Apis.Bigquery.v2.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Google.Apis.Core, Version=1.9.2.27816, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
@@ -72,21 +63,25 @@
       <HintPath>..\packages\Google.Apis.1.9.2\lib\net40\Google.Apis.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LINQPad, Version=1.0.0.0, Culture=neutral, PublicKeyToken=21353812cd2a2db5, processorArchitecture=MSIL">
+      <HintPath>..\packages\LINQPad.4.51.3\lib\net40\LINQPad.exe</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks.Extensions, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop, Version=1.0.168.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -95,7 +90,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Extensions, Version=2.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Extensions.dll</HintPath>
       <Private>True</Private>
@@ -109,6 +103,7 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Zlib.Portable, Version=1.11.0.0, Culture=neutral, PublicKeyToken=431cba815f6a8b5b, processorArchitecture=MSIL">
       <HintPath>..\packages\Zlib.Portable.Signed.1.11.0\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid\Zlib.Portable.dll</HintPath>
@@ -116,65 +111,39 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BigQueryable.cs" />
-    <Compile Include="MetaTableSchema.cs" />
-    <Compile Include="Query\BigQueryable.Flatten.cs" />
-    <Compile Include="Utils\Deserializer.cs" />
-    <Compile Include="Functions\BqFunc.Window.cs" />
-    <Compile Include="Functions\BqFunc.Url.cs" />
-    <Compile Include="Functions\BqFunc.String.cs" />
-    <Compile Include="Functions\BqFunc.RegularExpression.cs" />
-    <Compile Include="Functions\BqFunc.Mathematical.cs" />
-    <Compile Include="Functions\BqFunc.LogicalOperator.cs" />
-    <Compile Include="Functions\BqFunc.JSON.cs" />
-    <Compile Include="Functions\BqFunc.IP.cs" />
-    <Compile Include="Functions\BqFunc.DateAndTime.cs" />
-    <Compile Include="Functions\BqFunc.Comparison.cs" />
-    <Compile Include="Functions\BqFunc.Casting.cs" />
-    <Compile Include="Functions\BqFunc.Bitwise.cs" />
-    <Compile Include="Functions\BqFunc.Arithmetic.cs" />
-    <Compile Include="MetaTable.cs" />
-    <Compile Include="QueryResponse.cs" />
-    <Compile Include="Query\BigQueryable.Join.cs" />
-    <Compile Include="Query\BigQueryable.IgnoreCase.cs" />
-    <Compile Include="Query\BigQueryable.Limit.cs" />
-    <Compile Include="Query\BigQueryable.OrderBy.cs" />
-    <Compile Include="Query\BigQueryable.Where.cs" />
-    <Compile Include="BigQueryContext.cs" />
-    <Compile Include="DataType.cs" />
-    <Compile Include="Functions\Functions.cs" />
+    <Compile Include="BigQueryDataContextDriver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BigQueryTranslateVisitor.cs" />
-    <Compile Include="TableNameAttribute.cs" />
-    <Compile Include="Utils\DateTimeExtensions.cs" />
-    <Compile Include="Utils\LongExtensions.cs" />
-    <Compile Include="Utils\ReflectionAccessor.cs" />
-    <Compile Include="Utils\StringExtensions.cs" />
-    <Compile Include="Utils\TypeExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <Compile Include="Query\BigQueryable.Select.cs" />
-    <Compile Include="Query\BigQueryable.From.cs" />
-    <Compile Include="Query\BigQueryable.TableDecorator.cs" />
-    <Compile Include="Query\BigQueryable.GroupBy.cs" />
-    <Compile Include="Query\BigQueryable.Having.cs" />
-    <Compile Include="Functions\BqFunc.Aggregate.cs" />
-    <Compile Include="Functions\BqFunc.Other.cs" />
+    <None Include="app.config" />
+    <None Include="DevDeploy.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="linqtobigquery.snk" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="header.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BigQuery.Linq\BigQuery.Linq.csproj">
+      <Project>{5dfcdddb-5a06-4752-96c3-2b8c2b7f1c51}</Project>
+      <Name>BigQuery.Linq</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>DevDeploy.bat</PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+      <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
   </Target>
-  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

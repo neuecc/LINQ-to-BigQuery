@@ -18,4 +18,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("0.6.3.0")]
 [assembly: AssemblyFileVersion("0.6.3.0")]
 
-[assembly: InternalsVisibleTo("BigQuery.Linq.Tests")]
+// [assembly: InternalsVisibleTo("BigQuery.Linq.Tests")]
