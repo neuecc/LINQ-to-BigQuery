@@ -15,10 +15,15 @@ using Google.Apis.Util.Store;
 using LINQPad.Extensibility.DataContext;
 using Microsoft.CSharp;
 
-namespace ClassLibrary2
+namespace BigQuery.Linq
 {
     public class BigQueryDataContextDriver : DynamicDataContextDriver
     {
+        public BigQueryDataContextDriver()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+        }
+
         public override string Author
         {
             get
@@ -41,6 +46,8 @@ namespace ClassLibrary2
             // set to the cxInfo.DriverData
             //bool? result = new ConnectionDialog(cxInfo).ShowDialog();
             //return result == true;
+
+            cxInfo.AppConfigPath = @"C:\Users\y.kawai\Documents\neuecc\LINQ-to-BigQuery\BigQueryDataContextDriver\app.config";
 
             return true;
         }
@@ -111,23 +118,11 @@ namespace ClassLibrary2
                 }
             };
 
-            // Test Compile
-            CompilerResults results;
-            using (var codeProvider = new CSharpCodeProvider(new Dictionary<string, string>() { { "CompilerVersion", "v3.5" } }))
-            {
-                var options = new CompilerParameters("System.dll System.Core.dll System.Xml.dll ".Split(),
-                    assemblyToBuild.CodeBase,
-                    true);
-                results = codeProvider.CompileAssemblyFromSource(options, $"namespace {nameSpace} {{ public class Hoge {{ public int Huga {{ get; set; }} }} }}");
-            }
-            if (results.Errors.Count > 0)
-            {
-                throw new Exception
-                    ("Cannot compile typed context: " + results.Errors[0].ErrorText + " (line " + results.Errors[0].Line + ")");
-            }
 
 
-            typeName = "Hoge";
+
+
+            //var builder =  SchemaBuilder .FromTableInfosAsync(Query.GetWhiteContext());
 
 
 
@@ -135,10 +130,14 @@ namespace ClassLibrary2
             return list;
         }
 
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            // Fucking System.Net.Http.Primitives.dll
+            var dllName = args.Name.Split(',')[0] + ".dll";
+            return LoadAssemblySafely(Path.GetDirectoryName(typeof(Linq.BigQueryContext).Assembly.Location) + "\\" + dllName);
+        }
 
         // others to override...
-
-
 
         public override void InitializeContext(IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager)
         {

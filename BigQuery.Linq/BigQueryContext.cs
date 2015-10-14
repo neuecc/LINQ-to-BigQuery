@@ -239,6 +239,13 @@ namespace BigQuery.Linq
 
         // Util Methods
 
+        public async Task<string[]> GetAllDatasetsAsync()
+        {
+            // TODO:needs to paging?
+            var datasets = await BigQueryService.Datasets.List(ProjectId).ExecuteAsync().ConfigureAwait(false);
+            return datasets.Datasets.Select(x => x.FriendlyName).ToArray();
+        }
+
         public MetaTable[] GetAllTableInfo(string dataset)
         {
             var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
@@ -247,15 +254,20 @@ namespace BigQuery.Linq
 
         public string[] BuildCSharpClass(string dataset)
         {
+            return GetCollectedTableSchemasAsync(dataset)
+                .Result
+                .Select(x => x.BuildCSharpClass(outTablePrefixClassIfMatched: true))
+                .ToArray();
+        }
+
+        public Task<MetaTableSchema[]> GetCollectedTableSchemasAsync(string dataset)
+        {
             var tables = GetAllTableInfo(dataset)
                 .Select(info => new { info, prefix = Regex.Replace(info.ToFullTableName(), @"\d{8}]$", "]") })
                 .ToLookup(x => x.prefix, x => x.info)
                 .Select(x => x.First()); // alt distinct
 
-            return Task.WhenAll(tables.Select(x => x.GetTableSchemaAsync(BigQueryService)))
-                .Result
-                .Select(x => x.BuildCSharpClass(outTablePrefixClassIfMatched: true))
-                .ToArray();
+            return Task.WhenAll(tables.Select(x => x.GetTableSchemaAsync(BigQueryService)));
         }
 
         public void RegisterCustomDeserializeFallback(Type targetType, CustomDeserializeFallback fallback)
