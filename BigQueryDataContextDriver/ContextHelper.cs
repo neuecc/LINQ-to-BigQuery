@@ -11,7 +11,7 @@ namespace BigQuery.Linq
 {
     public static class ContextHelper
     {
-        private static BigQueryContext GetContext(string json, string user, string projectId)
+        public static BigQueryContext GetContext(string json, string user, string projectId)
         {
             BigQueryContext context;
 

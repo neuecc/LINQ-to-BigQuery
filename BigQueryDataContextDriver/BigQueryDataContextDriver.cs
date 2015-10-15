@@ -1,24 +1,18 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using BigQuery.Linq;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Bigquery.v2;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
 using LINQPad.Extensibility.DataContext;
-using Microsoft.CSharp;
+using Newtonsoft.Json;
 
 namespace BigQuery.Linq
 {
     public class BigQueryDataContextDriver : DynamicDataContextDriver
     {
+        bool tryFromCache = true;
+
         public BigQueryDataContextDriver()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -47,7 +41,7 @@ namespace BigQuery.Linq
             //bool? result = new ConnectionDialog(cxInfo).ShowDialog();
             //return result == true;
 
-            cxInfo.AppConfigPath = @"C:\Users\y.kawai\Documents\neuecc\LINQ-to-BigQuery\BigQueryDataContextDriver\app.config";
+            tryFromCache = false;
 
             return true;
         }
@@ -55,79 +49,66 @@ namespace BigQuery.Linq
         // 2. Title of listitem
         public override string GetConnectionDescription(IConnectionInfo cxInfo)
         {
-            return "BigQueryContext";
+            return cxInfo.DisplayName;
         }
 
         // 3. explore item and generate assembly
         public override List<ExplorerItem> GetSchemaAndBuildAssembly(IConnectionInfo cxInfo, AssemblyName assemblyToBuild, ref string nameSpace, ref string typeName)
         {
-            var list = new List<ExplorerItem>()
+            var property = new DriverProperty(cxInfo);
+
+            var context = ContextHelper.GetWhiteContext(); // TODO:From DriverProperty
+
+            SchemaBuilder schemaBuilder = null;
+            if (tryFromCache)
             {
-                new ExplorerItem("access", ExplorerItemKind.Category, ExplorerIcon.Box)
+                tryFromCache = false;
+
+                var schemaCache = property.Cache;
+                if (schemaCache != null)
                 {
-                    Children = new List<ExplorerItem>
+                    try
                     {
-                        new ExplorerItem("TableRanges", ExplorerItemKind.Category, ExplorerIcon.Schema)
-                        {
-                            Children = new List<ExplorerItem>
-                            {
-                                new ExplorerItem("Login_", ExplorerItemKind.QueryableObject, ExplorerIcon.Schema)
-                                {
-                                    Children = new List<ExplorerItem>
-                                    {
-                                        new ExplorerItem("timestamp (TIMESTAMP)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                        new ExplorerItem("sourceHost (STRING)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                        new ExplorerItem("gitRevision (STRING)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                    },
-                                    IsEnumerable = true
-                                }
-                            }
-                        },
-                        new ExplorerItem("Views", ExplorerItemKind.Category, ExplorerIcon.View)
-                        {
-                            Children = new List<ExplorerItem>
-                            {
-                                new ExplorerItem("Login_Current", ExplorerItemKind.QueryableObject, ExplorerIcon.View)
-                                {
-                                    Children = new List<ExplorerItem>
-                                    {
-                                        new ExplorerItem("timestamp (TIMESTAMP)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                        new ExplorerItem("sourceHost (STRING)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                        new ExplorerItem("gitRevision (STRING)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                    },
-                                    DragText = "hogemoge!!!"
-                                }
-                            }
-                        },
-                        new ExplorerItem("Tables", ExplorerItemKind.Category, ExplorerIcon.Table)
-                        {
-                            Children = new List<ExplorerItem>
-                            {
-                                new ExplorerItem("Login_20151014", ExplorerItemKind.QueryableObject, ExplorerIcon.Table)
-                                {
-                                    Children = new List<ExplorerItem>
-                                    {
-                                        new ExplorerItem("timestamp (TIMESTAMP)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                        new ExplorerItem("sourceHost (STRING)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                        new ExplorerItem("gitRevision (STRING)", ExplorerItemKind.Property, ExplorerIcon.Column),
-                                    }
-                                }
-                            }
-                        },
+                        var deserialized = JsonConvert.DeserializeObject<Schema[]>(schemaCache);
+                        schemaBuilder = new SchemaBuilder(context, deserialized);
+                    }
+                    catch
+                    {
                     }
                 }
-            };
+            }
 
+            if (schemaBuilder == null)
+            {
+                schemaBuilder = SchemaBuilder.FromTableInfosAsync(context).Result;
+                var cacheString = JsonConvert.SerializeObject(schemaBuilder.Schemas, Formatting.None);
+                property.Cache = cacheString;
+            }
 
-
-
-
-            //var builder =  SchemaBuilder .FromTableInfosAsync(Query.GetWhiteContext());
-
-
-
+            var list = schemaBuilder.BuildExplorerItems();
+            namespacesToAdd = schemaBuilder.CompileTo(assemblyToBuild, nameSpace);
 
             return list;
+        }
+
+        // 4,5...
+
+        string[] namespacesToAdd = new string[0];
+
+        public override IEnumerable<string> GetNamespacesToAdd(IConnectionInfo cxInfo)
+        {
+            return base.GetNamespacesToAdd(cxInfo).Concat(namespacesToAdd).Distinct();
+        }
+
+        public override IEnumerable<string> GetAssembliesToAdd(IConnectionInfo cxInfo)
+        {
+            return base.GetAssembliesToAdd(cxInfo)
+                .Concat(new[] 
+                {
+                    typeof(BigQueryContext).Assembly.Location,
+                    typeof(BigqueryService).Assembly.Location
+                })
+                .Distinct();
         }
 
         private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
@@ -135,18 +116,6 @@ namespace BigQuery.Linq
             // Fucking System.Net.Http.Primitives.dll
             var dllName = args.Name.Split(',')[0] + ".dll";
             return LoadAssemblySafely(Path.GetDirectoryName(typeof(Linq.BigQueryContext).Assembly.Location) + "\\" + dllName);
-        }
-
-        // others to override...
-
-        public override void InitializeContext(IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager)
-        {
-            base.InitializeContext(cxInfo, context, executionManager);
-        }
-
-        public override void TearDownContext(IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager, object[] constructorArguments)
-        {
-            base.TearDownContext(cxInfo, context, executionManager, constructorArguments);
         }
     }
 }

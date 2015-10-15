@@ -8,6 +8,15 @@ using System.Text.RegularExpressions;
 
 namespace BigQuery.Linq
 {
+
+    public class GroupedMetaTableSchema
+    {
+        public MetaTableSchema[] MetaTableSchemas { get; set; }
+        public bool IsGrouped { get; set; }
+        public string TablePrefix { get; set; }
+        public string ShortTablePrefix { get; set; }
+    }
+
     public class MetaTableSchema
     {
         readonly static HashSet<string> ReservedIdentifiers = new HashSet<string>

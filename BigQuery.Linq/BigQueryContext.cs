@@ -243,7 +243,7 @@ namespace BigQuery.Linq
         {
             // TODO:needs to paging?
             var datasets = await BigQueryService.Datasets.List(ProjectId).ExecuteAsync().ConfigureAwait(false);
-            return datasets.Datasets.Select(x => x.FriendlyName).ToArray();
+            return datasets.Datasets.Select(x => x.Id.Split(':')[1]).ToArray();
         }
 
         public MetaTable[] GetAllTableInfo(string dataset)
@@ -254,20 +254,60 @@ namespace BigQuery.Linq
 
         public string[] BuildCSharpClass(string dataset)
         {
-            return GetCollectedTableSchemasAsync(dataset)
+            return GetFastTableSchemasAsync(dataset)
                 .Result
-                .Select(x => x.BuildCSharpClass(outTablePrefixClassIfMatched: true))
+                .Select(x => x.MetaTableSchemas.First().BuildCSharpClass(outTablePrefixClassIfMatched: true))
                 .ToArray();
         }
 
-        public Task<MetaTableSchema[]> GetCollectedTableSchemasAsync(string dataset)
+        /// <summary>
+        /// GetTableSchemas but if can grouping by day suffix, use same schema(for reduce query).
+        /// </summary>
+        public Task<GroupedMetaTableSchema[]> GetFastTableSchemasAsync(string dataset)
         {
             var tables = GetAllTableInfo(dataset)
-                .Select(info => new { info, prefix = Regex.Replace(info.ToFullTableName(), @"\d{8}]$", "]") })
-                .ToLookup(x => x.prefix, x => x.info)
-                .Select(x => x.First()); // alt distinct
+                .Select(x =>
+                {
+                    var match = Regex.Match(x.ToFullTableName(), @"(.*)(\d{8})]$");
+                    if (match.Success && x.type != 2)
+                    {
+                        return new
+                        {
+                            info = x,
+                            prefix = match.Groups[1].Value + "]",
+                            day = int.Parse(match.Groups[2].Value)
+                        };
+                    }
+                    else
+                    {
+                        return new { info = x, prefix = default(string), day = default(int) };
+                    }
+                })
+                .GroupBy(x => x.prefix ?? x.info.ToFullTableName())
+                .Select(async xs =>
+                {
+                    var orderedTable = xs.OrderByDescending(x => x.day).ToArray();
+                    var targetTable = orderedTable.First();
 
-            return Task.WhenAll(tables.Select(x => x.GetTableSchemaAsync(BigQueryService)));
+                    var schema = await targetTable.info.GetTableSchemaAsync(BigQueryService).ConfigureAwait(false);
+
+                    if (orderedTable.Length == 1)
+                    {
+                        return new GroupedMetaTableSchema { MetaTableSchemas = new[] { schema }, IsGrouped = false };
+                    }
+                    else
+                    {
+                        return new GroupedMetaTableSchema
+                        {
+                            MetaTableSchemas = orderedTable.Select(x => new MetaTableSchema(x.info, schema.Fields)).ToArray(),
+                            IsGrouped = true,
+                            TablePrefix = targetTable.prefix,
+                            ShortTablePrefix = Regex.Match(targetTable.info.table_id, @"(.*)(\d{8})$").Groups[1].Value
+                    };
+                    }
+                });
+
+            return Task.WhenAll(tables);
         }
 
         public void RegisterCustomDeserializeFallback(Type targetType, CustomDeserializeFallback fallback)

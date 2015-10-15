@@ -112,6 +112,7 @@
   <ItemGroup>
     <Compile Include="BigQueryDataContextDriver.cs" />
     <Compile Include="ContextHelper.cs" />
+    <Compile Include="DriverProperty.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SchemaBuilder.cs" />
   </ItemGroup>
