@@ -11,15 +11,15 @@ namespace BigQuery.Linq
         // IP functions convert IP addresses to and from human-readable form.
 
         /// <summary>
-        /// <para>Converts 32 least significant bits of integer_value to human-readable IPv4 address string.</para>
-        /// <para>For example, FORMAT_IP(1) will return string '0.0.0.1'.</para>
+        /// Converts 32 least significant bits of integer_value to human-readable IPv4 address string.
+        /// For example, FORMAT_IP(1) will return string '0.0.0.1'.
         /// </summary>
         [FunctionName("FORMAT_IP")]
         public static string FormatIP(int value) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Converts a string representing IPv4 address to unsigned integer value.</para>
-        /// <para>For example, PARSE_IP('0.0.0.1') will return 1. If string is not a valid IPv4 address, PARSE_IP will return NULL.</para>
+        /// Converts a string representing IPv4 address to unsigned integer value.
+        /// For example, PARSE_IP('0.0.0.1') will return 1. If string is not a valid IPv4 address, PARSE_IP will return NULL.
         /// </summary>
         [FunctionName("PARSE_IP")]
         public static long ParseIP(string readableIP) { throw Invalid(); }
@@ -31,20 +31,20 @@ namespace BigQuery.Linq
 
 
         /// <summary>
-        /// <para>Returns a human-readable IP address, in the form 10.1.5.23 or 2620:0:1009:1:216:36ff:feef:3f.</para>
-        /// <para>Examples:</para>
-        /// <para>FORMAT_PACKED_IP('0123456789@ABCDE') returns '3031:3233:3435:3637:3839:4041:4243:4445'</para>
-        /// <para>FORMAT_PACKED_IP('0123') returns '48.49.50.51'</para>
+        /// Returns a human-readable IP address, in the form 10.1.5.23 or 2620:0:1009:1:216:36ff:feef:3f.
+        /// Examples:
+        /// FORMAT_PACKED_IP('0123456789@ABCDE') returns '3031:3233:3435:3637:3839:4041:4243:4445'
+        /// FORMAT_PACKED_IP('0123') returns '48.49.50.51'
         /// </summary>
         [FunctionName("FORMAT_PACKED_IP")]
         public static string FormatPackedIP(string packedIP) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns an IP address in binary format packed in a string.</para>
-        /// <para>If the input string is not a valid IPv4 or IPv6 address, PARSE_PACKED_IP will return NULL.</para>
-        /// <para>Examples:</para>
-        /// <para>PARSE_PACKED_IP('48.49.50.51') returns '0123'</para>
-        /// <para>PARSE_PACKED_IP('3031:3233:3435:3637:3839:4041:4243:4445') returns '0123456789@ABCDE'</para>
+        /// Returns an IP address in binary format packed in a string.
+        /// If the input string is not a valid IPv4 or IPv6 address, PARSE_PACKED_IP will return NULL.
+        /// Examples:
+        /// PARSE_PACKED_IP('48.49.50.51') returns '0123'
+        /// PARSE_PACKED_IP('3031:3233:3435:3637:3839:4041:4243:4445') returns '0123456789@ABCDE'
         /// </summary>
         [FunctionName("PARSE_PACKED_IP")]
         public static string ParsePackedIP(string readableIP) { throw Invalid(); }

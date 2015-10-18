@@ -13,7 +13,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns the concatenation of two or more strings, or NULL if any of the values are NULL.
-        /// <para>You can use str1 + str2 + ..., too.</para>
+        /// You can use str1 + str2 + ..., too.
         /// </summary>
         [FunctionName("CONCAT", SpecifiedFormatterType = typeof(ConcatFormatter))]
         public static string Concat(params string[] str)
@@ -22,8 +22,8 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns true if expr contains the specified string argument. This is a case-sensitive comparison.</para>
-        /// <para>You can use String.Contains - foo.Contains(bar), too.</para>
+        /// Returns true if expr contains the specified string argument. This is a case-sensitive comparison.
+        /// You can use String.Contains - foo.Contains(bar), too.
         /// </summary>
         [FunctionName("CONTAINS", SpecifiedFormatterType = typeof(ContainsFormatter))]
         public static bool Contains(string expr, string str)
@@ -42,7 +42,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns the leftmost numeric_expr characters of str. If the number is longer than str, the full string will be returned.
-        /// <para>Example: LEFT('seattle', 3) returns sea.</para>
+        /// Example: LEFT('seattle', 3) returns sea.
         /// </summary>
         [FunctionName("LEFT")]
         public static string Left(string str, long length)
@@ -51,9 +51,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>ReturnsRemoves characters from the left side of str1.</para>
-        /// <para>If str2 is omitted, LTRIM removes spaces from the left side of str1.</para>
-        /// <para>Otherwise, LTRIM removes any characters in str2 from the left side of str1 (case-sensitive).</para>
+        /// ReturnsRemoves characters from the left side of str1.
+        /// If str2 is omitted, LTRIM removes spaces from the left side of str1.
+        /// Otherwise, LTRIM removes any characters in str2 from the left side of str1 (case-sensitive).
         /// </summary>
         [FunctionName("LTRIM")]
         public static string TrimLeft(string str1)
@@ -62,9 +62,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>ReturnsRemoves characters from the left side of str1.</para>
-        /// <para>If str2 is omitted, LTRIM removes spaces from the left side of str1.</para>
-        /// <para>Otherwise, LTRIM removes any characters in str2 from the left side of str1 (case-sensitive).</para>
+        /// ReturnsRemoves characters from the left side of str1.
+        /// If str2 is omitted, LTRIM removes spaces from the left side of str1.
+        /// Otherwise, LTRIM removes any characters in str2 from the left side of str1 (case-sensitive).
         /// </summary>
         [FunctionName("LTRIM")]
         public static string TrimLeft(string str1, string str2)
@@ -74,7 +74,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns a numerical value for the length of the string.
-        /// <para>Example: if str is '123456', LENGTH returns 6.</para>
+        /// Example: if str is '123456', LENGTH returns 6.
         /// </summary>
         [FunctionName("LENGTH")]
         public static long Length(string str)
@@ -93,7 +93,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Pads str1 on the left with str2, repeating str2 until the result string is exactly numeric_expr characters.
-        /// <para>Example: LPAD('1', 7, '?') returns ??????1.</para>
+        /// Example: LPAD('1', 7, '?') returns ??????1.
         /// </summary>
         [FunctionName("LPAD")]
         public static string PadLeft(string str, int totalWidth, string paddingString)
@@ -103,7 +103,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns the righmost numeric_expr characters of str. If the number is longer than the string, it will return the whole string.
-        /// <para>Example: RIGHT('kirkland', 4) returns land.</para>
+        /// Example: RIGHT('kirkland', 4) returns land.
         /// </summary>
         [FunctionName("RIGHT")]
         public static string Right(string str, long length)
@@ -113,7 +113,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Pads str1 on the right with str2, repeating str2 until the result string is exactly numeric_expr characters.
-        /// <para>Example: RPAD('1', 7, '?') returns 1??????.</para>
+        /// Example: RPAD('1', 7, '?') returns 1??????.
         /// </summary>
         [FunctionName("RPAD")]
         public static string PadRight(string str, int totalWidth, string paddingString)
@@ -122,9 +122,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Removes trailing characters from the right side of str1.</para>
-        /// <para>If str2 is omitted, RTRIM removes trailing spaces from str1.</para>
-        /// <para>Otherwise, RTRIM removes any characters in str2 from the right side of str1 (case-sensitive).</para>
+        /// Removes trailing characters from the right side of str1.
+        /// If str2 is omitted, RTRIM removes trailing spaces from str1.
+        /// Otherwise, RTRIM removes any characters in str2 from the right side of str1 (case-sensitive).
         /// </summary>
         [FunctionName("RTRIM")]
         public static string TrimRight(string str1)
@@ -133,9 +133,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Removes trailing characters from the right side of str1.</para>
-        /// <para>If str2 is omitted, RTRIM removes trailing spaces from str1.</para>
-        /// <para>Otherwise, RTRIM removes any characters in str2 from the right side of str1 (case-sensitive).</para>
+        /// Removes trailing characters from the right side of str1.
+        /// If str2 is omitted, RTRIM removes trailing spaces from str1.
+        /// Otherwise, RTRIM removes any characters in str2 from the right side of str1 (case-sensitive).
         /// </summary>
         [FunctionName("RTRIM")]
         public static string TrimRight(string str1, string str2)
@@ -162,12 +162,12 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns a substring of str, starting at index.</para>
-        /// <para>If the optional max_len parameter is used, the returned string is a maximum of max_len characters long.</para>
-        /// <para>Counting starts at 1, so the first character in the string is in position 1 (not zero).</para>
-        /// <para>If index is 5, the substring begins with the 5th character from the left in str.</para>
-        /// <para>If index is -4, the substring begins with the 4th character from the right in str.</para>
-        /// <para>Example: SUBSTR('awesome', -4, 4) returns the substring some.</para>
+        /// Returns a substring of str, starting at index.
+        /// If the optional max_len parameter is used, the returned string is a maximum of max_len characters long.
+        /// Counting starts at 1, so the first character in the string is in position 1 (not zero).
+        /// If index is 5, the substring begins with the 5th character from the left in str.
+        /// If index is -4, the substring begins with the 4th character from the right in str.
+        /// Example: SUBSTR('awesome', -4, 4) returns the substring some.
         /// </summary>
         [FunctionName("SUBSTR")]
         public static string Substring(string str, int index)
@@ -176,12 +176,12 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns a substring of str, starting at index.</para>
-        /// <para>If the optional max_len parameter is used, the returned string is a maximum of max_len characters long.</para>
-        /// <para>Counting starts at 1, so the first character in the string is in position 1 (not zero).</para>
-        /// <para>If index is 5, the substring begins with the 5th character from the left in str.</para>
-        /// <para>If index is -4, the substring begins with the 4th character from the right in str.</para>
-        /// <para>Example: SUBSTR('awesome', -4, 4) returns the substring some.</para>
+        /// Returns a substring of str, starting at index.
+        /// If the optional max_len parameter is used, the returned string is a maximum of max_len characters long.
+        /// Counting starts at 1, so the first character in the string is in position 1 (not zero).
+        /// If index is 5, the substring begins with the 5th character from the left in str.
+        /// If index is -4, the substring begins with the 4th character from the right in str.
+        /// Example: SUBSTR('awesome', -4, 4) returns the substring some.
         /// </summary>
         [FunctionName("SUBSTR")]
         public static string Substring(string str, int index, int maxLength)

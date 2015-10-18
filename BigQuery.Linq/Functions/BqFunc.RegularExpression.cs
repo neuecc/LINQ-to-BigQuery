@@ -33,7 +33,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns a string where any substring of orig_str that matches reg_exp is replaced with replace_str.
-        /// <para>For example, REGEXP_REPLACE ('Hello', 'lo', 'p') returns Help.</para>
+        /// For example, REGEXP_REPLACE ('Hello', 'lo', 'p') returns Help.
         /// </summary>
         [FunctionName("REGEXP_REPLACE", SpecifiedFormatterType = typeof(RegexpReplaceFormatter))]
         public static string RegexpReplace(string originalStr, string regexp, string replaceStr)

@@ -79,10 +79,10 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the total number of non-NULL values in the scope of the function.</para>
-        /// <para>If you use the DISTINCT keyword, the function returns the number of distinct values for the specified field. Note that the returned value for DISTINCT is a statistical approximation and is not guaranteed to be exact.</para>
-        /// <para>If you require greater accuracy from COUNT(DISTINCT), you can specify a second parameter, n, which gives the threshold below which exact results are guaranteed. By default, n is 1000, but if you give a larger n, you will get exact results for COUNT(DISTINCT) up to that value of n. However, giving larger values of n will reduce scalability of this operator and may substantially increase query execution time or cause the query to fail.</para>
-        /// <para>To compute the exact number of distinct values in a scalable fashion, consider using GROUP EACH BY on the relevant field(s) and then applying COUNT(*). This approach is more scalable but might incur a slight up-front performance penalty.</para>
+        /// Returns the total number of non-NULL values in the scope of the function.
+        /// If you use the DISTINCT keyword, the function returns the number of distinct values for the specified field. Note that the returned value for DISTINCT is a statistical approximation and is not guaranteed to be exact.
+        /// If you require greater accuracy from COUNT(DISTINCT), you can specify a second parameter, n, which gives the threshold below which exact results are guaranteed. By default, n is 1000, but if you give a larger n, you will get exact results for COUNT(DISTINCT) up to that value of n. However, giving larger values of n will reduce scalability of this operator and may substantially increase query execution time or cause the query to fail.
+        /// To compute the exact number of distinct values in a scalable fashion, consider using GROUP EACH BY on the relevant field(s) and then applying COUNT(*). This approach is more scalable but might incur a slight up-front performance penalty.
         /// </summary>
         [FunctionName("COUNT(DISTINCT)", SpecifiedFormatterType = typeof(CountDistinctFormatter))]
         public static long CountDistinct(object field)
@@ -91,10 +91,10 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the total number of non-NULL values in the scope of the function.</para>
-        /// <para>If you use the DISTINCT keyword, the function returns the number of distinct values for the specified field. Note that the returned value for DISTINCT is a statistical approximation and is not guaranteed to be exact.</para>
-        /// <para>If you require greater accuracy from COUNT(DISTINCT), you can specify a second parameter, n, which gives the threshold below which exact results are guaranteed. By default, n is 1000, but if you give a larger n, you will get exact results for COUNT(DISTINCT) up to that value of n. However, giving larger values of n will reduce scalability of this operator and may substantially increase query execution time or cause the query to fail.</para>
-        /// <para>To compute the exact number of distinct values in a scalable fashion, consider using GROUP EACH BY on the relevant field(s) and then applying COUNT(*). This approach is more scalable but might incur a slight up-front performance penalty.</para>
+        /// Returns the total number of non-NULL values in the scope of the function.
+        /// If you use the DISTINCT keyword, the function returns the number of distinct values for the specified field. Note that the returned value for DISTINCT is a statistical approximation and is not guaranteed to be exact.
+        /// If you require greater accuracy from COUNT(DISTINCT), you can specify a second parameter, n, which gives the threshold below which exact results are guaranteed. By default, n is 1000, but if you give a larger n, you will get exact results for COUNT(DISTINCT) up to that value of n. However, giving larger values of n will reduce scalability of this operator and may substantially increase query execution time or cause the query to fail.
+        /// To compute the exact number of distinct values in a scalable fashion, consider using GROUP EACH BY on the relevant field(s) and then applying COUNT(*). This approach is more scalable but might incur a slight up-front performance penalty.
         /// </summary>
         [FunctionName("COUNT(DISTINCT)", SpecifiedFormatterType = typeof(CountDistinctFormatter))]
         public static long CountDistinct(object field, int n)
@@ -117,7 +117,7 @@ namespace BigQuery.Linq
         public static double CovarianceSample(double? numericExpression1, double? numericExpression2) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns the exact number of non-NULL, distinct values for the specified field. For better scalability and performance, use COUNT(DISTINCT field).</para>
+        /// Returns the exact number of non-NULL, distinct values for the specified field. For better scalability and performance, use COUNT(DISTINCT field).
         /// </summary>
         [FunctionName("EXACT_COUNT_DISTINCT")]
         public static long ExactCountDistinct(object field)
@@ -188,8 +188,8 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Aggregates all values in the current aggregation scope into a repeated field. For example, the query "SELECT x, NEST(y) FROM ... GROUP BY x" returns one output record for each distinct x value, and contains a repeated field for all y values paired with x in the query input. The NEST function requires a GROUP BY clause.</para>
-        /// <para>BigQuery automatically flattens query results, so if you use the NEST function on the top level query, the results won't contain repeated fields. Use the NEST function when using a subselect that produces intermediate results for immediate use by the same query.</para>
+        /// Aggregates all values in the current aggregation scope into a repeated field. For example, the query "SELECT x, NEST(y) FROM ... GROUP BY x" returns one output record for each distinct x value, and contains a repeated field for all y values paired with x in the query input. The NEST function requires a GROUP BY clause.
+        /// BigQuery automatically flattens query results, so if you use the NEST function on the top level query, the results won't contain repeated fields. Use the NEST function when using a subselect that produces intermediate results for immediate use by the same query.
         /// </summary>
         [FunctionName("NEST")]
         public static T Nest<T>(T field)
@@ -273,9 +273,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the top max_records records by frequency.</para>
-        /// <para>TOP is a function that is an alternative to the GROUP BY clause.</para>
-        /// <para>When using TOP in a SELECT clause, you must include COUNT(*) as one of the fields.</para>
+        /// Returns the top max_records records by frequency.
+        /// TOP is a function that is an alternative to the GROUP BY clause.
+        /// When using TOP in a SELECT clause, you must include COUNT(*) as one of the fields.
         /// </summary>
         /// <param name="field">The field or alias to return.</param>
         /// <returns></returns>
@@ -286,9 +286,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the top max_records records by frequency.</para>
-        /// <para>TOP is a function that is an alternative to the GROUP BY clause.</para>
-        /// <para>When using TOP in a SELECT clause, you must include COUNT(*) as one of the fields.</para>
+        /// Returns the top max_records records by frequency.
+        /// TOP is a function that is an alternative to the GROUP BY clause.
+        /// When using TOP in a SELECT clause, you must include COUNT(*) as one of the fields.
         /// </summary>
         /// <param name="field">The field or alias to return.</param>
         /// <param name="maxValues">[Optional] The maximum number of results to return. Default is 20.</param>
@@ -300,9 +300,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the top max_records records by frequency.</para>
-        /// <para>TOP is a function that is an alternative to the GROUP BY clause.</para>
-        /// <para>When using TOP in a SELECT clause, you must include COUNT(*) as one of the fields.</para>
+        /// Returns the top max_records records by frequency.
+        /// TOP is a function that is an alternative to the GROUP BY clause.
+        /// When using TOP in a SELECT clause, you must include COUNT(*) as one of the fields.
         /// </summary>
         /// <param name="field">The field or alias to return.</param>
         /// <param name="maxValues">[Optional] The maximum number of results to return. Default is 20.</param>
@@ -315,9 +315,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the set of unique, non-NULL values in the scope of the function in an undefined order.</para>
-        /// <para>Similar to a large GROUP BY clause without the EACH keyword, the query will fail with a "Resources Exceeded" error if there are too many distinct values.</para>
-        /// <para>Unlike GROUP BY, however, the UNIQUE function can be applied with scoped aggregation, allowing efficient operation on nested fields with a limited number of values.</para>
+        /// Returns the set of unique, non-NULL values in the scope of the function in an undefined order.
+        /// Similar to a large GROUP BY clause without the EACH keyword, the query will fail with a "Resources Exceeded" error if there are too many distinct values.
+        /// Unlike GROUP BY, however, the UNIQUE function can be applied with scoped aggregation, allowing efficient operation on nested fields with a limited number of values.
         /// </summary>
         [FunctionName("UNIQUE")]
         public static T Unique<T>(T expr)

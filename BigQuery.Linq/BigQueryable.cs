@@ -344,9 +344,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Note:Flatten with Table decorators is works fine.</para>
-        /// <para>But Flatten with Table wildcard currently BigQuery reports error.</para>
-        /// <para>see: https://code.google.com/p/google-bigquery/issues/detail?id=113</para>
+        /// Note:Flatten with Table decorators is works fine.
+        /// But Flatten with Table wildcard currently BigQuery reports error.
+        /// see: https://code.google.com/p/google-bigquery/issues/detail?id=113
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>

@@ -68,9 +68,9 @@ namespace BigQuery.Linq
 
         /// <param name="description">[Optional] A user-friendly description of this table.</param>
         /// <param name="expirationTime">
-        /// <para>[Optional] The time when this table expires, in milliseconds since the epoch.</para>
-        /// <para>If not present, the table will persist indefinitely. Expired tables will</para>
-        /// <para>be deleted and their storage reclaimed.</para>
+        /// [Optional] The time when this table expires, in milliseconds since the epoch.
+        /// If not present, the table will persist indefinitely. Expired tables will
+        /// be deleted and their storage reclaimed.
         /// </param>
         /// <param name="friendlyName">[Optional] A descriptive name for this table.</param>
         public void CreateTable(BigqueryService service, TableFieldSchema[] fields, string description = null, long? expirationTime = null, string friendlyName = null)
@@ -104,9 +104,9 @@ namespace BigQuery.Linq
 
         /// <param name="description">[Optional] A user-friendly description of this table.</param>
         /// <param name="expirationTime">
-        /// <para>[Optional] The time when this table expires, in milliseconds since the epoch.</para>
-        /// <para>If not present, the table will persist indefinitely. Expired tables will</para>
-        /// <para>be deleted and their storage reclaimed.</para>
+        /// [Optional] The time when this table expires, in milliseconds since the epoch.
+        /// If not present, the table will persist indefinitely. Expired tables will
+        /// be deleted and their storage reclaimed.
         /// </param>
         /// <param name="friendlyName">[Optional] A descriptive name for this table.</param>
         public async Task CreateTableAsync(BigqueryService service, TableFieldSchema[] fields, string description = null, long? expirationTime = null, string friendlyName = null)

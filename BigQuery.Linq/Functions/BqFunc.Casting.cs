@@ -14,16 +14,16 @@ namespace BigQuery.Linq
         // Casting functions are particularly useful for ensuring that arguments in a comparison function have the same data type.
 
         /// <summary>
-        /// <para>Returns true if numeric_expr is not 0 and not NULL.</para>
-        /// <para>Returns false if numeric_expr is 0.</para>
-        /// <para>Returns NULL if numeric_expr is NULL.</para>
+        /// Returns true if numeric_expr is not 0 and not NULL.
+        /// Returns false if numeric_expr is 0.
+        /// Returns NULL if numeric_expr is NULL.
         /// </summary>
         [FunctionName("BOOLEAN")]
         public static bool? Boolean(long? numericExpr) { throw Invalid(); }
         /// <summary>
-        /// <para>Returns true if numeric_expr is not 0 and not NULL.</para>
-        /// <para>Returns false if numeric_expr is 0.</para>
-        /// <para>Returns NULL if numeric_expr is NULL.</para>
+        /// Returns true if numeric_expr is not 0 and not NULL.
+        /// Returns false if numeric_expr is 0.
+        /// Returns NULL if numeric_expr is NULL.
         /// </summary>
         [FunctionName("BOOLEAN")]
         public static bool? Boolean(double? numericExpr) { throw Invalid(); }
