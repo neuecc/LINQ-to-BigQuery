@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting;
 using Google.Apis.Bigquery.v2;
 using LINQPad.Extensibility.DataContext;
 using Newtonsoft.Json;
@@ -11,12 +14,6 @@ namespace BigQuery.Linq
 {
     public class BigQueryDataContextDriver : DynamicDataContextDriver
     {
-        bool tryFromCache = true;
-
-        public BigQueryDataContextDriver()
-        {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-        }
 
         public override string Author
         {
@@ -34,16 +31,26 @@ namespace BigQuery.Linq
             }
         }
 
+        public BigQueryDataContextDriver()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+        }
+
         // 1. Show Dialog, get configuration. true is continue, false is cancel.
         public override bool ShowConnectionDialog(IConnectionInfo cxInfo, bool isNewConnection)
         {
             // set to the cxInfo.DriverData
-            //bool? result = new ConnectionDialog(cxInfo).ShowDialog();
-            //return result == true;
+            var window = new ConnectionDialog(cxInfo);
+            bool? result = window.ShowDialog();
 
-            tryFromCache = false;
-
-            return true;
+            if (result == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         // 2. Title of listitem
@@ -57,56 +64,75 @@ namespace BigQuery.Linq
         {
             var property = new DriverProperty(cxInfo);
 
-            var context = ContextHelper.GetWhiteContext(); // TODO:From DriverProperty
+            var context = ContextHelper.GetContext(property.ContextJsonAuthenticationKey, property.ContextUser, property.ContextProjectId);
 
             SchemaBuilder schemaBuilder = null;
-            if (tryFromCache)
-            {
-                tryFromCache = false;
 
-                var schemaCache = property.Cache;
+            var useCache = false; // for debugging shortcut
+            if (useCache)
+            {
+                var schemaCache = property.GetTempCache();
                 if (schemaCache != null)
                 {
                     try
                     {
                         var deserialized = JsonConvert.DeserializeObject<Schema[]>(schemaCache);
-                        schemaBuilder = new SchemaBuilder(context, deserialized);
+                        schemaBuilder = new SchemaBuilder(context, property, deserialized);
                     }
                     catch
                     {
+
                     }
                 }
             }
 
             if (schemaBuilder == null)
             {
-                schemaBuilder = SchemaBuilder.FromTableInfosAsync(context).Result;
+                schemaBuilder = SchemaBuilder.FromTableInfosAsync(context, property).GetAwaiter().GetResult();
                 var cacheString = JsonConvert.SerializeObject(schemaBuilder.Schemas, Formatting.None);
-                property.Cache = cacheString;
+                property.SetTempCache(cacheString);
             }
 
-            var list = schemaBuilder.BuildExplorerItems();
-            namespacesToAdd = schemaBuilder.CompileTo(assemblyToBuild, nameSpace);
+            BuildCodeResult[] generatedCodes;
+            var namespacesToAdd = schemaBuilder.CompileTo(assemblyToBuild, nameSpace, out generatedCodes);
+            var list = schemaBuilder.BuildExplorerItems(generatedCodes);
+
+            property.NamespacesToAdd = namespacesToAdd; // write to file...
+            typeName = "CustomBigQueryContext";
 
             return list;
         }
 
         // 4,5...
 
-        string[] namespacesToAdd = new string[0];
-
         public override IEnumerable<string> GetNamespacesToAdd(IConnectionInfo cxInfo)
         {
-            return base.GetNamespacesToAdd(cxInfo).Concat(namespacesToAdd).Distinct();
+            var prop = new DriverProperty(cxInfo);
+            var asms = AppDomain.CurrentDomain.GetAssemblies();
+
+            return base.GetNamespacesToAdd(cxInfo)
+                .Concat(prop.NamespacesToAdd)
+                .Concat(new[]
+                {
+                    "System.Linq",
+                })
+                .Distinct();
         }
 
         public override IEnumerable<string> GetAssembliesToAdd(IConnectionInfo cxInfo)
         {
             return base.GetAssembliesToAdd(cxInfo)
-                .Concat(new[] 
+                .Concat(new[]
                 {
                     typeof(BigQueryContext).Assembly.Location,
-                    typeof(BigqueryService).Assembly.Location
+                    typeof(BigqueryService).Assembly.Location,
+                    typeof(BigQueryContext).Assembly.Location,
+                    typeof(BigqueryService).Assembly.Location,
+                    typeof(Google.Apis.Auth.OAuth2.GoogleWebAuthorizationBroker).Assembly.Location,
+                    typeof(Google.Apis.Services.BaseClientService).Assembly.Location,
+                    typeof(Google.GoogleApiException).Assembly.Location,
+                    typeof(Google.Apis.Auth.JsonWebToken).Assembly.Location,
+                    typeof(Google.Apis.Util.Store.FileDataStore).Assembly.Location
                 })
                 .Distinct();
         }
@@ -115,7 +141,15 @@ namespace BigQuery.Linq
         {
             // Fucking System.Net.Http.Primitives.dll
             var dllName = args.Name.Split(',')[0] + ".dll";
-            return LoadAssemblySafely(Path.GetDirectoryName(typeof(Linq.BigQueryContext).Assembly.Location) + "\\" + dllName);
+            var dllPath = Path.GetDirectoryName(typeof(Linq.BigQueryContext).Assembly.Location) + "\\" + dllName;
+            if (File.Exists(dllPath))
+            {
+                return LoadAssemblySafely(Path.GetDirectoryName(typeof(Linq.BigQueryContext).Assembly.Location) + "\\" + dllName);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

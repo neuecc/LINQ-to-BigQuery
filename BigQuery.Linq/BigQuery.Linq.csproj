@@ -117,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigQueryable.cs" />
+    <Compile Include="DuplicateNamingStorage.cs" />
     <Compile Include="MetaTableSchema.cs" />
     <Compile Include="Query\BigQueryable.Flatten.cs" />
     <Compile Include="Utils\Deserializer.cs" />

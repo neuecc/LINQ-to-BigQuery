@@ -67,10 +67,10 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the total number of non-NULL values in the scope of the function.</para>
-        /// <para>If you use the DISTINCT keyword, the function returns the number of distinct values for the specified field. Note that the returned value for DISTINCT is a statistical approximation and is not guaranteed to be exact.</para>
-        /// <para>If you require greater accuracy from COUNT(DISTINCT), you can specify a second parameter, n, which gives the threshold below which exact results are guaranteed. By default, n is 1000, but if you give a larger n, you will get exact results for COUNT(DISTINCT) up to that value of n. However, giving larger values of n will reduce scalability of this operator and may substantially increase query execution time or cause the query to fail.</para>
-        /// <para>To compute the exact number of distinct values in a scalable fashion, consider using GROUP EACH BY on the relevant field(s) and then applying COUNT(*). This approach is more scalable but might incur a slight up-front performance penalty.</para>
+        /// Returns the total number of non-NULL values in the scope of the function.
+        /// If you use the DISTINCT keyword, the function returns the number of distinct values for the specified field. Note that the returned value for DISTINCT is a statistical approximation and is not guaranteed to be exact.
+        /// If you require greater accuracy from COUNT(DISTINCT), you can specify a second parameter, n, which gives the threshold below which exact results are guaranteed. By default, n is 1000, but if you give a larger n, you will get exact results for COUNT(DISTINCT) up to that value of n. However, giving larger values of n will reduce scalability of this operator and may substantially increase query execution time or cause the query to fail.
+        /// To compute the exact number of distinct values in a scalable fashion, consider using GROUP EACH BY on the relevant field(s) and then applying COUNT(*). This approach is more scalable but might incur a slight up-front performance penalty.
         /// </summary>
         [FunctionName("COUNT", SpecifiedFormatterType = typeof(CountFieldFormatter))]
         public static long Count(object field)

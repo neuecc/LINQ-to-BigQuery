@@ -22,7 +22,7 @@ namespace BigQuery.Linq
                     new[] { BigqueryService.Scope.Bigquery },
                     user,
                     CancellationToken.None, new FileDataStore(@"LINQ-to-BigQuery-for-" + projectId)) // localcache
-                    .Result;
+                    .GetAwaiter().GetResult();
 
                 var bigquery = new BigqueryService(new BaseClientService.Initializer
                 {
@@ -33,7 +33,7 @@ namespace BigQuery.Linq
                 context = new BigQueryContext(bigquery, projectId);
             }
             // Timeout or other options
-            context.TimeoutMs = (long)TimeSpan.FromMinutes(1).TotalMilliseconds;
+            context.TimeoutMs = (long)TimeSpan.FromMinutes(3).TotalMilliseconds;
             return context;
         }
     }

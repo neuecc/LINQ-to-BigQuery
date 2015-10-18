@@ -14,6 +14,8 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.IO;
+using Google.Apis.Util.Store;
 
 namespace BigQuery.Linq
 {
@@ -256,7 +258,9 @@ namespace BigQuery.Linq
         {
             return GetFastTableSchemasAsync(dataset)
                 .Result
-                .Select(x => x.MetaTableSchemas.First().BuildCSharpClass(outTablePrefixClassIfMatched: true))
+                .Select(x => x.MetaTableSchemas.First().BuildCSharpClasses(outTablePrefixClassIfMatched: true))
+                .SelectMany(xs => xs, (x, y) => y.Code)
+                .Distinct()
                 .ToArray();
         }
 
@@ -293,7 +297,11 @@ namespace BigQuery.Linq
 
                     if (orderedTable.Length == 1)
                     {
-                        return new GroupedMetaTableSchema { MetaTableSchemas = new[] { schema }, IsGrouped = false };
+                        return new GroupedMetaTableSchema
+                        {
+                            MetaTableSchemas = new[] { schema },
+                            IsGrouped = false,
+                        };
                     }
                     else
                     {
@@ -302,8 +310,8 @@ namespace BigQuery.Linq
                             MetaTableSchemas = orderedTable.Select(x => new MetaTableSchema(x.info, schema.Fields)).ToArray(),
                             IsGrouped = true,
                             TablePrefix = targetTable.prefix,
-                            ShortTablePrefix = Regex.Match(targetTable.info.table_id, @"(.*)(\d{8})$").Groups[1].Value
-                    };
+                            ShortTablePrefix = Regex.Match(targetTable.info.table_id, @"(.*)(\d{8})$").Groups[1].Value,
+                        };
                     }
                 });
 
