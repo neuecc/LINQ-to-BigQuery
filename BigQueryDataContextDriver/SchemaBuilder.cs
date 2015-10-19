@@ -230,6 +230,7 @@ namespace {namespaceName}
                         {
                             Children = g.MetaTableSchemas.Select(y =>
                             {
+                                // TODO:Here is buggy, sometimes fetch range table
                                 var className = lookupDictionary.GetOrDefault(y)?.ClassName ?? y.ToClassName(false);
 
                                 return new ExplorerItem(y.TableInfo.table_id, ExplorerItemKind.QueryableObject, ExplorerIcon.Table)
