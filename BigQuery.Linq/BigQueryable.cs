@@ -97,10 +97,6 @@ namespace BigQuery.Linq
 
         Task<QueryResponse<T>> RunAsync(CancellationToken cancellationToken = default(CancellationToken));
 
-
-        [Obsolete("Use 'Into' instead of AsSubquery. Future version, this method will be remove.", true)]
-        ISubqueryBigQueryable<T> AsSubquery();
-
         /// <summary>Change query as Subquery.</summary>
         ISubqueryBigQueryable<T> Into();
     }
@@ -210,12 +206,6 @@ namespace BigQuery.Linq
         public ISubqueryBigQueryable<T> Into()
         {
             return QueryContext.From(this);
-        }
-
-        [Obsolete("Use 'Into' instead of AsSubquery. Future version, this method will be remove.", true)]
-        ISubqueryBigQueryable<T> IExecutableBigQueryable<T>.AsSubquery()
-        {
-            return Into();
         }
     }
 
