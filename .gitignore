@@ -116,7 +116,7 @@ ClientBin/
 *.[Pp]ublish.xml
 *.pfx
 *.publishsettings
-
+a
 # RIA/Silverlight projects
 Generated_Code/
 
@@ -154,5 +154,3 @@ $RECYCLE.BIN/
 # Mac desktop service store files
 .DS_Store
 SampleApps/StoreTwitterTimeline/User.config
-BigQuery.Linq/linqtobigquery.snk
-BigQueryDataContextDriver/linqtobigquery.snk
