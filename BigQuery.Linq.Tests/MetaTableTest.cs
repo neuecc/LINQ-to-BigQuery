@@ -37,14 +37,7 @@ namespace BigQuery.Linq.Tests
             schema.BuildCSharpClass().Is(@"[TableName(""[bigquery-samples:wikipedia_pageviews_s2.201001]"")]
 public class _201001
 {
-    public long a { get; set; }
-
-    public override string ToString()
-    {
-        return """"
-             + ""a : "" + a + ""|""
-             ;
-    }
+    [ColumnName(""a"")]public long a { get; set; }
 }");
             
         }

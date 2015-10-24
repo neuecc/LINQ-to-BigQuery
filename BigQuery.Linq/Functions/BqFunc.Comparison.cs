@@ -180,8 +180,8 @@ namespace BigQuery.Linq
                 }
                 else if (argMember != null)
                 {
-                    var names = (object[])Expression.Lambda(argMember).Compile().DynamicInvoke();
-                    expr2 = string.Join(", ", names.Select(x => x is string ? string.Format("'{0}'", x) : x));
+                    var names = (Array)Expression.Lambda(argMember).Compile().DynamicInvoke();
+                    expr2 = string.Join(", ", names.Cast<object>().Select(x => DataTypeFormatter.Format(x)));
                 }
                 else
                 {

@@ -169,6 +169,26 @@ FROM
         }
 
         [TestMethod]
+        public void InWithTypedArray()
+        {
+            var vals = new int[] { 10, 20, 50, 1000 };
+            var context = new BigQueryContext();
+            context.Select(() => new { value = 100 })
+                .Into()
+                .Select(x => (BqFunc.In(x.value, vals)) ? 10000 : -10)
+                .ToString()
+                .Is(@"
+SELECT
+  IF([value] IN(10, 20, 50, 1000), 10000, -10)
+FROM
+(
+  SELECT
+    100 AS [value]
+)
+".TrimSmart());
+        }
+
+        [TestMethod]
         public void InWithStringArray()
         {
             var vals = new object[] { "10", "20", "50", "1000" };
