@@ -50,9 +50,9 @@ namespace BigQuery.Linq
         // WITHIN clause
 
         /// <summary>
-        /// <para>WITHIN RECORD</para>
-        /// <para>The WITHIN keyword specifically works with aggregate functions to aggregate across children and repeated fields within records and nested fields.</para>
-        /// <para>Aggregates data in the repeated values within the record, where a record represents an entire unique protocol buffer message, including children and repeated values.</para>
+        /// WITHIN RECORD
+        /// The WITHIN keyword specifically works with aggregate functions to aggregate across children and repeated fields within records and nested fields.
+        /// Aggregates data in the repeated values within the record, where a record represents an entire unique protocol buffer message, including children and repeated values.
         /// </summary>
         [FunctionName("WITHIN", SpecifiedFormatterType = typeof(WithInRecordFormatter))]
         public static T WithIn<T>(T expr)
@@ -61,9 +61,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>WITHIN node_name</para>
-        /// <para>The WITHIN keyword specifically works with aggregate functions to aggregate across children and repeated fields within records and nested fields.</para>
-        /// <para>Aggregates data in the repeated values within the specified node, where a node is a parent node of the field in the aggregation function.</para>
+        /// WITHIN node_name
+        /// The WITHIN keyword specifically works with aggregate functions to aggregate across children and repeated fields within records and nested fields.
+        /// Aggregates data in the repeated values within the specified node, where a node is a parent node of the field in the aggregation function.
         /// </summary>
         [FunctionName("WITHIN", SpecifiedFormatterType = typeof(WithInNodeFormatter))]
         public static T WithIn<T>(T expr, object node)

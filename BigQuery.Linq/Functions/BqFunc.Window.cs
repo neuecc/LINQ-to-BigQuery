@@ -17,8 +17,8 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns a double that indicates the cumulative distribution of a value in a group of values, calculated using the formula &lt;number of rows preceding or tied with the current row&gt; / &lt;total rows&gt;.
-        /// <para>Tied values return the same cumulative distribution value.</para>
-        /// <para>This window function requires ORDER BY in the OVER clause.</para>
+        /// Tied values return the same cumulative distribution value.
+        /// This window function requires ORDER BY in the OVER clause.
         /// </summary>
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, double> CumulativeDistribution<T>(T fieldSource)
@@ -28,8 +28,8 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns the integer rank of a value in a group of values. The rank is calculated based on comparisons with other values in the group.
-        /// <para>Tied values display as the same rank. The rank of the next value is incremented by 1. For example, if two values tie for rank 2, the next ranked value is 3. If you prefer a gap in the ranking list, use rank().</para>
-        /// <para>This window function requires ORDER BY in the OVER clause.</para>
+        /// Tied values display as the same rank. The rank of the next value is incremented by 1. For example, if two values tie for rank 2, the next ranked value is 3. If you prefer a gap in the ranking list, use rank().
+        /// This window function requires ORDER BY in the OVER clause.
         /// </summary>
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> DenseRank<T>(T fieldSource)
@@ -148,7 +148,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns the rank of the current row, relative to the other rows in the partition. Returned values range between 0 and 1, inclusively. The first value returned is 0.0.
-        /// <para>This window function requires ORDER BY in the OVER clause.</para>
+        /// This window function requires ORDER BY in the OVER clause.
         /// </summary>
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, double> PercentRank<T>(T fieldSource)
@@ -158,8 +158,8 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns values that are based upon linear interpolation between the values of the group, after ordering them per the ORDER BY clause.
-        /// <para>[percentile] must be between 0 and 1.</para>
-        /// <para>This window function requires ORDER BY in the OVER clause.</para>
+        /// [percentile] must be between 0 and 1.
+        /// This window function requires ORDER BY in the OVER clause.
         /// </summary>
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> PercentileCont<T>(T fieldSource, double percentile)
@@ -169,8 +169,8 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns the value with the smallest cumulative distribution that's greater or equal to [percentile].
-        /// <para>[percentile] must be between 0 and 1.</para>
-        /// <para>This window function requires ORDER BY in the OVER clause.</para>
+        /// [percentile] must be between 0 and 1.
+        /// This window function requires ORDER BY in the OVER clause.
         /// </summary>
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> PercentileDisc<T>(T fieldSource, double percentile)
@@ -179,9 +179,9 @@ namespace BigQuery.Linq
         }
 
         /// <summary>
-        /// <para>Returns the integer rank of a value in a group of values. The rank is calculated based on comparisons with other values in the group.</para>
-        /// <para>Tied values display as the same rank. The rank of the next value is incremented according to how many tied values occurred before it. For example, if two values tie for rank 2, the next ranked value is 4, not 3. If you prefer no gaps in the ranking list, use dense_rank().</para>
-        /// <para>This window function requires ORDER BY in the OVER clause.</para>
+        /// Returns the integer rank of a value in a group of values. The rank is calculated based on comparisons with other values in the group.
+        /// Tied values display as the same rank. The rank of the next value is incremented according to how many tied values occurred before it. For example, if two values tie for rank 2, the next ranked value is 4, not 3. If you prefer no gaps in the ranking list, use dense_rank().
+        /// This window function requires ORDER BY in the OVER clause.
         /// </summary>
         [WindowFunctionAlert]
         public static FirstWindowFunction<T, long> Rank<T>(T fieldSource)

@@ -8,6 +8,24 @@ using System.Text.RegularExpressions;
 
 namespace BigQuery.Linq
 {
+    public class GroupedMetaTableSchema
+    {
+        public MetaTableSchema[] MetaTableSchemas { get; set; }
+        public bool IsGrouped { get; set; }
+        public string TablePrefix { get; set; }
+        public string ShortTablePrefix { get; set; }
+    }
+
+    public class BuildCodeResult
+    {
+        public MetaTableSchema MetaTableSchema { get; set; }
+        public bool IsTableName { get; set; }
+        public bool IsTablePrefix { get; set; }
+        public bool IsRecordClass { get; set; }
+        public string ClassName { get; set; }
+        public string Code { get; set; }
+    }
+
     public class MetaTableSchema
     {
         readonly static HashSet<string> ReservedIdentifiers = new HashSet<string>
@@ -125,7 +143,7 @@ namespace BigQuery.Linq
             }
         }
 
-        static string InnerBuildCSharpClass(string className, IList<TableFieldSchema> fields, Dictionary<string, string> innerClasses)
+        static string InnerBuildCSharpClass(string className, IList<TableFieldSchema> fields, Dictionary<string, string> innerClasses, DuplicateNamingStorage namingStorage)
         {
             var props = fields.Select(x =>
             {
@@ -135,12 +153,20 @@ namespace BigQuery.Linq
                     name = "@" + name;
                 }
                 var type = ToCSharpType(name, x.Type, x.Mode);
-                if (x.Type == "RECORD" && !innerClasses.ContainsKey(name))
+                if (x.Type == "RECORD")
                 {
-                    innerClasses[name] = InnerBuildCSharpClass(name, x.Fields, innerClasses);
+                    var innerStoreCount = namingStorage.StoreName(name);
+                    var newName = name;
+                    if (innerStoreCount != -1)
+                    {
+                        newName += "__" + innerStoreCount;
+                    }
+
+                    type = newName;
+                    innerClasses[newName] = InnerBuildCSharpClass(newName, x.Fields, innerClasses, namingStorage);
                 }
 
-                return string.Format("    public {0} {1} {{ get; set; }}", type, name);
+                return $"    [ColumnName(\"{x.Name}\")]public {type} {name} {{ get; set; }}";
             });
 
             var format = @"public class {0}
@@ -152,9 +178,18 @@ namespace BigQuery.Linq
             return result;
         }
 
-
         public string BuildCSharpClass(bool outTablePrefixClassIfMatched = false)
         {
+            return string.Join(Environment.NewLine, BuildCSharpClasses(outTablePrefixClassIfMatched).Select(x => x.Code));
+        }
+
+        /// <summary>
+        /// not flatten nested table.
+        /// </summary>
+        public BuildCodeResult[] BuildCSharpClasses(bool outTablePrefixClassIfMatched = false, DuplicateNamingStorage namingStorage = null)
+        {
+            if (namingStorage == null) namingStorage = new DuplicateNamingStorage();
+
             var innerClasses = new Dictionary<string, string>();
             var props = Fields.Select(x =>
             {
@@ -163,13 +198,22 @@ namespace BigQuery.Linq
                 {
                     name = "@" + name;
                 }
+
                 var type = ToCSharpType(name, x.Type, x.Mode);
-                if (x.Type == "RECORD" && !innerClasses.ContainsKey(name))
+                if (x.Type == "RECORD")
                 {
-                    innerClasses[name] = InnerBuildCSharpClass(name, x.Fields, innerClasses);
+                    var innerStoreCount = namingStorage.StoreName(name);
+                    var newName = name;
+                    if (innerStoreCount != -1)
+                    {
+                        newName += "__" + innerStoreCount;
+                    }
+
+                    type = newName;
+                    innerClasses[newName] = InnerBuildCSharpClass(newName, x.Fields, innerClasses, namingStorage);
                 }
 
-                return string.Format("    public {0} {1} {{ get; set; }}", type, name);
+                return $"    [ColumnName(\"{x.Name}\")]public {type} {name} {{ get; set; }}";
             });
 
             var className = TableInfo.table_id;
@@ -177,28 +221,44 @@ namespace BigQuery.Linq
             {
                 className = "_" + className;
             }
+            if (ReservedIdentifiers.Contains(className))
+            {
+                className = "@" + className;
+            }
 
             var regex = new Regex(@"\d{8}]$");
             var fullname = TableInfo.ToFullTableName();
+            bool isTable;
             string attr;
             if (outTablePrefixClassIfMatched && regex.IsMatch(fullname))
             {
+                isTable = false;
                 attr = $"[TablePrefix(\"{regex.Replace(fullname, "]")}\")]";
                 className = regex.Replace(className + "]", "").TrimEnd('_', ']');
             }
             else
             {
+                isTable = true;
                 attr = $"[TableName(\"{fullname}\")]";
             }
 
-        var format = @"{0}
+            // already stored, incr naming
+            var storeCount = namingStorage.StoreName(className);
+            if (storeCount != -1)
+            {
+                className += "__" + storeCount;
+            }
+
+            var format = @"{0}
 public class {1}
 {{
 {2}
 }}";
             var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props));
 
-            return string.Join(Environment.NewLine, new[] { result }.Concat(innerClasses.Select(x => Environment.NewLine + x.Value)));
+            return new[] { new BuildCodeResult { ClassName = className, Code = result, IsTableName = isTable, IsTablePrefix = !isTable, MetaTableSchema = this } }
+                .Concat(innerClasses.Select(x => new BuildCodeResult { ClassName = x.Key, Code = x.Value, IsRecordClass = true }))
+                .ToArray();
         }
 
         /// <summary>
@@ -247,6 +307,29 @@ public class {1}
                 return sw.ToString();
             }
         }
+
+        public string ToClassName(bool outTablePrefixClassIfMatched)
+        {
+            var className = TableInfo.table_id;
+            if (Regex.IsMatch(className, "^[0123456789]"))
+            {
+                className = "_" + className;
+            }
+            if (ReservedIdentifiers.Contains(className))
+            {
+                className = "@" + className;
+            }
+
+            var regex = new Regex(@"\d{8}]$");
+            var fullname = TableInfo.ToFullTableName();
+            if (outTablePrefixClassIfMatched && regex.IsMatch(fullname))
+            {
+                className = regex.Replace(className + "]", "").TrimEnd('_', ']');
+            }
+
+            return className;
+        }
+
         public override string ToString()
         {
             return TableInfo.ToFullTableName();

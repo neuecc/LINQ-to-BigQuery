@@ -10,7 +10,7 @@ namespace BigQuery.Linq
     {
         /// <summary>
         /// Given a URL, returns the host name as a string.
-        /// <para>Example: HOST('http://www.google.com:80/index.html') returns 'www.google.com'</para>
+        /// Example: HOST('http://www.google.com:80/index.html') returns 'www.google.com'
         /// </summary>
         [FunctionName("HOST")]
         public static string Host(string url)
@@ -20,7 +20,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Given a URL, returns the domain as a string.
-        /// <para>Example: DOMAIN('http://www.google.com:80/index.html') returns 'google.com'</para>
+        /// Example: DOMAIN('http://www.google.com:80/index.html') returns 'google.com'
         /// </summary>
         [FunctionName("DOMAIN")]
         public static string Domain(string url)
@@ -30,7 +30,7 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Given a URL, returns the top level domain plus any country domain in the URL.
-        /// <para>Example: TLD('http://www.google.com:80/index.html') returns '.com'. TLD('http://www.google.co.uk:80/index.html') returns '.co.uk'.</para>
+        /// Example: TLD('http://www.google.com:80/index.html') returns '.com'. TLD('http://www.google.co.uk:80/index.html') returns '.co.uk'.
         /// </summary>
         [FunctionName("TLD")]
         public static string Tld(string url)

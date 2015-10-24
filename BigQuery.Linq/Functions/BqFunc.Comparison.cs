@@ -43,35 +43,35 @@ namespace BigQuery.Linq
         public static bool Between<T>(T expr1, T expr2, T expr3) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
-        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
-        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
+        /// Returns true if expr matches expr1, expr2, or any value in the parentheses.
+        /// The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).
+        /// The expressions used with the IN keyword must be constants and they must match the data type of expr
         /// </summary>
         [FunctionName("IN", SpecifiedFormatterType = typeof(InFormatter))]
         public static bool In<T>(T expr, params T[] exprs) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
-        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
-        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
-        /// <para>Semijoin expression (i.e. "x IN (SELECT ...)") only supported in WHERE or HAVING clauses</para>
+        /// Returns true if expr matches expr1, expr2, or any value in the parentheses.
+        /// The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).
+        /// The expressions used with the IN keyword must be constants and they must match the data type of expr
+        /// Semijoin expression (i.e. "x IN (SELECT ...)") only supported in WHERE or HAVING clauses
         /// </summary>
         [FunctionName("IN", SpecifiedFormatterType = typeof(InSemijoinFormatter))]
         public static bool In<T, TExpr>(T expr, IExecutableBigQueryable<TExpr> exprs) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
-        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
-        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
+        /// Returns true if expr matches expr1, expr2, or any value in the parentheses.
+        /// The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).
+        /// The expressions used with the IN keyword must be constants and they must match the data type of expr
         /// </summary>
         [FunctionName("NOT IN", SpecifiedFormatterType = typeof(InFormatter))]
         public static bool NotIn<T>(T expr, params T[] exprs) { throw Invalid(); }
 
         /// <summary>
-        /// <para>Returns true if expr matches expr1, expr2, or any value in the parentheses.</para>
-        /// <para>The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).</para>
-        /// <para>The expressions used with the IN keyword must be constants and they must match the data type of expr</para>
-        /// <para>Semijoin expression (i.e. "x IN (SELECT ...)") only supported in WHERE or HAVING clauses</para>
+        /// Returns true if expr matches expr1, expr2, or any value in the parentheses.
+        /// The IN keyword is an efficient shorthand for (expr = expr1 || expr = expr2 || ...).
+        /// The expressions used with the IN keyword must be constants and they must match the data type of expr
+        /// Semijoin expression (i.e. "x IN (SELECT ...)") only supported in WHERE or HAVING clauses
         /// </summary>
         [FunctionName("NOT IN", SpecifiedFormatterType = typeof(InSemijoinFormatter))]
         public static bool NotIn<T, TExpr>(T expr, IExecutableBigQueryable<TExpr> exprs) { throw Invalid(); }

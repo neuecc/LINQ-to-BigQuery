@@ -327,7 +327,10 @@ namespace BigQuery.Linq
                 sb.Append("[");
                 for (int i = nodes.Count - 1; i >= 0; i--)
                 {
-                    sb.Append(nodes[i].Member.Name);
+                    var memberInfo = nodes[i].Member;
+                    var columnNameAttr = memberInfo.GetCustomAttribute<ColumnNameAttribute>(true);
+
+                    sb.Append(columnNameAttr?.ColumnName ?? memberInfo.Name);
 
                     // If Nullable don't emit .Value
                     if (nodes[i].Type.IsNullable()) break;

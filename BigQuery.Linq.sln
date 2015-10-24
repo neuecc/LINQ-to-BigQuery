@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30516.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigQuery.Linq", "BigQuery.Linq\BigQuery.Linq.csproj", "{5DFCDDDB-5A06-4752-96C3-2B8C2B7F1C51}"
 EndProject
@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D903E0
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigQueryDataContextDriver", "BigQueryDataContextDriver\BigQueryDataContextDriver.csproj", "{1693BE95-B9A2-4D3D-A2D8-A07B55CBD908}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE030008-49F3-4BC1-B7C6-F5E4C4EEF20D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1693BE95-B9A2-4D3D-A2D8-A07B55CBD908}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1693BE95-B9A2-4D3D-A2D8-A07B55CBD908}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1693BE95-B9A2-4D3D-A2D8-A07B55CBD908}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1693BE95-B9A2-4D3D-A2D8-A07B55CBD908}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

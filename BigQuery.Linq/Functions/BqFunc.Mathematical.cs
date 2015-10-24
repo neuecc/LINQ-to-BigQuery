@@ -97,16 +97,16 @@ namespace BigQuery.Linq
 
         /// <summary>
         /// Returns a random float value in the range 0.0 &lt;= value &lt; 1.0.
-        /// <para>Each int32_seed value always generates the same sequence of random numbers within a given query, as long as you don't use a LIMIT clause.</para>
-        /// <para>If int32_seed is not specified, BigQuery uses the current timestamp as the seed value.</para>
+        /// Each int32_seed value always generates the same sequence of random numbers within a given query, as long as you don't use a LIMIT clause.
+        /// If int32_seed is not specified, BigQuery uses the current timestamp as the seed value.
         /// </summary>
         [FunctionName("RAND")]
         public static double Random() { throw Invalid(); }
 
         /// <summary>
         /// Returns a random float value in the range 0.0 &lt;= value &lt; 1.0.
-        /// <para>Each int32_seed value always generates the same sequence of random numbers within a given query, as long as you don't use a LIMIT clause.</para>
-        /// <para>If int32_seed is not specified, BigQuery uses the current timestamp as the seed value.</para>
+        /// Each int32_seed value always generates the same sequence of random numbers within a given query, as long as you don't use a LIMIT clause.
+        /// If int32_seed is not specified, BigQuery uses the current timestamp as the seed value.
         /// </summary>
         [FunctionName("RAND")]
         public static double Random(int seed) { throw Invalid(); }

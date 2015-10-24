@@ -13,7 +13,7 @@ namespace BigQuery.Linq
 {
     public delegate bool CustomDeserializeFallback(PropertyInfo targetProperty, object value, out object deserializedValue);
 
-    internal abstract class Deserializer
+    public abstract class Deserializer
     {
         protected static readonly HashSet<Type> ParsableType = new HashSet<Type>
         {
@@ -102,7 +102,7 @@ namespace BigQuery.Linq
         }
     }
 
-    internal class Deserializer<T> : Deserializer
+    public class Deserializer<T> : Deserializer
     {
         readonly TableSchema schema;
         readonly Dictionary<string, PropertyInfo> typeInfo;

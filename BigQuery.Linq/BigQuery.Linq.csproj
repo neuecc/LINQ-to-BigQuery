@@ -42,11 +42,10 @@
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>linqtobigquery.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Google.Apis, Version=1.9.2.27817, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
@@ -61,8 +60,8 @@
       <HintPath>..\packages\Google.Apis.Auth.1.9.2\lib\net40\Google.Apis.Auth.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Google.Apis.Bigquery.v2, Version=1.9.2.234, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.Bigquery.v2.1.9.2.2340\lib\portable-net40+sl50+win+wpa81+wp80\Google.Apis.Bigquery.v2.dll</HintPath>
+    <Reference Include="Google.Apis.Bigquery.v2, Version=1.9.2.238, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Bigquery.v2.1.9.2.2380\lib\portable-net40+sl50+win+wpa81+wp80\Google.Apis.Bigquery.v2.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Google.Apis.Core, Version=1.9.2.27816, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
@@ -118,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigQueryable.cs" />
+    <Compile Include="DuplicateNamingStorage.cs" />
     <Compile Include="MetaTableSchema.cs" />
     <Compile Include="Query\BigQueryable.Flatten.cs" />
     <Compile Include="Utils\Deserializer.cs" />
@@ -162,6 +162,7 @@
     <Compile Include="Query\BigQueryable.Having.cs" />
     <Compile Include="Functions\BqFunc.Aggregate.cs" />
     <Compile Include="Functions\BqFunc.Other.cs" />
+    <None Include="linqtobigquery.snk" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
