@@ -171,7 +171,22 @@ namespace BigQuery.Linq
                 var innerTranslator = new BigQueryTranslateVisitor();
                 var expr1 = innerTranslator.VisitAndClearBuffer(node.Arguments[0]);
                 var arg = node.Arguments[1] as NewArrayExpression;
-                var expr2 = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
+                var argMember = node.Arguments[1] as MemberExpression;
+
+                string expr2;
+                if (arg != null)
+                {
+                    expr2 = string.Join(", ", arg.Expressions.Select(x => innerTranslator.VisitAndClearBuffer(x)));
+                }
+                else if (argMember != null)
+                {
+                    var names = (object[])Expression.Lambda(argMember).Compile().DynamicInvoke();
+                    expr2 = string.Join(", ", names.Select(x => x is string ? string.Format("'{0}'", x) : x));
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
 
                 return string.Format("{0} {1}({2})", expr1, fuctionName, expr2);
             }
