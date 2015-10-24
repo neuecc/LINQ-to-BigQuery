@@ -108,7 +108,7 @@ namespace BigQuery.Linq
         public override ParameterDescriptor[] GetContextConstructorParameters(IConnectionInfo cxInfo)
         {
             // With Embedded CustomBigQueryContext
-            return new[] 
+            return new[]
             {
                 new ParameterDescriptor("json", typeof(string).FullName),
                 new ParameterDescriptor("user", typeof(string).FullName),
@@ -120,7 +120,7 @@ namespace BigQuery.Linq
         {
             var property = new DriverProperty(cxInfo);
 
-            return new object[] 
+            return new object[]
             {
                 property.ContextJsonAuthenticationKey,
                 property.ContextUser,
@@ -130,8 +130,14 @@ namespace BigQuery.Linq
 
         public override IEnumerable<string> GetNamespacesToAdd(IConnectionInfo cxInfo)
         {
+            var asm = typeof(DynamicDataContextDriver).Assembly; // LINQPad.exe
+            Version version;
+            if (!Version.TryParse(asm.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "", out version))
+            {
+                version = new Version(1, 0, 0, 0);
+            }
+
             var prop = new DriverProperty(cxInfo);
-            var asms = AppDomain.CurrentDomain.GetAssemblies();
 
             return base.GetNamespacesToAdd(cxInfo)
                 .Concat(prop.NamespacesToAdd)
@@ -141,6 +147,7 @@ namespace BigQuery.Linq
                     "BigQuery.Linq",
                     "System.Windows.Forms.DataVisualization.Charting"
                 })
+                .Concat(new Version(5, 0, 0, 0) <= version ? new[] { "static BigQuery.Linq.BqFunc" } : new string[0])
                 .Distinct();
         }
 
