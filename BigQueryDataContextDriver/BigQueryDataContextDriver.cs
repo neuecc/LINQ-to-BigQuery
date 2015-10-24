@@ -105,6 +105,29 @@ namespace BigQuery.Linq
 
         // 4,5...
 
+        public override ParameterDescriptor[] GetContextConstructorParameters(IConnectionInfo cxInfo)
+        {
+            // With Embedded CustomBigQueryContext
+            return new[] 
+            {
+                new ParameterDescriptor("json", typeof(string).FullName),
+                new ParameterDescriptor("user", typeof(string).FullName),
+                new ParameterDescriptor("projectId", typeof(string).FullName)
+            };
+        }
+
+        public override object[] GetContextConstructorArguments(IConnectionInfo cxInfo)
+        {
+            var property = new DriverProperty(cxInfo);
+
+            return new object[] 
+            {
+                property.ContextJsonAuthenticationKey,
+                property.ContextUser,
+                property.ContextProjectId
+            };
+        }
+
         public override IEnumerable<string> GetNamespacesToAdd(IConnectionInfo cxInfo)
         {
             var prop = new DriverProperty(cxInfo);
@@ -115,6 +138,8 @@ namespace BigQuery.Linq
                 .Concat(new[]
                 {
                     "System.Linq",
+                    "BigQuery.Linq",
+                    "System.Windows.Forms.DataVisualization.Charting"
                 })
                 .Distinct();
         }
@@ -124,8 +149,8 @@ namespace BigQuery.Linq
             return base.GetAssembliesToAdd(cxInfo)
                 .Concat(new[]
                 {
-                    typeof(BigQueryContext).Assembly.Location,
-                    typeof(BigqueryService).Assembly.Location,
+                    typeof(System.Windows.Forms.Form).Assembly.Location,
+                    typeof(System.Windows.Forms.DataVisualization.Charting.Chart).Assembly.Location,
                     typeof(BigQueryContext).Assembly.Location,
                     typeof(BigqueryService).Assembly.Location,
                     typeof(Google.Apis.Auth.OAuth2.GoogleWebAuthorizationBroker).Assembly.Location,

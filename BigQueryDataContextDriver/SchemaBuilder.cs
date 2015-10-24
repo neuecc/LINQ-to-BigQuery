@@ -31,7 +31,6 @@ namespace BigQuery.Linq
         readonly BigQueryContext context;
         readonly DriverProperty property;
 
-
         public SchemaBuilder(BigQueryContext context, DriverProperty property, Schema[] schemas)
         {
             this.context = context;
@@ -78,6 +77,10 @@ namespace BigQuery.Linq
             code.AppendLine("using System;");
             code.AppendLine("using System.IO;");
             code.AppendLine("using System.Text;");
+            code.AppendLine("using System.Linq;");
+            code.AppendLine("using System.Collections;");
+            code.AppendLine("using System.Collections.Generic;");
+            code.AppendLine("using System.Windows.Forms.DataVisualization.Charting;");
             code.AppendLine("using System.Threading;");
             code.AppendLine("using Google.Apis.Auth.OAuth2;");
             code.AppendLine("using Google.Apis.Bigquery.v2;");
@@ -85,7 +88,7 @@ namespace BigQuery.Linq
             code.AppendLine("using Google.Apis.Util.Store;");
             code.AppendLine("using BigQuery.Linq;");
 
-            code.Append(BuildCustomContext(namespaceName, property.ContextJsonAuthenticationKey, property.ContextUser, property.ContextProjectId));
+            code.Append(BuildCustomContext(namespaceName));
 
 
             foreach (var schema in Schemas.Where(x => x.GroupedMetaTableSchemas.Any()))
@@ -128,6 +131,8 @@ namespace {namespaceName}.@{schema.DatasetName.Replace("-", "_").Replace(":", "_
                     new[]
                     {
                         "mscorlib.dll", "System.dll", "System.Core.dll", "System.Xml.dll",
+                        "System.Windows.Forms.dll", "System.Windows.Forms.DataVisualization.dll",
+                        typeof(LINQPad.DataContextBase).Assembly.Location,
                         typeof(BigQueryContext).Assembly.Location,
                         typeof(BigqueryService).Assembly.Location,
                         typeof(GoogleWebAuthorizationBroker).Assembly.Location,
@@ -140,7 +145,7 @@ namespace {namespaceName}.@{schema.DatasetName.Replace("-", "_").Replace(":", "_
                     true);
                 results = codeProvider.CompileAssemblyFromSource(options, code.ToString());
             }
-            
+
             if (results.Errors.Count > 0)
             {
                 throw new Exception
@@ -151,21 +156,15 @@ namespace {namespaceName}.@{schema.DatasetName.Replace("-", "_").Replace(":", "_
             return namespaces.ToArray();
         }
 
-        public string BuildCustomContext(string namespaceName, string json, string user, string projectId)
+        public string BuildCustomContext(string namespaceName)
         {
-            json = json.Replace("\"", "\"\"");
-
             var template = $@"
 namespace {namespaceName}
 {{
     public class CustomBigQueryContext : BigQueryContext
     {{
-        public CustomBigQueryContext()
+        public CustomBigQueryContext(string json, string user, string projectId)
         {{
-            var json = @""{json}"";
-            var user = ""{user}"";
-            var projectId = ""{projectId}"";
-
             using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
             {{
                 var userCredential = GoogleWebAuthorizationBroker.AuthorizeAsync(ms,
@@ -188,6 +187,55 @@ namespace {namespaceName}
         }}
     }}
 }}
+
+namespace {namespaceName}
+{{
+    public static class LINQPadExtensions
+    {{
+        public static QueryResponse<T> DumpRun<T>(this IExecutableBigQueryable<T> source)
+        {{
+            return LINQPad.Extensions.Dump(source.Run());
+        }}
+
+        public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column, bool isShowXLabel = false)
+        {{
+            var chart = new Chart();
+            chart.ChartAreas.Add(new ChartArea());
+            var series = new Series{{ ChartType = chartType}};
+            foreach (var item in source)
+            {{
+                var x = xSelector(item);
+                var y = ySelector(item);
+                var index = series.Points.AddXY(x, y);
+                series.Points[index].ToolTip = item.ToString();
+                if(isShowXLabel) series.Points[index].Label = x.ToString();
+            }}
+            chart.Series.Add(series);
+            LINQPad.Extensions.Dump(chart, ""Chart"");
+            return source;
+        }}
+
+        public static IEnumerable<IGrouping<TKey, T>> DumpGroupChart<TKey, T>(this IEnumerable<IGrouping<TKey, T>> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Line)
+        {{
+            var chart = new Chart();
+            chart.ChartAreas.Add(new ChartArea());
+            foreach (var g in source)
+            {{
+                var series = new Series{{ ChartType = chartType }};
+                foreach(var item in g)
+                {{
+                    var x = xSelector(item);
+                    var y = ySelector(item);
+                    var index = series.Points.AddXY(x, y);
+                    series.Points[index].ToolTip = item.ToString();
+                }}
+                chart.Series.Add(series);
+            }}
+            LINQPad.Extensions.Dump(chart, ""Chart"");
+            return source;
+        }}
+    }}
+}}
 ";
 
             return template;
@@ -196,8 +244,13 @@ namespace {namespaceName}
 
         public List<ExplorerItem> BuildExplorerItems(BuildCodeResult[] generatedCodes)
         {
-            var lookupDictionary = generatedCodes
-                .Where(x => x.IsTable)
+            var tableRangeLookupDictionary = generatedCodes
+                .Where(x => x.IsTablePrefix)
+                .Distinct(x => x.MetaTableSchema)
+                .ToDictionary(x => x.MetaTableSchema);
+
+            var tableLookupDictionary = generatedCodes
+                .Where(x => x.IsTableName)
                 .Distinct(x => x.MetaTableSchema)
                 .ToDictionary(x => x.MetaTableSchema);
 
@@ -230,8 +283,7 @@ namespace {namespaceName}
                         {
                             Children = g.MetaTableSchemas.Select(y =>
                             {
-                                // TODO:Here is buggy, sometimes fetch range table
-                                var className = lookupDictionary.GetOrDefault(y)?.ClassName ?? y.ToClassName(false);
+                                var className = tableLookupDictionary.GetOrDefault(y)?.ClassName ?? y.ToClassName(false);
 
                                 return new ExplorerItem(y.TableInfo.table_id, ExplorerItemKind.QueryableObject, ExplorerIcon.Table)
                                 {
@@ -244,7 +296,7 @@ namespace {namespaceName}
                         var propertyList = new List<ExplorerItem> { groupingChild };
                         propertyList.AddRange(BuildColumnExplorerItems(x.Fields));
 
-                        var classNameCheck = lookupDictionary.GetOrDefault(x)?.ClassName ?? x.ToClassName(true);
+                        var classNameCheck = tableRangeLookupDictionary.GetOrDefault(x)?.ClassName ?? x.ToClassName(true);
 
                         var item = new ExplorerItem(g.ShortTablePrefix, ExplorerItemKind.QueryableObject, ExplorerIcon.Schema)
                         {
@@ -261,7 +313,7 @@ namespace {namespaceName}
                     Children = lookup[2].Select(g =>
                     {
                         var x = g.MetaTableSchemas.First();
-                        var className = lookupDictionary.GetOrDefault(x)?.ClassName ?? x.ToClassName(false);
+                        var className = tableLookupDictionary.GetOrDefault(x)?.ClassName ?? x.ToClassName(false);
 
                         var item = new ExplorerItem(x.TableInfo.table_id, ExplorerItemKind.QueryableObject, ExplorerIcon.View)
                         {
@@ -278,7 +330,7 @@ namespace {namespaceName}
                     Children = lookup[1].Select(g =>
                     {
                         var x = g.MetaTableSchemas.First();
-                        var className = lookupDictionary.GetOrDefault(x)?.ClassName ?? x.ToClassName(false);
+                        var className = tableLookupDictionary.GetOrDefault(x)?.ClassName ?? x.ToClassName(false);
 
                         var item = new ExplorerItem(x.TableInfo.table_id, ExplorerItemKind.QueryableObject, ExplorerIcon.Table)
                         {

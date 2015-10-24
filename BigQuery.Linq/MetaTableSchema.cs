@@ -19,7 +19,9 @@ namespace BigQuery.Linq
     public class BuildCodeResult
     {
         public MetaTableSchema MetaTableSchema { get; set; }
-        public bool IsTable { get; set; }
+        public bool IsTableName { get; set; }
+        public bool IsTablePrefix { get; set; }
+        public bool IsRecordClass { get; set; }
         public string ClassName { get; set; }
         public string Code { get; set; }
     }
@@ -154,15 +156,17 @@ namespace BigQuery.Linq
                 if (x.Type == "RECORD")
                 {
                     var innerStoreCount = namingStorage.StoreName(name);
+                    var newName = name;
                     if (innerStoreCount != -1)
                     {
-                        name += "__" + innerStoreCount;
+                        newName += "__" + innerStoreCount;
                     }
 
-                    innerClasses[name] = InnerBuildCSharpClass(name, x.Fields, innerClasses, namingStorage);
+                    type = newName;
+                    innerClasses[newName] = InnerBuildCSharpClass(newName, x.Fields, innerClasses, namingStorage);
                 }
 
-                return string.Format("    public {0} {1} {{ get; set; }}", type, name);
+                return $"    [ColumnName(\"{x.Name}\")]public {type} {name} {{ get; set; }}";
             });
 
             var format = @"public class {0}
@@ -194,19 +198,22 @@ namespace BigQuery.Linq
                 {
                     name = "@" + name;
                 }
+
                 var type = ToCSharpType(name, x.Type, x.Mode);
                 if (x.Type == "RECORD")
                 {
                     var innerStoreCount = namingStorage.StoreName(name);
+                    var newName = name;
                     if (innerStoreCount != -1)
                     {
-                        name += "__" + innerStoreCount;
+                        newName += "__" + innerStoreCount;
                     }
 
-                    innerClasses[name] = InnerBuildCSharpClass(name, x.Fields, innerClasses, namingStorage);
+                    type = newName;
+                    innerClasses[newName] = InnerBuildCSharpClass(newName, x.Fields, innerClasses, namingStorage);
                 }
 
-                return string.Format("    public {0} {1} {{ get; set; }}", type, name);
+                return $"    [ColumnName(\"{x.Name}\")]public {type} {name} {{ get; set; }}";
             });
 
             var className = TableInfo.table_id;
@@ -221,14 +228,17 @@ namespace BigQuery.Linq
 
             var regex = new Regex(@"\d{8}]$");
             var fullname = TableInfo.ToFullTableName();
+            bool isTable;
             string attr;
             if (outTablePrefixClassIfMatched && regex.IsMatch(fullname))
             {
+                isTable = false;
                 attr = $"[TablePrefix(\"{regex.Replace(fullname, "]")}\")]";
                 className = regex.Replace(className + "]", "").TrimEnd('_', ']');
             }
             else
             {
+                isTable = true;
                 attr = $"[TableName(\"{fullname}\")]";
             }
 
@@ -246,8 +256,8 @@ public class {1}
 }}";
             var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props));
 
-            return new[] { new BuildCodeResult { ClassName = className, Code = result, IsTable = true, MetaTableSchema = this } }
-                .Concat(innerClasses.Select(x => new BuildCodeResult { ClassName = x.Key, Code =x.Value }))
+            return new[] { new BuildCodeResult { ClassName = className, Code = result, IsTableName = isTable, IsTablePrefix = !isTable, MetaTableSchema = this } }
+                .Concat(innerClasses.Select(x => new BuildCodeResult { ClassName = x.Key, Code = x.Value, IsRecordClass = true }))
                 .ToArray();
         }
 

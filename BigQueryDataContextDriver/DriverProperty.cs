@@ -32,22 +32,34 @@ namespace BigQuery.Linq
             }
         }
 
+        void WithEncrypt(string elementName, string value)
+        {
+            driverData.SetElementValue(elementName, cxInfo.Encrypt(value));
+        }
+
+        string WithDecrypt(string elementName)
+        {
+            var v = (string)driverData.Element(elementName);
+            if (v == null) return null;
+            return cxInfo.Decrypt(v);
+        }
+
         public string ContextJsonAuthenticationKey
         {
-            get { return (string)driverData.Element(nameof(ContextJsonAuthenticationKey)); }
-            set { driverData.SetElementValue(nameof(ContextJsonAuthenticationKey), value); }
+            get { return WithDecrypt(nameof(ContextJsonAuthenticationKey)); }
+            set { WithEncrypt(nameof(ContextJsonAuthenticationKey), value); }
         }
 
         public string ContextUser
         {
-            get { return (string)driverData.Element(nameof(ContextUser)); }
-            set { driverData.SetElementValue(nameof(ContextUser), value); }
+            get { return WithDecrypt(nameof(ContextUser)); }
+            set { WithEncrypt(nameof(ContextUser), value); }
         }
 
         public string ContextProjectId
         {
-            get { return (string)driverData.Element(nameof(ContextProjectId)); }
-            set { driverData.SetElementValue(nameof(ContextProjectId), value); }
+            get { return WithDecrypt(nameof(ContextProjectId)); }
+            set { WithEncrypt(nameof(ContextProjectId), value); }
         }
 
         public bool ContextIsOnlyDataSet
@@ -58,8 +70,8 @@ namespace BigQuery.Linq
 
         public string ContextDataSet
         {
-            get { return (string)driverData.Element(nameof(ContextDataSet)); }
-            set { driverData.SetElementValue(nameof(ContextDataSet), value); }
+            get { return WithDecrypt(nameof(ContextDataSet)); }
+            set { WithEncrypt(nameof(ContextDataSet), value); }
         }
 
         public string[] NamespacesToAdd
@@ -80,7 +92,11 @@ namespace BigQuery.Linq
 
         public string GetConnectionIdentity()
         {
-            return (ContextUser + "_" + ContextProjectId).Replace("@", "_").Replace("\\", "_").Replace("/", "_");
+            return (ContextUser + "_" + ContextProjectId + "_" + ContextIsOnlyDataSet + "_" + (ContextDataSet ?? ""))
+                .Replace("@", "_")
+                .Replace("\\", "_")
+                .Replace("/", "_")
+                .Replace(":", "_");
         }
 
         FileInfo GetTempPathInfo(string type) => new FileInfo(Path.Combine(Path.GetTempPath(), "LINQtoBigQueryDriver", type, GetConnectionIdentity(), "." + type));
@@ -99,7 +115,7 @@ namespace BigQuery.Linq
             File.WriteAllText(path.FullName, cache);
         }
 
-        // unfortunately can't work
+        // unfortunately doesn't work
         //public bool ForceSave()
         //{
         //    cxInfo.Persist = true;
