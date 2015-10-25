@@ -18,7 +18,7 @@ LINQ with LINQPad
 ---
 [LINQPad](http://www.linqpad.net) is Desktop GUI Client for BigQuery!
 
-![bq_linqpad_first](https://cloud.githubusercontent.com/assets/46207/10714917/c52c3f9e-7b46-11e5-88e5-446470afb5e5.png)
+![bq_linqpad_first](https://cloud.githubusercontent.com/assets/46207/10714939/78e5bcb8-7b47-11e5-9262-c802040011f8.png)
 
 * Schema tree window in side explorer
 * "this" as BigQueryContext with authenticated connection
