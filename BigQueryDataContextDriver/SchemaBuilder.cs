@@ -197,20 +197,38 @@ namespace {namespaceName}
             return LINQPad.Extensions.Dump(source.Run());
         }}
 
-        public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column, bool isShowXLabel = false)
+        public static T[] DumpRunToArray<T>(this IExecutableBigQueryable<T> source)
+        {{
+            return LINQPad.Extensions.Dump(source.Run()).Rows;
+        }}
+
+        public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column)
         {{
             var chart = new Chart();
             chart.ChartAreas.Add(new ChartArea());
             var series = new Series{{ ChartType = chartType}};
+            var isString = false;
             foreach (var item in source)
             {{
                 var x = xSelector(item);
                 var y = ySelector(item);
                 var index = series.Points.AddXY(x, y);
                 series.Points[index].ToolTip = item.ToString();
-                if(isShowXLabel) series.Points[index].Label = x.ToString();
+                
+                if(x != null && x is string) isString = true;
             }}
             chart.Series.Add(series);
+
+            var axis = chart.ChartAreas[0].AxisX;
+            axis.IsLabelAutoFit = true;
+            axis.LabelAutoFitStyle = LabelAutoFitStyles.DecreaseFont | LabelAutoFitStyles.LabelsAngleStep45;
+            axis.LabelAutoFitMinFontSize = 5;
+            axis.MajorGrid.Interval = 1;
+            axis.MajorGrid.Enabled = false;
+
+            if(isString) axis.Interval = 1.0;
+            if(chartType == SeriesChartType.Bar) axis.IsReversed = true;
+
             LINQPad.Extensions.Dump(chart, ""Chart"");
             return source;
         }}
@@ -219,6 +237,7 @@ namespace {namespaceName}
         {{
             var chart = new Chart();
             chart.ChartAreas.Add(new ChartArea());
+            var isString = false;
             foreach (var g in source)
             {{
                 var series = new Series{{ ChartType = chartType }};
@@ -228,9 +247,21 @@ namespace {namespaceName}
                     var y = ySelector(item);
                     var index = series.Points.AddXY(x, y);
                     series.Points[index].ToolTip = item.ToString();
+
+                    if(x != null && x is string) isString = true;
                 }}
+                series.Name = (g.Key != null) ? g.Key.ToString() : ""null"";
                 chart.Series.Add(series);
             }}
+
+            var axis = chart.ChartAreas[0].AxisX;
+            axis.IsLabelAutoFit = true;
+            axis.LabelAutoFitStyle = LabelAutoFitStyles.DecreaseFont | LabelAutoFitStyles.LabelsAngleStep45;
+            axis.LabelAutoFitMinFontSize = 5;
+            axis.MajorGrid.Interval = 1;
+            axis.MajorGrid.Enabled = false;           
+            if(chartType == SeriesChartType.Bar) axis.IsReversed = true;
+
             LINQPad.Extensions.Dump(chart, ""Chart"");
             return source;
         }}

@@ -1,28 +1,35 @@
 LINQ to BigQuery
 ================
-LINQ to BigQuery is C# LINQ Provider for [Google BigQuery](https://cloud.google.com/bigquery/). It also enables Desktop query editor and dump to chart with [LINQPad](http://www.linqpad.net).
+LINQ to BigQuery is C# LINQ Provider for [Google BigQuery](https://cloud.google.com/bigquery/). It also enables Desktop GUI Client with [LINQPad](http://www.linqpad.net) and plug-in driver.
 
 Installation
 ---
-binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuery)
+Binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuery)
 
 ```
 PM> Install-Package LINQ-to-BigQuery
 ```
 
-LastUpdate, ver 0.6.2(2015-08-10). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
+LINQPad Driver can download from [Releases](https://github.com/neuecc/LINQ-to-BigQuery/releases). (I'll request to LINQPad Driver Gallery). Note:Configuration's JSON is OAuth2 JSON Generate from GCP Management Page.
+
+LastUpdate, ver 0.7.0(2015-10-25). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
 
 LINQ with LINQPad
 ---
-[LINQPad](http://www.linqpad.net) is editor for BigQuery!
+[LINQPad](http://www.linqpad.net) is Desktop GUI Client for BigQuery!
 
-Query and chart tab(Dump chart code, see:[LINQPad Integration section](https://github.com/neuecc/LINQ-to-BigQuery#linqpad-integration)
+![bq_linqpad_first](https://cloud.githubusercontent.com/assets/46207/10714460/56a47798-7b33-11e5-8839-cac3c47ca086.png)
 
-![bq_linqpad_first](https://cloud.githubusercontent.com/assets/46207/4381898/acbc7124-437d-11e4-99c4-aacddb4bad9c.jpg)
+* Schema tree window in side explorer
+* "this" as BigQueryContext with authenticated connection
+* load dependented assembly and namespaces automatically(such as "BigQuery.Linq" namespace)
+* generate/load class of schema dynamically
+* add utility dump for BigQuery(DumpRun/DumpRunToArray/DumpChart/DumpGroupChart)
+* of course you can save/load query in file
 
 Result tab(Rows is expandable to grid view)
 
-![bq_linqpad_results](https://cloud.githubusercontent.com/assets/46207/4381897/acba029a-437d-11e4-89e1-2e4a12cb5c48.jpg)
+![bq_linqpad_results](https://cloud.githubusercontent.com/assets/46207/10714349/946fcc84-7b2f-11e5-8a0c-567da3522751.png)
 
 Why LINQ?
 ---
@@ -32,7 +39,7 @@ Strongly Typed with IntelliSense(and function documents).
 
 ![bq_intellisense_func](https://cloud.githubusercontent.com/assets/46207/4381902/acc2f72e-437d-11e4-8e3b-a79147b6f044.jpg)
 
-All BigQuery functions is under BqFunc(except string.Contains). If you use C# 6.0 you can enable static using.
+All BigQuery functions is under BqFunc(except string.Contains). If you use C# 6.0(or LINQPad 5) you can enable static using.
 
 ```csharp
 // C# 6.0 Using Static
@@ -127,29 +134,6 @@ public class github_timeline
 }
 ```
 
-Class definition can generate from MetaTable and it's helper method.
-
-```csharp
-new MetaTable("publicdata", "samples", "github_timeline")
-	.GetTableSchema(context.BigQueryService)
-	.BuildCSharpClass();
-```
-
-If table is under your project, you can get all tableinfo.
-
-```csharp
-// Get All tableinfo(table_id, creation_time, row_count, size_bytes, etc...)
-var tableInfos = context.GetAllTableInfo("mydataset");
-// ToString - Human readable info
-tableInfos.Select(x => x.ToString()).Dump();
-
-// Get TableSchema
-var schema = tableInfos[0].GetTableSchema(context.BigQueryService);
-
-// Build C# class definition
-schema.BuildCSharpClass().Dump();
-```
-
 If table separated in YYYYMMDD suffix(for FromDateRange), you can use TablePrefixAttribute's table and `BigQueryContext.BuildCSharpClass` supports generate class.
 
 ```csharp
@@ -176,6 +160,17 @@ context.FromDateRange<LoginInfo>();
 context.FromDateRange<LoginInfo>(new DateTime(2015, 3, 4));
 ```
 
+Class definition can generate from MetaTable and it's helper method.
+
+```csharp
+new MetaTable("publicdata", "samples", "github_timeline")
+	.GetTableSchema(context.BigQueryService)
+	.BuildCSharpClass();
+
+// or generate all tableinfo with guess table/tableprefix
+context.BuildCSharpClass("mydataset");
+```
+
 Advanced Sample
 ---
 Show github new repository every month by language.
@@ -185,53 +180,52 @@ Show github new repository every month by language.
 Code
 
 ```csharp
-Query.GetContext()
-    .From<github_timeline>()
-    .Where(x => x.repository_language != null && x.repository_fork == "false")
-    .Select(x => new
-    {
-        x.repository_url,
-        x.repository_created_at,
-        language = BqFunc.LastValue(x, y => y.repository_language)
-            .PartitionBy(y => y.repository_url)
-            .OrderBy(y => y.created_at)
-            .Value
-    })
-    .Into()
-    .Select(x => new
-    {
-        x.language,
-        yyyymm = BqFunc.StrftimeUtcUsec(BqFunc.ParseUtcUsec(x.repository_created_at), "%Y-%m"),
-        count = BqFunc.CountDistinct(x.repository_url)
-    })
-    .GroupBy(x => new { x.language, x.yyyymm })
-    .Having(x => BqFunc.GreaterThanEqual(x.yyyymm, "2010-01"))
-    .Into()
-    .Select(x => new
-    {
-        x.language,
-        x.yyyymm,
-        x.count,
-        ratio = BqFunc.RatioToReport(x, y => y.count)
-            .PartitionBy(y => y.yyyymm)
-            .OrderBy(y => y.count)
-            .Value
-    })
-    .Into()
-    .Select(x => new
-    {
-        x.language,
-        x.count,
-        x.yyyymm,
-        percentage = BqFunc.Round(x.ratio * 100, 2)
-    })
-    .OrderBy(x => x.yyyymm)
-    .ThenByDescending(x => x.percentage)
-    .Run()  // ↑BigQuery
-    .Dump() // ↓LINQ to Objects(and LINQPad)
-    .Rows
-    .GroupBy(x => x.language)
-    .DumpGroupChart(x => x.yyyymm, x => x.percentage);
+From<github_timeline>()
+  .Where(x => x.repository_language != null && x.repository_fork == "false")
+  .Select(x => new
+  {
+      x.repository_url,
+      x.repository_created_at,
+      language = LastValue(x, y => y.repository_language)
+          .PartitionBy(y => y.repository_url)
+          .OrderBy(y => y.created_at)
+          .Value
+  })
+  .Into()
+  .Select(x => new
+  {
+      x.language,
+      yyyymm = StrftimeUtcUsec(BqFunc.ParseUtcUsec(x.repository_created_at), "%Y-%m"),
+      count = CountDistinct(x.repository_url)
+  })
+  .GroupBy(x => new { x.language, x.yyyymm })
+  .Having(x => GreaterThanEqual(x.yyyymm, "2010-01"))
+  .Into()
+  .Select(x => new
+  {
+      x.language,
+      x.yyyymm,
+      x.count,
+      ratio = RatioToReport(x, y => y.count)
+          .PartitionBy(y => y.yyyymm)
+          .OrderBy(y => y.count)
+          .Value
+  })
+  .Into()
+  .Select(x => new
+  {
+      x.language,
+      x.count,
+      x.yyyymm,
+      percentage = Round(x.ratio * 100, 2)
+  })
+  .OrderBy(x => x.yyyymm)
+  .ThenByDescending(x => x.percentage)
+  .Run()  // ↑BigQuery
+  .Dump() // ↓LINQ to Objects(and LINQPad)
+  .Rows
+  .GroupBy(x => x.language)
+  .DumpGroupChart(x => x.yyyymm, x => x.percentage);
 ```
 
 It's query.
@@ -289,9 +283,8 @@ Observable.Timer(TimeSpan.Zero, TimeSpan.FromMinutes(5))
 	.Buffer(2, 1) // Buffer Window
 	.SelectMany(xs =>
 	{
-		var context = Query.GetContext();
-		context.UseQueryCache = false;
-		return context.From<github_timeline>().WithRange(xs[0].Timestamp, xs[1].Timestamp)
+		this.UseQueryCache = false;
+		return this.From<github_timeline>().WithRange(xs[0].Timestamp, xs[1].Timestamp)
 			.Select(x => new { x.repository_name, x.created_at })
 			.ToArrayAsync();
 	})
@@ -301,97 +294,6 @@ Observable.Timer(TimeSpan.Zero, TimeSpan.FromMinutes(5))
 More query samples, see:[BigQuery.Linq.Tests](https://github.com/neuecc/LINQ-to-BigQuery/tree/master/BigQuery.Linq.Tests). You can see How to Join? How to Window? etc...
 
 Create table, insert data samples, see:[SampleApps/StoreTwitterTimeline](https://github.com/neuecc/LINQ-to-BigQuery/blob/master/SampleApps/StoreTwitterTimeline/).
-
-LINQPad Integration
----
-Put following code on LINQPad's My Extensions and configure auth json and projectId.
-
-```csharp
-// Import this namespaces
-BigQuery.Linq
-System.Windows.Forms.DataVisualization.Charting
-Google.Apis.Auth.OAuth2
-Google.Apis.Bigquery.v2
-Google.Apis.Util.Store
-Google.Apis.Services
-
-public static class Query
-{
-    public static BigQueryContext GetContext()
-    {
-        BigQueryContext context;
-        // Replace this JSON. OAuth2 JSON Generate from GCP Management Page. 
-        var json = @"{""installed"":{""auth_uri"":""https://accounts.google.com/o/oauth2/auth"",""client_secret"":"""",""token_uri"":""https://accounts.google.com/o/oauth2/token"",""client_email"":"""",""redirect_uris"":[""urn:ietf:wg:oauth:2.0:oob"",""oob""],""client_x509_cert_url"":"""",""client_id"":"""",""auth_provider_x509_cert_url"":""https://www.googleapis.com/oauth2/v1/certs""}}";
-
-        using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-        {
-            // Open Browser, Accept Auth
-            var userCredential = GoogleWebAuthorizationBroker.AuthorizeAsync(ms,
-                new[] { BigqueryService.Scope.Bigquery },
-                "user",
-                CancellationToken.None, new FileDataStore(@"LINQ-to-BigQuery")) // localcache
-                .Result;
-
-            var bigquery = new BigqueryService(new BaseClientService.Initializer
-            {
-                ApplicationName = "LINQ to BigQuery",
-                HttpClientInitializer = userCredential
-            });
-
-            context = new BigQueryContext(bigquery, "write your project id");
-        }
-        // Timeout or other options
-        context.TimeoutMs = (long)TimeSpan.FromMinutes(1).TotalMilliseconds;
-        return context;
-    }
-}
-
-public static class MyExtensions
-{
-    public static QueryResponse<T> DumpRun<T>(this IExecutableBigQueryable<T> source)
-    {
-        return source.Run().Dump();
-    }
-
-	public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column, bool isShowXLabel = false)
-	{
-	    var chart = new Chart();
-		chart.ChartAreas.Add(new ChartArea());
-		var series = new Series{ ChartType = chartType};
-	    foreach (var item in source)
-	    {
-		    var x = xSelector(item);
-			var y = ySelector(item);
-		    var index = series.Points.AddXY(x, y);
-			series.Points[index].ToolTip = item.ToString();
-			if(isShowXLabel) series.Points[index].Label = x.ToString();
-	    }
-	    chart.Series.Add(series);
-	    chart.Dump("Chart");
-		return source;
-	}
-	
-	public static IEnumerable<IGrouping<TKey, T>> DumpGroupChart<TKey, T>(this IEnumerable<IGrouping<TKey, T>> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Line)
-	{
-	    var chart = new Chart();
-		chart.ChartAreas.Add(new ChartArea());
-	    foreach (var g in source)
-	    {
-		    var series = new Series{ ChartType = chartType };
-			foreach(var item in g)
-			{
-				var x = xSelector(item);
-				var y = ySelector(item);
-				var index = series.Points.AddXY(x, y);
-				series.Points[index].ToolTip = item.ToString();
-			}
-			chart.Series.Add(series);
-	    }
-	    chart.Dump("Chart");
-		return source;
-	}
-}
-```
 
 Author Info
 ---
