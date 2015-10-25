@@ -10,7 +10,7 @@ Binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuer
 PM> Install-Package LINQ-to-BigQuery
 ```
 
-LINQPad Driver can download from [Releases](https://github.com/neuecc/LINQ-to-BigQuery/releases). (I'll request to LINQPad Driver Gallery). Note:Configuration's JSON is OAuth2 JSON Generate from GCP Management Page.
+LINQPad Driver can download from [Releases](https://github.com/neuecc/LINQ-to-BigQuery/releases), BigQueryDataContextDriver.lpx. (I'll request to LINQPad Driver Gallery). Note:Configuration's JSON is OAuth2 JSON Generate from GCP Management Page.
 
 LastUpdate, ver 0.7.0(2015-10-25). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
 
@@ -18,7 +18,7 @@ LINQ with LINQPad
 ---
 [LINQPad](http://www.linqpad.net) is Desktop GUI Client for BigQuery!
 
-![bq_linqpad_first](https://cloud.githubusercontent.com/assets/46207/10714460/56a47798-7b33-11e5-8839-cac3c47ca086.png)
+![bq_linqpad_first](https://cloud.githubusercontent.com/assets/46207/10714651/2871d1d2-7b3c-11e5-8030-4d39c072e39e.png)
 
 * Schema tree window in side explorer
 * "this" as BigQueryContext with authenticated connection
