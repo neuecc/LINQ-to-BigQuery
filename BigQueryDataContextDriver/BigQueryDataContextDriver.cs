@@ -14,7 +14,6 @@ namespace BigQuery.Linq
 {
     public class BigQueryDataContextDriver : DynamicDataContextDriver
     {
-
         public override string Author
         {
             get
@@ -97,7 +96,7 @@ namespace BigQuery.Linq
             var namespacesToAdd = schemaBuilder.CompileTo(assemblyToBuild, nameSpace, out generatedCodes);
             var list = schemaBuilder.BuildExplorerItems(generatedCodes);
 
-            property.NamespacesToAdd = namespacesToAdd; // write to file...
+            property.NamespacesToAdd = namespacesToAdd;
             typeName = "CustomBigQueryContext";
 
             return list;

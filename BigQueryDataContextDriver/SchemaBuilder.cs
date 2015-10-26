@@ -130,7 +130,7 @@ namespace {namespaceName}.@{schema.DatasetName.Replace("-", "_").Replace(":", "_
                 var options = new CompilerParameters(
                     new[]
                     {
-                        "mscorlib.dll", "System.dll", "System.Core.dll", "System.Xml.dll",
+                        "mscorlib.dll", "System.dll", "System.Core.dll", "System.Xml.dll", "System.Data.dll",
                         "System.Windows.Forms.dll", "System.Windows.Forms.DataVisualization.dll",
                         typeof(LINQPad.DataContextBase).Assembly.Location,
                         typeof(BigQueryContext).Assembly.Location,
@@ -202,6 +202,26 @@ namespace {namespaceName}
             return LINQPad.Extensions.Dump(source.Run()).Rows;
         }}
 
+        public static string DumpQuery<T>(this IExecutableBigQueryable<T> source)
+        {{
+            return LINQPad.Extensions.Dump(source.ToString());
+        }}
+
+	    public static T[] DumpToExcel<T>(this IExecutableBigQueryable<T> querySource)
+	    {{
+            var source = DumpRunToArray(querySource);
+
+            var fileName = System.IO.Path.Combine(System.IO.Path.GetTempPath(), ""LINQtoBigQueryLINQPadDriver"", System.IO.Path.GetTempFileName() + "".csv"");
+            LINQPad.Util.WriteCsv(source, fileName);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {{
+                FileName = ""excel.exe"",
+                Arguments = fileName,
+            }});
+
+            return source;
+        }}
+
         public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column)
         {{
             var chart = new Chart();
@@ -237,7 +257,6 @@ namespace {namespaceName}
         {{
             var chart = new Chart();
             chart.ChartAreas.Add(new ChartArea());
-            var isString = false;
             foreach (var g in source)
             {{
                 var series = new Series{{ ChartType = chartType }};
@@ -247,8 +266,6 @@ namespace {namespaceName}
                     var y = ySelector(item);
                     var index = series.Points.AddXY(x, y);
                     series.Points[index].ToolTip = item.ToString();
-
-                    if(x != null && x is string) isString = true;
                 }}
                 series.Name = (g.Key != null) ? g.Key.ToString() : ""null"";
                 chart.Series.Add(series);
