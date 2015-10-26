@@ -24,12 +24,16 @@ LINQ with LINQPad
 * "this" as BigQueryContext with authenticated connection
 * load dependented assembly and namespaces automatically(such as "BigQuery.Linq" namespace)
 * generate/load class of schema dynamically
-* add utility dump for BigQuery(DumpRun/DumpRunToArray/DumpChart/DumpGroupChart)
+* add utility dump for BigQuery(DumpQuery/DumpRun/DumpRunToArray/DumpChart/DumpGroupChart//DumpToExcel)
 * of course you can save/load query in file
 
 Result tab(Rows is expandable to grid view)
 
 ![bq_linqpad_results](https://cloud.githubusercontent.com/assets/46207/10714349/946fcc84-7b2f-11e5-8a0c-567da3522751.png)
+
+Legendary Dump to Excel, perfect integration to Excel:)
+
+![legendary_dump_to_excel](https://cloud.githubusercontent.com/assets/46207/10721962/968632b4-7bee-11e5-9b48-904fcb48e75f.gif)
 
 Why LINQ?
 ---
