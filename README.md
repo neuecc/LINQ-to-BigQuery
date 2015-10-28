@@ -10,7 +10,9 @@ Binary from NuGet, [LINQ-to-BigQuery](https://nuget.org/packages/LINQ-to-BigQuer
 PM> Install-Package LINQ-to-BigQuery
 ```
 
-LINQPad Driver can download from [Releases](https://github.com/neuecc/LINQ-to-BigQuery/releases), BigQueryDataContextDriver.lpx. (I'll request to LINQPad Driver Gallery). Note:Configuration's JSON is OAuth2 JSON Generate from GCP Management Page.
+LINQPad Driver can install from LINQ Pad driver gallery.    
+"Add connection" -> "View more drivers..." -> clcik "LINQ to BigQuery" - "Download & Enabled driver" link.    
+Note:Configuration's JSON is OAuth2 JSON Generate from GCP Management Page.
 
 LastUpdate, ver 0.7.0(2015-10-25). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
 
