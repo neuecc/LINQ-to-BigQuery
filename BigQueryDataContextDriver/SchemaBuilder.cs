@@ -113,14 +113,15 @@ namespace BigQuery.Linq
 
                 var typeCode = string.Join(Environment.NewLine + Environment.NewLine, tableCodes.Select(x => x.Code));
 
+                Func<string, string> toNamespaceName = x => (Regex.IsMatch(x, "^[0123456789]") ? "_": "") + x.Replace("-", "_").Replace(":", "_"); 
                 var template = $@"
-namespace {namespaceName}.@_{schema.DatasetName.Replace("-", "_").Replace(":", "_")}
+namespace {namespaceName}.@{toNamespaceName(schema.DatasetName)}
 {{
 {typeCode}
 }}";
 
                 code.Append(template);
-                namespaces.Add($"{namespaceName}.@_{schema.DatasetName.Replace("-", "_").Replace(":", "_")}");
+                namespaces.Add($"{namespaceName}.@{toNamespaceName(schema.DatasetName)}");
                 generatedCodes.AddRange(tableCodes);
             }
 
