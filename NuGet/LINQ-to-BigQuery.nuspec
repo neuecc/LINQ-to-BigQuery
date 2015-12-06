@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,15 +10,7 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop GUI Client with LINQPad and plug-in driver.</description>
         <releaseNotes>
             <![CDATA[
-Update : Update BigQuery's dll - 1.9.2.2380
-Add : BigQueryDataContextDriver dll for LINQPad plug-in integration
-Add : BigQueryContext.GetAllDatasetsAsync
-Add : BigQueryContext.GetFastTableSchemasAsync
-Add : ColumnNameAttribute
-Changes : All BqFunc's IntelliSense can show in LINQPad
-Changes : BuildCSharpClass generates __No suffix when detect duplicate class name
-Breaking Changes : Delete Obsolete BigQueryable.AsSubquery(use Into)
-Improvement : Accept an existing array object for BqFunc.In, thanks @kbremner
+Support : BigQueryDataContextDriver 1.0.2.0 - Fix do not work when DataSet name startWith a number or equal C# reserved words, thanks @minato128
             ]]>
         </releaseNotes>
         <language>en-US</language>

@@ -114,13 +114,13 @@ namespace BigQuery.Linq
                 var typeCode = string.Join(Environment.NewLine + Environment.NewLine, tableCodes.Select(x => x.Code));
 
                 var template = $@"
-namespace {namespaceName}.@{NameConverter.ConvertSafeName(schema.DatasetName)}
+namespace {namespaceName}.{NameConverter.ConvertSafeName(schema.DatasetName)}
 {{
 {typeCode}
 }}";
 
                 code.Append(template);
-                namespaces.Add($"{namespaceName}.@{NameConverter.ConvertSafeName(schema.DatasetName)}");
+                namespaces.Add($"{namespaceName}.{NameConverter.ConvertSafeName(schema.DatasetName)}");
                 generatedCodes.AddRange(tableCodes);
             }
 
@@ -209,17 +209,21 @@ namespace {namespaceName}
 
 	    public static T[] DumpToExcel<T>(this IExecutableBigQueryable<T> querySource)
 	    {{
-            var source = DumpRunToArray(querySource);
+            return DumpToExcel<T>(DumpRunToArray(querySource));
+        }}
 
+	    public static T[] DumpToExcel<T>(this IEnumerable<T> source)
+	    {{
+            var array = source.ToArray();
             var fileName = System.IO.Path.Combine(System.IO.Path.GetTempPath(), ""LINQtoBigQueryLINQPadDriver"", System.IO.Path.GetTempFileName() + "".csv"");
-            LINQPad.Util.WriteCsv(source, fileName);
+            LINQPad.Util.WriteCsv(array, fileName);
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {{
                 FileName = ""excel.exe"",
                 Arguments = fileName,
             }});
 
-            return source;
+            return array;
         }}
 
         public static IEnumerable<T> DumpChart<T>(this IEnumerable<T> source, Func<T, object> xSelector, Func<T, object> ySelector, SeriesChartType chartType = SeriesChartType.Column)
