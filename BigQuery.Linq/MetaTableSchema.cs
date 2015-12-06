@@ -28,89 +28,6 @@ namespace BigQuery.Linq
 
     public class MetaTableSchema
     {
-        readonly static HashSet<string> ReservedIdentifiers = new HashSet<string>
-        {
-            "abstract",
-            "as",
-            "base",
-            "bool",
-            "break",
-            "byte",
-            "case",
-            "catch",
-            "char",
-            "checked",
-            "class",
-            "const",
-            "continue",
-            "decimal",
-            "default",
-            "delegate",
-            "do",
-            "double",
-            "else",
-            "enum",
-            "event",
-            "explicit",
-            "extern",
-            "false",
-            "finally",
-            "fixed",
-            "float",
-            "for",
-            "foreach",
-            "goto",
-            "if",
-            "implicit",
-            "in",
-            "in",
-            "int",
-            "interface",
-            "internal",
-            "is",
-            "lock",
-            "long",
-            "namespace",
-            "new",
-            "null",
-            "object",
-            "operator",
-            "out",
-            "out",
-            "override",
-            "params",
-            "private",
-            "protected",
-            "public",
-            "readonly",
-            "ref",
-            "return",
-            "sbyte",
-            "sealed",
-            "short",
-            "sizeof",
-            "stackalloc",
-            "static",
-            "string",
-            "struct",
-            "switch",
-            "this",
-            "throw",
-            "true",
-            "try",
-            "typeof",
-            "uint",
-            "ulong",
-            "unchecked",
-            "unsafe",
-            "ushort",
-            "using",
-            "virtual",
-            "void",
-            "volatile",
-            "while",
-        };
-
         public MetaTable TableInfo { get; private set; }
         public IList<TableFieldSchema> Fields { get; private set; }
 
@@ -147,11 +64,8 @@ namespace BigQuery.Linq
         {
             var props = fields.Select(x =>
             {
-                var name = x.Name;
-                if (ReservedIdentifiers.Contains(name))
-                {
-                    name = "@" + name;
-                }
+                var name = NameConverter.ConvertSafeName(x.Name);
+
                 var type = ToCSharpType(name, x.Type, x.Mode);
                 if (x.Type == "RECORD")
                 {
@@ -193,11 +107,7 @@ namespace BigQuery.Linq
             var innerClasses = new Dictionary<string, string>();
             var props = Fields.Select(x =>
             {
-                var name = x.Name;
-                if (ReservedIdentifiers.Contains(name))
-                {
-                    name = "@" + name;
-                }
+                var name = NameConverter.ConvertSafeName(x.Name);
 
                 var type = ToCSharpType(name, x.Type, x.Mode);
                 if (x.Type == "RECORD")
@@ -216,15 +126,7 @@ namespace BigQuery.Linq
                 return $"    [ColumnName(\"{x.Name}\")]public {type} {name} {{ get; set; }}";
             });
 
-            var className = TableInfo.table_id;
-            if (Regex.IsMatch(className, "^[0123456789]"))
-            {
-                className = "_" + className;
-            }
-            if (ReservedIdentifiers.Contains(className))
-            {
-                className = "@" + className;
-            }
+            var className = NameConverter.ConvertSafeName(TableInfo.table_id);
 
             var regex = new Regex(@"\d{8}]$");
             var fullname = TableInfo.ToFullTableName();
@@ -310,15 +212,7 @@ public class {1}
 
         public string ToClassName(bool outTablePrefixClassIfMatched)
         {
-            var className = TableInfo.table_id;
-            if (Regex.IsMatch(className, "^[0123456789]"))
-            {
-                className = "_" + className;
-            }
-            if (ReservedIdentifiers.Contains(className))
-            {
-                className = "@" + className;
-            }
+            var className = NameConverter.ConvertSafeName(TableInfo.table_id);
 
             var regex = new Regex(@"\d{8}]$");
             var fullname = TableInfo.ToFullTableName();

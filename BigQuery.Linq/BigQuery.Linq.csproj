@@ -149,6 +149,7 @@
     <Compile Include="TableNameAttribute.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="Utils\LongExtensions.cs" />
+    <Compile Include="Utils\NameConverter.cs" />
     <Compile Include="Utils\ReflectionAccessor.cs" />
     <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="Utils\TypeExtensions.cs" />
