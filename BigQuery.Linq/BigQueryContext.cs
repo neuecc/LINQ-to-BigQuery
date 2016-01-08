@@ -36,15 +36,21 @@ namespace BigQuery.Linq
         public bool? UseQueryCache { get; set; }
 
         internal readonly Dictionary<Type, CustomDeserializeFallback> fallbacks = new Dictionary<Type, CustomDeserializeFallback>();
+        private readonly IRowsParser _rowsParser;
 
-        public BigQueryContext()
+        public BigQueryContext() : this(new DeserializerRowsParser())
+        {
+        }
+
+        public BigQueryContext(IRowsParser rowsParser)
         {
             this.IndentSize = 2;
             this.IsConvertResultUtcToLocalTime = true;
+            this._rowsParser = rowsParser;
         }
 
-        public BigQueryContext(BigqueryService service, string projectId)
-            : this()
+        public BigQueryContext(IRowsParser rowsParser, BigqueryService service, string projectId)
+            : this(rowsParser)
         {
             this.BigQueryService = service;
             this.ProjectId = projectId;
@@ -251,7 +257,7 @@ namespace BigQuery.Linq
         public MetaTable[] GetAllTableInfo(string dataset)
         {
             var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
-            return Run<MetaTable>(query).Rows;
+            return Run<MetaTable>(query).FirstPage.Rows;
         }
 
         public string[] BuildCSharpClass(string dataset)
@@ -358,34 +364,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var jobId = queryResponse.JobReference.JobId;
-            var projectId = queryResponse.JobReference.ProjectId;
-            var pageToken = queryResponse.PageToken;
-
-            if (queryResponse.Rows != null && pageToken != null && (ulong)queryResponse.Rows.Count < queryResponse.TotalRows)
-            {
-                do
-                {
-                    var furtherRequest = BigQueryService.Jobs.GetQueryResults(projectId, jobId);
-                    furtherRequest.PageToken = pageToken;
-                    var minSw = Stopwatch.StartNew();
-                    var furtherQueryResponse = furtherRequest.Execute();
-                    minSw.Stop();
-                    if (furtherQueryResponse.JobComplete == false)
-                    {
-                        sw.Stop();
-                        throw new TimeoutException("Job(Paging) is uncompleted. TotalExecutionTime:" + sw.Elapsed + " PagingExecutionTime:" + minSw.Elapsed);
-                    }
-                    pageToken = furtherQueryResponse.PageToken;
-                    foreach (var tableRow in furtherQueryResponse.Rows)
-                    {
-                        queryResponse.Rows.Add(tableRow);
-                    }
-                } while (!string.IsNullOrEmpty(pageToken));
-            }
-            sw.Stop();
-
-            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, isDynamic: false);
+            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, false, _rowsParser);
             return response;
         }
 
@@ -399,7 +378,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, isDynamic: false);
+            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, false, _rowsParser);
             return response;
         }
 
@@ -413,7 +392,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, isDynamic: false);
+            var response = new QueryResponse<T>(this, query, sw.Elapsed, queryResponse, false, _rowsParser);
             return response;
         }
 
@@ -432,7 +411,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, isDynamic: true);
+            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, true, _rowsParser);
             return response;
         }
 
@@ -449,7 +428,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, isDynamic: true);
+            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, true, _rowsParser);
             return response;
         }
 
@@ -466,7 +445,7 @@ namespace BigQuery.Linq
                 throw new TimeoutException("Job is uncompleted maybe timeout, you can change QueryContext.TimeoutMs. ExecutionTime:" + sw.Elapsed);
             }
 
-            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, isDynamic: true);
+            var response = new QueryResponse<dynamic>(this, query, sw.Elapsed, queryResponse, true, _rowsParser);
             return response;
         }
 
@@ -477,7 +456,7 @@ namespace BigQuery.Linq
         /// </summary>
         public T[] Query<T>(string query)
         {
-            return Run<T>(query).Rows;
+            return Run<T>(query).FirstPage.Rows;
         }
 
         /// <summary>
@@ -486,7 +465,7 @@ namespace BigQuery.Linq
         public async Task<T[]> QueryAsync<T>(string query)
         {
             var response = await RunAsync<T>(query).ConfigureAwait(false);
-            return response.Rows;
+            return response.FirstPage.Rows;
         }
 
         /// <summary>
@@ -494,7 +473,7 @@ namespace BigQuery.Linq
         /// </summary>
         public dynamic[] Query(string query)
         {
-            return Run(query).Rows;
+            return Run(query).FirstPage.Rows;
         }
 
         /// <summary>
@@ -503,7 +482,7 @@ namespace BigQuery.Linq
         public async Task<dynamic[]> QueryAsync(string query)
         {
             var response = await RunAsync(query).ConfigureAwait(false);
-            return response.Rows;
+            return response.FirstPage.Rows;
         }
     }
 }

@@ -1,67 +1,55 @@
 ﻿using Google.Apis.Bigquery.v2.Data;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BigQuery.Linq
 {
     public class QueryResponse<T>
     {
-        public string Query { get; private set; }
-        public bool? CacheHit { get; private set; }
-        public string ETag { get; private set; }
-        public string Kind { get; private set; }
-        public string PageToken { get; private set; }
-        public T[] Rows { get; private set; }
-        public long? TotalBytesProcessed { get; private set; }
-        public string TotalBytesProcessedFormatted { get; private set; }
-        public ulong? TotalRows { get; private set; }
-        public TimeSpan ExecutionTime { get; private set; }
-        public IList<TableFieldSchema> TableFieldSchemas { get; private set; }
+        public string Query { get; }
+        public bool? CacheHit { get; }
+        public string ETag { get; }
+        public string Kind { get; }
+        public string PageToken { get; }
+        [Obsolete("Access via FirstPage property instead")]
+        public T[] Rows { get; }
+        public long? TotalBytesProcessed { get; }
+        public string TotalBytesProcessedFormatted { get; }
+        [Obsolete("Access via FirstPage property instead")]
+        public ulong? TotalRows { get; }
+        [Obsolete("Access via FirstPage property instead")]
+        public TimeSpan ExecutionTime { get; }
+        public IList<TableFieldSchema> TableFieldSchemas { get; }
+        public IQueryResponsePage<T> FirstPage { get; }
 
-        internal QueryResponse(BigQueryContext context, string query, TimeSpan executionTime, QueryResponse queryResponse, bool isDynamic)
+        internal QueryResponse(BigQueryContext context, string query, TimeSpan executionTime, QueryResponse queryResponse, bool isDynamic, IRowsParser rowsParser)
         {
-            T[] rows;
-            if (queryResponse.Rows == null)
-            {
-                rows = new T[0];
-            }
-            else if (!isDynamic)
-            {
-                CustomDeserializeFallback fallback;
-                if (!context.fallbacks.TryGetValue(typeof(T), out fallback))
-                {
-                    fallback = null;
-                }
+            var rows = queryResponse.Rows == null
+                ? new T[0]
+                : rowsParser.Parse<T>(queryResponse.Schema, queryResponse.Rows, isDynamic).ToArray();
 
-                var deserializer = new Deserializer<T>(queryResponse.Schema, fallback);
-                rows = queryResponse.Rows.Select(row => deserializer.Deserialize(row, context.IsConvertResultUtcToLocalTime)).ToArray();
-            }
-            else
-            {
-                rows = queryResponse.Rows.Select(row => Deserializer.DeserializeDynamic(queryResponse.Schema, row))
-                    .Cast<T>() // T as dynamic...
-                    .ToArray();
-            }
             var schemas = (queryResponse.Schema == null)
                 ? new TableFieldSchema[0]
                 : queryResponse.Schema.Fields;
 
-            this.Query = query;
-            this.CacheHit = queryResponse.CacheHit;
-            this.ETag = queryResponse.ETag;
-            this.Kind = queryResponse.Kind;
-            this.PageToken = queryResponse.PageToken;
-            this.Rows = rows;
-            this.TotalBytesProcessed = queryResponse.TotalBytesProcessed;
-            this.TotalRows = queryResponse.TotalRows;
-            this.ExecutionTime = executionTime;
-            this.TableFieldSchemas = schemas;
+            Query = query;
+            CacheHit = queryResponse.CacheHit;
+            ETag = queryResponse.ETag;
+            Kind = queryResponse.Kind;
+            PageToken = queryResponse.PageToken;
+            Rows = rows;
+            TotalBytesProcessed = queryResponse.TotalBytesProcessed;
+            TotalRows = queryResponse.TotalRows;
+            ExecutionTime = executionTime;
+            TableFieldSchemas = schemas;
 
-            this.TotalBytesProcessedFormatted = queryResponse.TotalBytesProcessed.ToHumanReadableSize();
+            TotalBytesProcessedFormatted = queryResponse.TotalBytesProcessed.ToHumanReadableSize();
+
+            FirstPage = new QueryResponsePage<T>(
+                context,
+                rowsParser, queryResponse.JobReference, queryResponse.TotalRows, queryResponse.JobComplete, queryResponse.PageToken, queryResponse.Schema, queryResponse.Rows, executionTime, isDynamic);
         }
+
     }
 }

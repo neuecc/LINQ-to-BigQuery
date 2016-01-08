@@ -40,7 +40,9 @@ namespace BigQuery.Linq.Tests
                     HttpClientInitializer = authToken
                 });
 
-                context = new BigQueryContext(service, projectId);
+                var rowsParser = new DeserializerRowsParser();
+
+                context = new BigQueryContext(rowsParser, service, projectId);
             }
         }
 
