@@ -27,7 +27,12 @@ namespace BigQuery.Linq
         {
             var rows = queryResponse.Rows == null
                 ? new T[0]
-                : rowsParser.Parse<T>(queryResponse.Schema, queryResponse.Rows, isDynamic).ToArray();
+                : rowsParser.Parse<T>(
+                    context.fallbacks,
+                    context.IsConvertResultUtcToLocalTime,
+                    queryResponse.Schema,
+                    queryResponse.Rows,
+                    isDynamic).ToArray();
 
             var schemas = (queryResponse.Schema == null)
                 ? new TableFieldSchema[0]

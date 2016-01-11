@@ -31,7 +31,7 @@ namespace BigQuery.Linq
 
             Rows = rows == null
                 ? new T[0]
-                : rowsParser.Parse<T>(schema, rows, isDynamic).ToArray();
+                : rowsParser.Parse<T>(context.fallbacks, context.IsConvertResultUtcToLocalTime, schema, rows, isDynamic).ToArray();
         }
 
         public TimeSpan ExecutionTime { get; }
