@@ -151,12 +151,8 @@ namespace BigQuery.Linq
                 className += "__" + storeCount;
             }
 
-            var format = @"{0}
-public class {1}
-{{
-{2}
-}}";
-            var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props));
+            var format = @"{0}{3}public class {1}{3}{{{3}{2}{3}}}";
+            var result = string.Format(format, attr, className, string.Join(Environment.NewLine, props), Environment.NewLine);
 
             return new[] { new BuildCodeResult { ClassName = className, Code = result, IsTableName = isTable, IsTablePrefix = !isTable, MetaTableSchema = this } }
                 .Concat(innerClasses.Select(x => new BuildCodeResult { ClassName = x.Key, Code = x.Value, IsRecordClass = true }))
