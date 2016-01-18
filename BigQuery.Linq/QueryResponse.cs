@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +22,10 @@ namespace BigQuery.Linq
         public ulong? TotalRows { get; }
         public TimeSpan ExecutionTime { get; }
         public IList<TableFieldSchema> TableFieldSchemas { get; }
+
+        // there's only another page if the previous response contained a PageToken 
+        // (see https://cloud.google.com/bigquery/docs/data#paging)
+        public bool HasNextPage => _pageToken != null;
 
         private readonly bool _jobComplete;
         private readonly string _pageToken;
@@ -90,58 +93,42 @@ namespace BigQuery.Linq
 
         public QueryResponse<T> GetNextResponse()
         {
-            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, _pageToken);
-            if (request != null)
-            {
-                var furtherRequest = _context.BigQueryService.Jobs.GetQueryResults(_jobReference.ProjectId,
-                    _jobReference.JobId);
-                furtherRequest.PageToken = _pageToken;
+            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, _pageToken, HasNextPage);
 
-                var sw = Stopwatch.StartNew();
-                var furtherQueryResponse = furtherRequest.Execute();
-                sw.Stop();
+            var sw = Stopwatch.StartNew();
+            var furtherQueryResponse = request.Execute();
+            sw.Stop();
 
-                return new QueryResponse<T>(_context, Query, sw.Elapsed, furtherQueryResponse, _isDynamic, _rowsParser);
-            }
-            return null;
+            return new QueryResponse<T>(_context, Query, sw.Elapsed, furtherQueryResponse, _isDynamic, _rowsParser);
         }
 
         public async Task<QueryResponse<T>> GetNextResponseAsync(CancellationToken token = default(CancellationToken))
         {
-            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, _pageToken);
-            if (request != null)
-            {
-                var furtherRequest = _context.BigQueryService.Jobs.GetQueryResults(_jobReference.ProjectId,
-                    _jobReference.JobId);
-                furtherRequest.PageToken = _pageToken;
+            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, _pageToken, HasNextPage);
 
-                var sw = Stopwatch.StartNew();
-                var furtherQueryResponse = await furtherRequest.ExecuteAsync(token);
-                sw.Stop();
+            var sw = Stopwatch.StartNew();
+            var furtherQueryResponse = await request.ExecuteAsync(token);
+            sw.Stop();
 
-                return new QueryResponse<T>(_context, Query, sw.Elapsed, furtherQueryResponse, _isDynamic, _rowsParser);
-            }
-            return null;
+            return new QueryResponse<T>(_context, Query, sw.Elapsed, furtherQueryResponse, _isDynamic, _rowsParser);
         }
         
-        private static JobsResource.GetQueryResultsRequest CreateNextPageRequest(BigQueryContext context,
-            bool jobComplete, JobReference jobReference, string pageToken)
+        private JobsResource.GetQueryResultsRequest CreateNextPageRequest(BigQueryContext context,
+            bool jobComplete, JobReference jobReference, string pageToken, bool hasNextPage)
         {
             if (!jobComplete)
             {
                 throw new InvalidOperationException("Can't get next page for a job that has not completed");
             }
 
-            // there's only another page if the previous response contained a PageToken 
-            // (see https://cloud.google.com/bigquery/docs/data#paging)
-            if (pageToken != null)
+            if (!hasNextPage)
             {
-                var furtherRequest = context.BigQueryService.Jobs.GetQueryResults(jobReference.ProjectId,
-                    jobReference.JobId);
-                furtherRequest.PageToken = pageToken;
-                return furtherRequest;
+                throw new InvalidOperationException("No more pages to retrieve");
             }
-            return null;
+            
+            var furtherRequest = context.BigQueryService.Jobs.GetQueryResults(jobReference.ProjectId, jobReference.JobId);
+            furtherRequest.PageToken = pageToken;
+            return furtherRequest;
         }
     }
 }
