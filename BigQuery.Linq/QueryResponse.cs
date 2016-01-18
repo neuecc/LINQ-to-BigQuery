@@ -25,10 +25,9 @@ namespace BigQuery.Linq
 
         // there's only another page if the previous response contained a PageToken 
         // (see https://cloud.google.com/bigquery/docs/data#paging)
-        public bool HasNextPage => _pageToken != null;
-
+        public bool HasNextPage => PageToken != null;
+        
         private readonly bool _jobComplete;
-        private readonly string _pageToken;
         private readonly JobReference _jobReference;
         private readonly BigQueryContext _context;
         private readonly IRowsParser _rowsParser;
@@ -93,7 +92,7 @@ namespace BigQuery.Linq
 
         public QueryResponse<T> GetNextResponse()
         {
-            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, _pageToken, HasNextPage);
+            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, PageToken, HasNextPage);
 
             var sw = Stopwatch.StartNew();
             var furtherQueryResponse = request.Execute();
@@ -104,7 +103,7 @@ namespace BigQuery.Linq
 
         public async Task<QueryResponse<T>> GetNextResponseAsync(CancellationToken token = default(CancellationToken))
         {
-            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, _pageToken, HasNextPage);
+            var request = CreateNextPageRequest(_context, _jobComplete, _jobReference, PageToken, HasNextPage);
 
             var sw = Stopwatch.StartNew();
             var furtherQueryResponse = await request.ExecuteAsync(token);
