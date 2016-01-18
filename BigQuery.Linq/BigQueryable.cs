@@ -173,12 +173,14 @@ namespace BigQuery.Linq
             var result = QueryContext.Run<T>(ToString());
             var rows = new List<T>((int) result.TotalRows.GetValueOrDefault(0));
 
-            while (result != null)
+            rows.AddRange(result.Rows);
+
+            while (result.HasNextPage)
             {
-                rows.AddRange(result.Rows);
                 result = result.GetNextResponse();
+                rows.AddRange(result.Rows);
             }
-                
+
             return rows.ToArray();
         }
 
@@ -187,10 +189,12 @@ namespace BigQuery.Linq
             var result = await QueryContext.RunAsync<T>(ToString(), cancellationToken).ConfigureAwait(false);
             var rows = new List<T>((int) result.TotalRows.GetValueOrDefault(0));
 
-            while (result != null)
+            rows.AddRange(result.Rows);
+
+            while (result.HasNextPage)
             {
-                rows.AddRange(result.Rows);
                 result = await result.GetNextResponseAsync(cancellationToken).ConfigureAwait(false);
+                rows.AddRange(result.Rows);
             }
 
             return rows.ToArray();
