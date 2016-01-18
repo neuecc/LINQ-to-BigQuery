@@ -257,7 +257,7 @@ namespace BigQuery.Linq
         public MetaTable[] GetAllTableInfo(string dataset)
         {
             var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
-            return Run<MetaTable>(query).FirstPage.Rows;
+            return Run<MetaTable>(query).Rows;
         }
 
         public string[] BuildCSharpClass(string dataset)
@@ -456,7 +456,7 @@ namespace BigQuery.Linq
         /// </summary>
         public T[] Query<T>(string query)
         {
-            return Run<T>(query).FirstPage.Rows;
+            return Run<T>(query).Rows;
         }
 
         /// <summary>
@@ -465,7 +465,7 @@ namespace BigQuery.Linq
         public async Task<T[]> QueryAsync<T>(string query)
         {
             var response = await RunAsync<T>(query).ConfigureAwait(false);
-            return response.FirstPage.Rows;
+            return response.Rows;
         }
 
         /// <summary>
@@ -473,7 +473,7 @@ namespace BigQuery.Linq
         /// </summary>
         public dynamic[] Query(string query)
         {
-            return Run(query).FirstPage.Rows;
+            return Run(query).Rows;
         }
 
         /// <summary>
@@ -482,7 +482,7 @@ namespace BigQuery.Linq
         public async Task<dynamic[]> QueryAsync(string query)
         {
             var response = await RunAsync(query).ConfigureAwait(false);
-            return response.FirstPage.Rows;
+            return response.Rows;
         }
     }
 }

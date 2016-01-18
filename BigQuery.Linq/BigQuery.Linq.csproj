@@ -119,10 +119,8 @@
     <Compile Include="BigQueryable.cs" />
     <Compile Include="DuplicateNamingStorage.cs" />
     <Compile Include="DeserializerRowsParser.cs" />
-    <Compile Include="IQueryResponsePage.cs" />
     <Compile Include="IRowsParser.cs" />
     <Compile Include="MetaTableSchema.cs" />
-    <Compile Include="QueryResponsePage.cs" />
     <Compile Include="Query\BigQueryable.Flatten.cs" />
     <Compile Include="Utils\Deserializer.cs" />
     <Compile Include="Functions\BqFunc.Window.cs" />
