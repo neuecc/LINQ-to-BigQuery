@@ -505,10 +505,12 @@ SELECT
         [TestMethod]
         public void DateTime()
         {
-            var jpCalendar = CultureInfo.GetCultureInfo("ja-jp").Calendar; // +9
-            new BigQueryContext().Select(() => new { dt = new DateTime(2014, 10, 17, 6, 0, 0, jpCalendar) })
-                .ToString()
-                .Is(@"
+            var local = new DateTime(2014, 10, 16, 21, 0, 0, DateTimeKind.Local);
+            var offset = TimeZone.CurrentTimeZone.GetUtcOffset(local);
+            var offsetLocal = new DateTime(local.Ticks + offset.Ticks, DateTimeKind.Local);
+            new BigQueryContext().Select(() => new { dt = offsetLocal })
+                            .ToString()
+                            .Is(@"
 SELECT
   '2014-10-16 21:00:00.000000' AS [dt]".TrimSmart());
 

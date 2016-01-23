@@ -170,13 +170,34 @@ namespace BigQuery.Linq
 
         public T[] ToArray()
         {
-            return QueryContext.Run<T>(ToString()).Rows;
+            var result = QueryContext.Run<T>(ToString());
+            var rows = new List<T>((int) result.TotalRows.GetValueOrDefault(0));
+
+            rows.AddRange(result.Rows);
+
+            while (result.HasNextPage)
+            {
+                result = result.GetNextResponse();
+                rows.AddRange(result.Rows);
+            }
+
+            return rows.ToArray();
         }
 
         public async Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            var response = await QueryContext.RunAsync<T>(ToString(), cancellationToken).ConfigureAwait(false);
-            return response.Rows;
+            var result = await QueryContext.RunAsync<T>(ToString(), cancellationToken).ConfigureAwait(false);
+            var rows = new List<T>((int) result.TotalRows.GetValueOrDefault(0));
+
+            rows.AddRange(result.Rows);
+
+            while (result.HasNextPage)
+            {
+                result = await result.GetNextResponseAsync(cancellationToken).ConfigureAwait(false);
+                rows.AddRange(result.Rows);
+            }
+
+            return rows.ToArray();
         }
 
         public QueryResponse<T> Run()

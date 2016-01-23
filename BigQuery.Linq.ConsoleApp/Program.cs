@@ -42,7 +42,9 @@ namespace BigQuery.Linq.ConsoleApp
                     HttpClientInitializer = userCredential
                 });
 
-                context = new BigQueryContext(bigquery, projectId);
+                var rowsParser = new DeserializerRowsParser();
+
+                context = new BigQueryContext(rowsParser, bigquery, projectId);
             }
             // Timeout or other options
             context.TimeoutMs = (long)TimeSpan.FromMinutes(1).TotalMilliseconds;

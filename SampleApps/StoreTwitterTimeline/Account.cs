@@ -43,7 +43,8 @@ namespace StoreTwitterTimeline
             var projectId = ConfigurationManager.AppSettings["projectId"];
 
             var bigquery = GetService();
-            var context = new BigQueryContext(bigquery, projectId);
+            var rowsParser = new DeserializerRowsParser();
+            var context = new BigQueryContext(rowsParser, bigquery, projectId);
             context.TimeoutMs = (long)TimeSpan.FromMinutes(5).TotalMilliseconds;
             return context;
         }

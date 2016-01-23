@@ -208,6 +208,16 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
                 return;
             }
 
+            if (typeof(T) == typeof(string))
+            {
+                string actualStr = (string)(object)actual;
+                string expectedStr = (string)(object)expected;
+                expectedStr = expectedStr.Replace("\r", "");
+                expectedStr = expectedStr.Replace("\n", Environment.NewLine);
+                expected = (T)(object)expectedStr;
+                actual = (T)(object)actualStr;
+            }
+
             Assert.AreEqual(expected, actual, message);
         }
 

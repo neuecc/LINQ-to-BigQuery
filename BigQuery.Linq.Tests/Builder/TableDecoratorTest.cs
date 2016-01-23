@@ -156,7 +156,7 @@ FROM
         [TestMethod]
         public void RealEx()
         {
-            var date = new DateTime(2014,10,30, 3,59,0);
+            var date = new DateTime(2014,10,30, 3,59,0, DateTimeKind.Utc);
             var context = new BigQuery.Linq.BigQueryContext();
             context.From<int>("tablewikipedia")
                 .WithRange(date.AddSeconds(-10), date)
@@ -166,7 +166,7 @@ FROM
 SELECT
   *
 FROM
-  [tablewikipedia@1414609130000-1414609140000]
+  [tablewikipedia@1414641530000-1414641540000]
 ".TrimSmart());
         }
     }
