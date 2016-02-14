@@ -257,7 +257,7 @@ namespace BigQuery.Linq
         public MetaTable[] GetAllTableInfo(string dataset)
         {
             var query = "SELECT * from " + (dataset.UnescapeBq() + ".__TABLES__").EscapeBq();
-            return Run<MetaTable>(query).Rows;
+            return Run<MetaTable>(query).ToArray();
         }
 
         public string[] BuildCSharpClass(string dataset)
@@ -456,16 +456,16 @@ namespace BigQuery.Linq
         /// </summary>
         public T[] Query<T>(string query)
         {
-            return Run<T>(query).Rows;
+            return Run<T>(query).ToArray();
         }
 
         /// <summary>
         /// Run query and return rows.
         /// </summary>
-        public async Task<T[]> QueryAsync<T>(string query)
+        public async Task<T[]> QueryAsync<T>(string query, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var response = await RunAsync<T>(query).ConfigureAwait(false);
-            return response.Rows;
+            var response = await RunAsync<T>(query, cancellationToken).ConfigureAwait(false);
+            return await response.ToArrayAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -473,16 +473,16 @@ namespace BigQuery.Linq
         /// </summary>
         public dynamic[] Query(string query)
         {
-            return Run(query).Rows;
+            return Run(query).ToArray();
         }
 
         /// <summary>
         /// Run query and return dynamic(ExpandoObject/Primitive) rows.
         /// </summary>
-        public async Task<dynamic[]> QueryAsync(string query)
+        public async Task<dynamic[]> QueryAsync(string query, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var response = await RunAsync(query).ConfigureAwait(false);
-            return response.Rows;
+            var response = await RunAsync(query, cancellationToken).ConfigureAwait(false);
+            return await response.ToArrayAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -199,7 +199,7 @@ namespace {namespaceName}
 
         public static T[] DumpRunToArray<T>(this IExecutableBigQueryable<T> source)
         {{
-            return LINQPad.Extensions.Dump(source.Run()).Rows;
+            return LINQPad.Extensions.Dump(source.Run()).ToArray();
         }}
 
         public static string DumpQuery<T>(this IExecutableBigQueryable<T> source)

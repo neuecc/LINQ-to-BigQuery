@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigQuery.Linq
 {
-    public static class Extensions
+    internal static class Extensions
     {
         public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default(TValue))
         {

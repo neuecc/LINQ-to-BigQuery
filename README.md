@@ -229,7 +229,7 @@ From<github_timeline>()
   .ThenByDescending(x => x.percentage)
   .Run()  // ↑BigQuery
   .Dump() // ↓LINQ to Objects(and LINQPad)
-  .Rows
+  .ToArray()
   .GroupBy(x => x.language)
   .DumpGroupChart(x => x.yyyymm, x => x.percentage);
 ```

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace System.Linq
 {
-    public static class AnonymousComparer
+    internal static class AnonymousComparer
     {
         #region IComparer<T>
 

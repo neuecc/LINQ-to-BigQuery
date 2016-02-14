@@ -16,6 +16,7 @@ namespace BigQuery.Linq
         public string ETag { get; }
         public string Kind { get; }
         public string PageToken { get; }
+        /// <summary>Returns current page rows. If you needs all paged rows, use ToArray or ToArrayAsync instead.</summary>
         public T[] Rows { get; }
         public long? TotalBytesProcessed { get; }
         public string TotalBytesProcessedFormatted { get; }
@@ -26,7 +27,7 @@ namespace BigQuery.Linq
         // there's only another page if the previous response contained a PageToken 
         // (see https://cloud.google.com/bigquery/docs/data#paging)
         public bool HasNextPage => PageToken != null;
-        
+
         private readonly bool _jobComplete;
         private readonly JobReference _jobReference;
         private readonly BigQueryContext _context;
@@ -111,7 +112,7 @@ namespace BigQuery.Linq
 
             return new QueryResponse<T>(_context, Query, sw.Elapsed, furtherQueryResponse, _isDynamic, _rowsParser);
         }
-        
+
         private JobsResource.GetQueryResultsRequest CreateNextPageRequest(BigQueryContext context,
             bool jobComplete, JobReference jobReference, string pageToken, bool hasNextPage)
         {
@@ -124,10 +125,49 @@ namespace BigQuery.Linq
             {
                 throw new InvalidOperationException("No more pages to retrieve");
             }
-            
+
             var furtherRequest = context.BigQueryService.Jobs.GetQueryResults(jobReference.ProjectId, jobReference.JobId);
             furtherRequest.PageToken = pageToken;
             return furtherRequest;
+        }
+
+        /// <summary>
+        /// Get paging result.
+        /// </summary>
+        public T[] ToArray()
+        {
+            var result = this;
+            var rows = new List<T>((int)result.TotalRows.GetValueOrDefault((ulong)result.Rows.Length));
+
+            rows.AddRange(result.Rows);
+
+            while (result.HasNextPage)
+            {
+                result = result.GetNextResponse();
+                rows.AddRange(result.Rows);
+            }
+
+            return rows.ToArray();
+        }
+
+
+        /// <summary>
+        /// Get paging result.
+        /// </summary>
+        public async Task<T[]> ToArrayAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var result = this;
+            var rows = new List<T>((int)result.TotalRows.GetValueOrDefault((ulong)result.Rows.Length));
+
+            rows.AddRange(result.Rows);
+
+            while (result.HasNextPage)
+            {
+                result = await result.GetNextResponseAsync(cancellationToken).ConfigureAwait(false);
+                rows.AddRange(result.Rows);
+            }
+
+            return rows.ToArray();
         }
     }
 }
