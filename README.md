@@ -1,4 +1,4 @@
-LINQ to BigQuery
+LINQ to BigQuery [![build status](https://ci.appveyor.com/api/projects/status/github/neuecc/linq-to-bigquery)](https://ci.appveyor.com/project/neuecc/linq-to-bigquery)
 ================
 LINQ to BigQuery is C# LINQ Provider for [Google BigQuery](https://cloud.google.com/bigquery/). It also enables Desktop GUI Client with [LINQPad](http://www.linqpad.net) and plug-in driver.
 
