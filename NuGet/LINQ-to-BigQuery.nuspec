@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>LINQ-to-BigQuery</id>
-        <version>$version$</version>
+        <version>0.7.2</version>
         <title>LINQ to BigQuery</title>
         <authors>neuecc</authors>
         <owners>neuecc</owners>
@@ -10,7 +10,7 @@
         <description>LINQ to BigQuery is C# LINQ Provider for Google BigQuery. It also enables Desktop GUI Client with LINQPad and plug-in driver.</description>
         <releaseNotes>
             <![CDATA[
-Support : BigQueryDataContextDriver 1.0.2.0 - Fix do not work when DataSet name startWith a number or equal C# reserved words, thanks @minato128
+QueryResponse supportes paging, thanks @kbremner
             ]]>
         </releaseNotes>
         <language>en-US</language>

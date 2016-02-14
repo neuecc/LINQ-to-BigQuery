@@ -199,12 +199,24 @@ namespace {namespaceName}
 
         public static T[] DumpRunToArray<T>(this IExecutableBigQueryable<T> source)
         {{
-            return LINQPad.Extensions.Dump(source.Run()).ToArray();
+            var rows = LINQPad.Extensions.Dump(source.Run()).ToArray();
+            LINQPad.Extensions.Dump(rows, ""ToArray"", true); // to datagrid.
+            return rows;
         }}
 
         public static string DumpQuery<T>(this IExecutableBigQueryable<T> source)
         {{
             return LINQPad.Extensions.Dump(source.ToString());
+        }}
+
+        public static T[] DumpWithCache<T>(this BigQuery.Linq.IExecutableBigQueryable<T> source)
+        {{
+            return Util.Cache(() => source.Run().Dump().ToArray());
+        }}
+    
+        public static T[] DumpWithCache<T>(this BigQuery.Linq.IExecutableBigQueryable<T> source, string key)
+        {{
+            return Util.Cache(() => source.Run().Dump().ToArray(), key);
         }}
 
 	    public static T[] DumpToExcel<T>(this IExecutableBigQueryable<T> querySource)

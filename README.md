@@ -14,7 +14,7 @@ LINQPad Driver can install from LINQ Pad driver gallery.
 "Add connection" -> "View more drivers..." -> clcik "LINQ to BigQuery" - "Download & Enabled driver" link.    
 Note:Configuration's JSON is OAuth2 JSON Generate from GCP Management Page.
 
-LastUpdate, ver 0.7.1(2015-12-06). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
+LastUpdate, ver 0.7.2(2016-02-15). See [All Release Notes](https://github.com/neuecc/LINQ-to-BigQuery/releases)
 
 LINQ with LINQPad
 ---
